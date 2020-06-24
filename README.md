@@ -1,21 +1,33 @@
 # Lidar_Backpack_ISAAC_SDK
 
 System  Requirements:
-  -Ubuntu 18.04 LTS
-  -Nvidia GPU with compute capability of 3.5 or higher
-  
+
+-Ubuntu 18.04 LTS
+
+-Nvidia GPU with compute capability of 3.5 or higher
+
+
 Software Version:
-  -Isaac SDK: 2020.1
-  -Isaac Sim: 2020.1 (Unity 3D)
-  -Unity 3D: 2019.3.15f1
-  -Bazel Version: 2.2.0
-  -CUDA: 10.0
-  -libcudnn: 7
-  -Nvidia GPU driver: 450
+
+-Isaac SDK: 2020.1
+
+-Isaac Sim: 2020.1 (Unity 3D)
+
+-Unity 3D: 2019.3.15f1
+
+-Bazel Version: 2.2.0
+
+-CUDA: 10.0
+
+-libcudnn: 7
+
+-Nvidia GPU driver: 450
   
-  Filepath: ISAAC SDK Root directory
-  ex: steve@steve-Inspiron-7559:~/isaac/apps$ 
-      steve@steve-Inspiron-7559:~/isaac/packages$ 
+
+Filepath: ISAAC SDK Root directory
+ex: 
+steve@steve-Inspiron-7559:~/isaac/apps$ 
+steve@steve-Inspiron-7559:~/isaac/packages$ 
 
 Modifications:
 1) modified file: isaac/packages/message_generators: BUILD
@@ -46,9 +58,9 @@ c) -run navsim_sub_gmap to run gmapping by subscribing to published data
 
 Note: 
      to run either navsim_sub_gmap or navsim_replay_gmap or navsim_gmapping;
-     select_json_gmapping.sh need to be modified accordingly at line 29
+     select_json_gmapping.sh need to be modified accordingly at line 29 by changing the app name accordingly
      
      line 29: engine/alice/tools/main --app apps/navsim/navsim_sub_gmap.app.json \
      
-     by changing the app name accordingly
+     
   
