@@ -102,6 +102,8 @@ b) run navsim_record app to publish data while navigating (data can be recorded 
 c) -run navsim_sub_gmap to run gmapping by subscribing to published data, or
     
    -run navsim_replay_gamp to run gmapping by replaying recorded data (Isaac Sight Replay widget)
+
+.
    
 
 Note: 
