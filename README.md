@@ -6,7 +6,7 @@ System  Requirements:
 
  -Nvidia GPU with compute capability of 3.5 or higher
  
- -
+ .
 
 
 
@@ -26,7 +26,7 @@ Software Version:
 
 -Nvidia GPU driver: 450
 
--
+.
   
   
   
@@ -39,7 +39,7 @@ steve@steve-Inspiron-7559:~/isaac/apps$
 
 steve@steve-Inspiron-7559:~/isaac/packages$ 
 
--
+.
 
 
 Modifications:
