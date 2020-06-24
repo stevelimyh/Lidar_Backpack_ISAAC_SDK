@@ -2,28 +2,28 @@
 
 System  Requirements:
 
-  -Ubuntu 18.04 LTS
+  	-Ubuntu 18.04 LTS
 
-  -Nvidia GPU with compute capability of 3.5 or higher
+  	-Nvidia GPU with compute capability of 3.5 or higher
 
 
 
 
 Software Version:
 
-  -Isaac SDK: 2020.1
+		-Isaac SDK: 2020.1
 
-  -Isaac Sim: 2020.1 (Unity 3D)
+		-Isaac Sim: 2020.1 (Unity 3D)
 
-  -Unity 3D: 2019.3.15f1
+		-Unity 3D: 2019.3.15f1
 
-  -Bazel Version: 2.2.0
+		-Bazel Version: 2.2.0
 
-  -CUDA: 10.0
+		-CUDA: 10.0
 
-  -libcudnn: 7
+		-libcudnn: 7
 
-  -Nvidia GPU driver: 450
+		-Nvidia GPU driver: 450
   
   
   
