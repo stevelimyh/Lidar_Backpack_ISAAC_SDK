@@ -50,43 +50,47 @@ modified file: isaac/packages/message_generators: BUILD
 
 -rigid_body_3_group_generator added to module
 
--
+.
 
 
 2) 
 
 new directory: isaac/apps/record_dummy
 
--
+.
 
 -record_dummy, record_test 
   
 apply message generators to create dummy data, use Isaac Sight Recorder widget to record
 
--
+.
   
 -display_dummy. display_test
   
 replay dummy data, visualize in Isaac Sight
 
--
+.
   
 -Imu_test
   
 Test imu generation with rigid_body_generator and ImuSim
 
--
+.
   
 -Svo_test
   
 test stereo visual odometry with message generators
 
--
+.
   
   
-3) modified directory: isaac/packages/flatsim/apps
+3) 
+
+modified directory: isaac/packages/flatsim/apps
 
 -added gmapping component to flatsim app
+
+.
 
 
 4) modified directory: isaac/apps/navsim
