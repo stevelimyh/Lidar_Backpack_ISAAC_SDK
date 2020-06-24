@@ -1,0 +1,55 @@
+{
+  "name": "gstreamer_pipeline",
+  "modules": [
+    "deepstream",
+    "sight",
+    "viewers"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "deepstream",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "pipeline",
+            "type": "isaac::deepstream::Pipeline"
+          },
+          {
+            "name": "viewer",
+            "type": "isaac::viewers::ColorCameraViewer"
+          },
+          {
+            "name": "viewer_widget",
+            "type": "isaac::sight::SightWidget"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "deepstream/pipeline/image",
+        "target": "deepstream/viewer/color_listener"
+      }
+    ]
+  },
+  "config": {
+    "deepstream": {
+      "pipeline": {
+        "pipeline": "videotestsrc ! video/x-raw,format=RGB ! videoconvert ! appsink name=image"
+      },
+      "viewer_widget": {
+        "title": "Viewer: Test Source",
+        "type": "2d",
+        "channels": [
+          {
+            "name": "deepstream/viewer/Color"
+          }
+        ]
+      }
+    }
+  }
+}

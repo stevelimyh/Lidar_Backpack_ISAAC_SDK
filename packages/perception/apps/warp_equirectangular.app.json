@@ -1,0 +1,85 @@
+{
+  "name" : "warp_equirectangular",
+  "modules" : [
+      "perception",
+      "message_generators"
+  ],
+  "graph":
+  {
+    "nodes": [
+      {
+        "name": "image",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "loader",
+            "type": "isaac::message_generators::ImageLoader"
+          }
+        ]
+      },
+      {
+        "name": "undistort",
+        "components": [
+          {
+            "name": "ml",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "undistortion",
+            "type": "isaac::perception::ImageWarp"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+          "source": "image/loader/color",
+          "target": "undistort/undistortion/input_image"
+      }
+    ]
+  },
+  "config":
+  {
+    "image": {
+      "loader": {
+        "color_filename": "packages/perception/assets/three_cubes.png",
+        "tick_period": "1Hz",
+        "focal_length": [935.307, 935.307],
+        "optical_center": [540, 960],
+        "distortion_coefficients": [0.0, 0.0, 0.0, 0.0, 0.0]
+      }
+    },
+    "undistort": {
+      "undistortion": {
+        "down_scale_factor": 2,
+        "output_model": "equirectangular",
+        "pixel_density": 1000.0,
+        "background_color": [128, 128, 128]
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "port": 3000,
+        "ui_config": {
+          "windows": {
+            "Image Undistortion": {
+              "renderer": "2d",
+              "channels": [
+                { "name": "warp_equirectangular/undistort/undistortion/output" }
+              ]
+            },
+            "Original Image": {
+              "renderer": "2d",
+              "channels": [
+                { "name": "warp_equirectangular/undistort/undistortion/input" }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

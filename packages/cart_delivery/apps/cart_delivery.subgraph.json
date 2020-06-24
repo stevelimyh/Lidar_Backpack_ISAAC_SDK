@@ -1,0 +1,1187 @@
+{
+  "modules": [
+    "behavior_tree",
+    "message_generators",
+    "navigation",
+    "utils"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "interface",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "subgraph",
+            "type": "isaac::alice::Subgraph"
+          }
+        ]
+      },
+      {
+        "name": "navigation",
+        "subgraph": "packages/navigation/apps/differential_base_navigation.subgraph.json"
+      },
+      {
+        "name": "detection_pose_estimation",
+        "subgraph": "packages/object_pose_estimation/apps/pose_cnn_decoder/detection_pose_estimation_cnn_inference.subgraph.json"
+      },
+      {
+        "name": "roi_pose_initializer",
+        "start_order": -200,
+        "components": [
+          {
+            "name": "PoseInitializer",
+            "type": "isaac::alice::PoseInitializer"
+          }
+        ]
+      },
+      {
+        "name": "drive_under_dolly_pose_initializer",
+        "start_order": -200,
+        "components": [
+          {
+            "name": "PoseInitializer",
+            "type": "isaac::alice::PoseInitializer"
+          }
+        ]
+      },
+      {
+        "name": "drive_out_dolly_pose_initializer",
+        "start_order": -200,
+        "components": [
+          {
+            "name": "PoseInitializer",
+            "type": "isaac::alice::PoseInitializer"
+          }
+        ]
+      },
+      {
+        "name": "run_on_start",
+        "components": [
+          {
+            "name": "NodeGroup",
+            "type": "isaac::behavior_tree::NodeGroup"
+          },
+          {
+            "name": "SwitchBehavior",
+            "type": "isaac::behavior_tree::SwitchBehavior"
+          }
+        ]
+      },
+      {
+        "name": "sequence_behavior",
+        "components": [
+          {
+            "name": "NodeGroup",
+            "type": "isaac::behavior_tree::NodeGroup"
+          },
+          {
+            "name": "MemorySequenceBehavior",
+            "type": "isaac::behavior_tree::MemorySequenceBehavior"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "delivery_mission",
+        "components": [
+          {
+            "name": "NodeGroup",
+            "type": "isaac::behavior_tree::NodeGroup"
+          },
+          {
+            "name": "MemorySequenceBehavior",
+            "type": "isaac::behavior_tree::MemorySequenceBehavior"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "config_without_dolly",
+        "components": [
+          {
+            "name": "NodeGroup",
+            "type": "isaac::behavior_tree::NodeGroup"
+          },
+          {
+            "name": "ParallelBehavior",
+            "type": "isaac::behavior_tree::ParallelBehavior"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "config_for_planner_graph_without_dolly",
+        "components": [
+          {
+            "name": "ConfigLoader",
+            "type": "isaac::alice::ConfigLoader"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "config_before_docking",
+        "components": [
+          {
+            "name": "ConfigLoader",
+            "type": "isaac::alice::ConfigLoader"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "approach_dolly_pickup",
+        "components": [
+          {
+            "name": "NodeGroup",
+            "type": "isaac::behavior_tree::NodeGroup"
+          },
+          {
+            "name": "ParallelBehavior",
+            "type": "isaac::behavior_tree::ParallelBehavior"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "goal_approach_dolly_pickup",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "MapWaypointAsGoal",
+            "type": "isaac::navigation::MapWaypointAsGoal"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "detect_dolly",
+        "components": [
+          {
+            "name": "NodeGroup",
+            "type": "isaac::behavior_tree::NodeGroup"
+          },
+          {
+            "name": "ParallelBehavior",
+            "type": "isaac::behavior_tree::ParallelBehavior"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "detections_filter",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "Detections3Filter",
+            "type": "isaac::utils::Detections3Filter"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "detections_to_pose_tree",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "DetectionsToPoseTree",
+            "type": "isaac::utils::DetectionsToPoseTree"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "target_dolly_viewer",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "ObjectViewer",
+            "type": "isaac::viewers::ObjectViewer"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "detection_timer",
+        "components": [
+          {
+            "name": "NodeGroup",
+            "type": "isaac::behavior_tree::NodeGroup"
+          },
+          {
+            "name": "TimerBehavior",
+            "type": "isaac::behavior_tree::TimerBehavior"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "drive_under_dolly",
+        "components": [
+          {
+            "name": "NodeGroup",
+            "type": "isaac::behavior_tree::NodeGroup"
+          },
+          {
+            "name": "ParallelBehavior",
+            "type": "isaac::behavior_tree::ParallelBehavior"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "goal_drive_under_dolly",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "PoseAsGoal",
+            "type": "isaac::navigation::PoseAsGoal"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "plan_to_under_dolly",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "Plan2Generator",
+            "type": "isaac::message_generators::Plan2Generator"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "dolly_wheels_as_static_obstacle",
+        "components": [
+          {
+            "name": "wheel_1",
+            "type": "isaac::navigation::TemporaryObstacle"
+          },
+          {
+            "name": "wheel_2",
+            "type": "isaac::navigation::TemporaryObstacle"
+          },
+          {
+            "name": "wheel_3",
+            "type": "isaac::navigation::TemporaryObstacle"
+          },
+          {
+            "name": "wheel_4",
+            "type": "isaac::navigation::TemporaryObstacle"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "lift_dolly",
+        "components": [
+          {
+            "name": "NodeGroup",
+            "type": "isaac::behavior_tree::NodeGroup"
+          },
+          {
+            "name": "ParallelBehavior",
+            "type": "isaac::behavior_tree::ParallelBehavior"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "lift_command",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "DifferentialBaseControlGenerator",
+            "type": "isaac::message_generators::DifferentialBaseControlGenerator"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "lift_timer",
+        "components": [
+          {
+            "name": "NodeGroup",
+            "type": "isaac::behavior_tree::NodeGroup"
+          },
+          {
+            "name": "TimerBehavior",
+            "type": "isaac::behavior_tree::TimerBehavior"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "config_with_dolly",
+        "components": [
+          {
+            "name": "NodeGroup",
+            "type": "isaac::behavior_tree::NodeGroup"
+          },
+          {
+            "name": "ParallelBehavior",
+            "type": "isaac::behavior_tree::ParallelBehavior"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "config_for_robot_shape_with_dolly",
+        "components": [
+          {
+            "name": "ConfigLoader",
+            "type": "isaac::alice::ConfigLoader"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "config_for_planner_graph_with_dolly",
+        "components": [
+          {
+            "name": "ConfigLoader",
+            "type": "isaac::alice::ConfigLoader"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "config_after_docking",
+        "components": [
+          {
+            "name": "ConfigLoader",
+            "type": "isaac::alice::ConfigLoader"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "dolly_pose_on_robot",
+        "components": [
+          {
+            "name": "PoseTreeRelink",
+            "type": "isaac::alice::PoseTreeRelink"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "drive_to_dolly_dropoff",
+        "components": [
+          {
+            "name": "NodeGroup",
+            "type": "isaac::behavior_tree::NodeGroup"
+          },
+          {
+            "name": "ParallelBehavior",
+            "type": "isaac::behavior_tree::ParallelBehavior"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "goal_drive_to_dolly_dropoff",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "MapWaypointAsGoal",
+            "type": "isaac::navigation::MapWaypointAsGoal"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "drop_dolly",
+        "components": [
+          {
+            "name": "NodeGroup",
+            "type": "isaac::behavior_tree::NodeGroup"
+          },
+          {
+            "name": "ParallelBehavior",
+            "type": "isaac::behavior_tree::ParallelBehavior"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "drop_command",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "DifferentialBaseControlGenerator",
+            "type": "isaac::message_generators::DifferentialBaseControlGenerator"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "drop_timer",
+        "components": [
+          {
+            "name": "NodeGroup",
+            "type": "isaac::behavior_tree::NodeGroup"
+          },
+          {
+            "name": "TimerBehavior",
+            "type": "isaac::behavior_tree::TimerBehavior"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "config_for_robot_shape_without_dolly",
+        "components": [
+          {
+            "name": "ConfigLoader",
+            "type": "isaac::alice::ConfigLoader"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "dolly_pose_in_world",
+        "components": [
+          {
+            "name": "PoseTreeRelink",
+            "type": "isaac::alice::PoseTreeRelink"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "drive_out_from_under_dolly",
+        "components": [
+          {
+            "name": "NodeGroup",
+            "type": "isaac::behavior_tree::NodeGroup"
+          },
+          {
+            "name": "ParallelBehavior",
+            "type": "isaac::behavior_tree::ParallelBehavior"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "goal_drive_out_from_under_dolly",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "PoseAsGoal",
+            "type": "isaac::navigation::PoseAsGoal"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "plan_to_out_dolly",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "Plan2Generator",
+            "type": "isaac::message_generators::Plan2Generator"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "drive_home",
+        "components": [
+          {
+            "name": "NodeGroup",
+            "type": "isaac::behavior_tree::NodeGroup"
+          },
+          {
+            "name": "ParallelBehavior",
+            "type": "isaac::behavior_tree::ParallelBehavior"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "goal_drive_home",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "MapWaypointAsGoal",
+            "type": "isaac::navigation::MapWaypointAsGoal"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "sight_widgets",
+        "components": [
+          {
+            "type": "isaac::sight::SightWidget",
+            "name": "Camera View"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "interface/subgraph/color",
+        "target": "detection_pose_estimation.interface/Subgraph/color"
+      },
+      {
+        "source": "detection_pose_estimation.interface/Subgraph/output_poses",
+        "target": "detections_filter/Detections3Filter/detections_in"
+      },
+      {
+        "source": "detections_filter/Detections3Filter/detections_out",
+        "target": "detections_to_pose_tree/DetectionsToPoseTree/detections"
+      },
+      {
+        "source": "interface/subgraph/flatscan",
+        "target": "navigation.subgraph/interface/flatscan_for_localization"
+      },
+      {
+        "source": "interface/subgraph/flatscan_2",
+        "target": "navigation.subgraph/interface/flatscan_2_for_localization"
+      },
+      {
+        "source": "interface/subgraph/flatscan",
+        "target": "navigation.subgraph/interface/flatscan_for_obstacles"
+      },
+      {
+        "source": "interface/subgraph/flatscan_2",
+        "target": "navigation.subgraph/interface/flatscan_2_for_obstacles"
+      },
+      {
+        "source": "interface/subgraph/base_state",
+        "target": "navigation.subgraph/interface/state"
+      },
+      {
+        "source": "interface/subgraph/imu_raw",
+        "target": "navigation.subgraph/interface/imu_raw"
+      },
+      {
+        "source": "navigation.subgraph/interface/command",
+        "target": "interface/subgraph/base_command"
+      },
+      {
+        "source": "goal_approach_dolly_pickup/MapWaypointAsGoal/goal",
+        "target": "navigation.subgraph/interface/goal"
+      },
+      {
+        "source": "goal_drive_under_dolly/PoseAsGoal/goal",
+        "target": "navigation.subgraph/interface/goal"
+      },
+      {
+        "source": "plan_to_under_dolly/Plan2Generator/plan",
+        "target": "navigation.control.subgraph/interface/plan"
+      },
+      {
+        "source": "plan_to_out_dolly/Plan2Generator/plan",
+        "target": "navigation.control.subgraph/interface/plan"
+      },
+      {
+        "source": "goal_drive_to_dolly_dropoff/MapWaypointAsGoal/goal",
+        "target": "navigation.subgraph/interface/goal"
+      },
+      {
+        "source": "goal_drive_out_from_under_dolly/PoseAsGoal/goal",
+        "target": "navigation.subgraph/interface/goal"
+      },
+      {
+        "source": "goal_drive_home/MapWaypointAsGoal/goal",
+        "target": "navigation.subgraph/interface/goal"
+      },
+      {
+        "source": "navigation.planner.global_plan_smoother/smoother/smooth_plan",
+        "target": "interface/subgraph/smooth_plan"
+      },
+      {
+        "source": "navigation.control.lqr/isaac.planner.DifferentialBaseLqrPlanner/plan",
+        "target": "interface/subgraph/plan"
+      },
+      {
+        "source": "lift_command/DifferentialBaseControlGenerator/command",
+        "target": "interface/subgraph/lift_command"
+      },
+      {
+        "source": "drop_command/DifferentialBaseControlGenerator/command",
+        "target": "interface/subgraph/lift_command"
+      }
+    ]
+  },
+  "config": {
+    "navigation.go_to.repeat_go_to_behavior": {
+      "disable_automatic_start": true
+    },
+    "navigation.localization.viewers": {
+      "disable_automatic_start": true
+    },
+    "navigation.planner.planner_switch_behavior": {
+      "disable_automatic_start": true
+    },
+    "navigation.go_to.goal_monitor": {
+      "GoalMonitor": {
+        "arrived_position_thresholds": [0.1, 0.2],
+        "stationary_speed_thresholds": [0.02, 0.05]
+      }
+    },
+    "navigation.control.lqr": {
+      "isaac.planner.DifferentialBaseLqrPlanner": {
+        "plan_visualization_width": 0.3,
+        "obstacle_names": [
+          "local_map",
+          "map/restricted_area",
+          "$(fullname dolly_wheels_as_static_obstacle/wheel_1)",
+          "$(fullname dolly_wheels_as_static_obstacle/wheel_2)",
+          "$(fullname dolly_wheels_as_static_obstacle/wheel_3)",
+          "$(fullname dolly_wheels_as_static_obstacle/wheel_4)"
+        ]
+      }
+    },
+    "navigation.shared_robot_model": {
+      "SphericalRobotShapeComponent": {
+        "smooth_minimum": 100.0,
+        "circles": [
+          { "center": [-0.745, 0.0], "radius": 0.315},
+          { "center": [-0.485, 0.0], "radius": 0.315},
+          { "center": [-0.20,  0.0], "radius": 0.315},
+          { "center": [ 0.075, 0.0], "radius": 0.315},
+          { "center": [-0.955,  0.21], "radius": 0.105},
+          { "center": [-0.955, -0.21], "radius": 0.105},
+          { "center": [ 0.285,  0.21], "radius": 0.105},
+          { "center": [ 0.285, -0.21], "radius": 0.105}
+        ]
+      }
+    },
+    "navigation.sight_widgets": {
+      "Planner View": {
+        "type": "2d",
+        "channels": [
+          { "name": "$(fullname navigation.local_map.local_map/isaac.navigation.LocalMap/local_map)" },
+          { "name": "$(fullname navigation.go_to.goal_viewer/GoalViewer/goal)" },
+          { "name": "$(fullname navigation.planner.global_plan_smoother/smoother/smooth_plan.path)" },
+          { "name": "$(fullname navigation.localization.viewers/RobotViewer/robot_model)" },
+          { "name": "$(fullname navigation.localization.viewers/PoseTrailViewer/pose_trail)" },
+          { "name": "$(fullname dolly_wheels_as_static_obstacle/wheel_1/obstacle)" },
+          { "name": "$(fullname dolly_wheels_as_static_obstacle/wheel_2/obstacle)" },
+          { "name": "$(fullname dolly_wheels_as_static_obstacle/wheel_3/obstacle)" },
+          { "name": "$(fullname dolly_wheels_as_static_obstacle/wheel_4/obstacle)" },
+          { "name": "$(fullname navigation.control.lqr/isaac.planner.DifferentialBaseLqrPlanner/plan)" },
+          { "name": "$(fullname detections_filter/Detections3Filter/roi_2D)" }
+        ]
+      }
+    },
+    "detection_pose_estimation.sight_widgets": {
+      "Pose Estimation": {
+        "enabled": false
+      }
+    },
+    "detection_pose_estimation.viewers": {
+      "disable_automatic_start": true
+    },
+    "roi_pose_initializer": {
+      "PoseInitializer": {
+        "lhs_frame": "robot",
+        "rhs_frame": "roi_center",
+        "pose": {
+          "translation": [3.0, 0.0, 0.0],
+          "rotation": {
+            "yaw_degrees": 180.0
+          }
+        }
+      }
+    },
+    "drive_under_dolly_pose_initializer": {
+      "PoseInitializer": {
+        "lhs_frame": "dolly",
+        "rhs_frame": "under_dolly",
+        "pose": {
+          "translation": [-0.25, 0.0, 0.0],
+          "rotation": {
+            "yaw_degrees": 180.0
+          }
+        }
+      }
+    },
+    "drive_out_dolly_pose_initializer": {
+      "PoseInitializer": {
+        "lhs_frame": "dolly",
+        "rhs_frame": "out_dolly",
+        "pose": {
+          "translation": [1.75, 0.0, 0.0],
+          "rotation": {
+            "yaw_degrees": 180.0
+          }
+        }
+      }
+    },
+    "run_on_start": {
+      "SwitchBehavior": {
+        "desired_behavior": "$(fullname sequence_behavior)"
+      },
+      "NodeGroup": {
+        "node_names": [
+          "$(fullname sequence_behavior)"
+        ]
+      }
+    },
+    "sequence_behavior": {
+      "NodeGroup": {
+        "node_names": [
+          "$(fullname delivery_mission)",
+          "$(fullname drive_home)"
+        ]
+      }
+    },
+    "delivery_mission": {
+      "NodeGroup": {
+        "node_names": [
+          "$(fullname config_without_dolly)",
+          "$(fullname approach_dolly_pickup)",
+          "$(fullname detect_dolly)",
+          "$(fullname config_before_docking)",
+          "$(fullname drive_under_dolly)",
+          "$(fullname lift_dolly)",
+          "$(fullname config_with_dolly)",
+          "$(fullname config_after_docking)",
+          "$(fullname dolly_pose_on_robot)",
+          "$(fullname drive_to_dolly_dropoff)",
+          "$(fullname drop_dolly)",
+          "$(fullname config_without_dolly)",
+          "$(fullname dolly_pose_in_world)",
+          "$(fullname drive_out_from_under_dolly)"
+        ]
+      }
+    },
+    "config_without_dolly": {
+      "NodeGroup": {
+        "node_names": [
+          "$(fullname config_for_planner_graph_without_dolly)",
+          "$(fullname config_for_robot_shape_without_dolly)"
+        ]
+      }
+    },
+    "config_before_docking": {
+      "ConfigLoader": {
+        "config": {
+          "delivery.navigation.control.lqr": {
+            "isaac.planner.DifferentialBaseLqrPlanner": {
+              "use_adaptive_num_controls": true,
+              "min_num_controls": 10,
+              "gain_to_end_position_y": 1.0,
+              "static_frame": "odom"
+            }
+          },
+          "delivery.navigation.obstacle_atlas": {
+            "obstacle_atlas": {
+              "static_frame": "odom"
+            }
+          }
+        }
+      }
+    },
+    "config_after_docking": {
+      "ConfigLoader": {
+        "config": {
+          "delivery.navigation.control.lqr": {
+            "isaac.planner.DifferentialBaseLqrPlanner": {
+              "use_adaptive_num_controls": false,
+              "gain_to_end_position_y": 50.0,
+              "static_frame": "world"
+            }
+          },
+          "delivery.navigation.obstacle_atlas": {
+            "obstacle_atlas": {
+              "static_frame": "world"
+            }
+          }
+        }
+      }
+    },
+    "approach_dolly_pickup": {
+      "ParallelBehavior": {
+        "success_threshold": 1
+      },
+      "NodeGroup": {
+        "node_names": [
+          "$(fullname navigation.go_to.go_to_behavior)",
+          "$(fullname goal_approach_dolly_pickup)",
+          "$(fullname detection_pose_estimation.viewers)",
+          "$(fullname detection_pose_estimation.object_detection.detection_viewer)",
+          "$(fullname navigation.localization.viewers)",
+          "$(fullname navigation.planner.planner_switch_behavior)"
+        ]
+      }
+    },
+    "goal_approach_dolly_pickup": {
+      "MapWaypointAsGoal": {
+        "waypoint": "pickup_face_dolly_8",
+        "tick_period": "250ms"
+      }
+    },
+    "detect_dolly": {
+      "ParallelBehavior": {
+        "success_threshold": 2
+      },
+      "NodeGroup": {
+        "node_names": [
+          "$(fullname detections_filter)",
+          "$(fullname detections_to_pose_tree)",
+          "$(fullname detection_timer)",
+          "$(fullname detection_pose_estimation.object_detection.detection_viewer)",
+          "$(fullname target_dolly_viewer)",
+          "$(fullname navigation.localization.viewers)"
+        ]
+      }
+    },
+    "detections_filter": {
+      "Detections3Filter": {
+        "roi_frame": "roi_center",
+        "detection_frame": "camera",
+        "threshold_translation": [1.25, 0.75, 0.25],
+        "threshold_rotation": [0.5, 0.5, 0.5]
+      }
+    },
+    "detections_to_pose_tree": {
+      "DetectionsToPoseTree": {
+        "report_success": true,
+        "reference_frame": "odom",
+        "detection_frame": "camera"
+      }
+    },
+    "detection_pose_estimation.viewers": {
+      "Detections3Viewer": {
+        "detections_color": [190, 190, 190]
+      }
+    },
+    "target_dolly_viewer": {
+      "ObjectViewer": {
+        "tick_period": "100Hz",
+        "frame": "dolly",
+        "bounding_box": {
+          "center": [0.0, 0.0, 0.375],
+          "dimensions": [0.9, 1.32, 0.25]
+        }
+      }
+    },
+    "detection_timer": {
+      "TimerBehavior": {
+        "delay": 5.0
+      }
+    },
+    "drive_under_dolly": {
+      "ParallelBehavior": {
+        "success_threshold": 1
+      },
+      "NodeGroup": {
+        "node_names": [
+          "$(fullname navigation.go_to.go_to_behavior)",
+          "$(fullname goal_drive_under_dolly)",
+          "$(fullname target_dolly_viewer)",
+          "$(fullname dolly_wheels_as_static_obstacle)",
+          "$(fullname navigation.localization.viewers)",
+          "$(fullname plan_to_under_dolly)"
+        ]
+      }
+    },
+    "goal_drive_under_dolly": {
+      "PoseAsGoal": {
+        "goal_frame": "under_dolly",
+        "tick_period": "250ms"
+      }
+    },
+    "plan_to_under_dolly": {
+      "Plan2Generator": {
+        "frames": ["under_dolly"],
+        "plan_frame": "odom",
+        "static_frame": "odom",
+        "tick_period": "250ms"
+      }
+    },
+    "dolly_wheels_as_static_obstacle": {
+      "wheel_1": {
+        "reference_frame": "dolly",
+        "circle": { "center": [-0.35, -0.55], "radius": 0.1}
+      },
+      "wheel_2": {
+        "reference_frame": "dolly",
+        "circle": { "center": [-0.35, 0.55], "radius": 0.1}
+      },
+      "wheel_3": {
+        "reference_frame": "dolly",
+        "circle": { "center": [0.35, -0.55], "radius": 0.1}
+      },
+      "wheel_4": {
+        "reference_frame": "dolly",
+        "circle": { "center": [0.35, 0.55], "radius": 0.1}
+      }
+    },
+    "lift_dolly": {
+      "ParallelBehavior": {
+        "success_threshold": 1
+      },
+      "NodeGroup": {
+        "node_names": [
+          "$(fullname lift_command)",
+          "$(fullname lift_timer)",
+          "$(fullname navigation.localization.viewers)",
+          "$(fullname navigation.planner.planner_switch_behavior)"
+        ]
+      }
+    },
+    "lift_command": {
+      "DifferentialBaseControlGenerator": {
+        "linear_speed": 1.0,
+        "angular_speed": 0.0,
+        "tick_period": "100Hz"
+      }
+    },
+    "lift_timer": {
+      "TimerBehavior": {
+        "delay": 3.0
+      }
+    },
+    "config_with_dolly": {
+      "NodeGroup": {
+        "node_names": [
+          "$(fullname config_for_planner_graph_with_dolly)",
+          "$(fullname config_for_robot_shape_with_dolly)"
+        ]
+      }
+    },
+    "config_for_robot_shape_with_dolly": {
+      "ConfigLoader": {
+        "config": {
+          "delivery.navigation.shared_robot_model": {
+            "SphericalRobotShapeComponent": {
+              "circles": [
+                { "center": [-0.745, 0.0], "radius": 0.315},
+                { "center": [-0.485, 0.0], "radius": 0.315},
+                { "center": [-0.20,  0.0], "radius": 0.315},
+                { "center": [ 0.075, 0.0], "radius": 0.315},
+                { "center": [-0.955,  0.21], "radius": 0.105},
+                { "center": [-0.955, -0.21], "radius": 0.105},
+                { "center": [ 0.285,  0.21], "radius": 0.105},
+                { "center": [ 0.285, -0.21], "radius": 0.105},
+
+                { "center": [-0.25,  0.115], "radius": 0.6},
+                { "center": [-0.25, -0.115], "radius": 0.6},
+                { "center": [-0.7,  0.565], "radius": 0.2},
+                { "center": [-0.7, -0.565], "radius": 0.2},
+                { "center": [ 0.2,  0.565], "radius": 0.2},
+                { "center": [ 0.2, -0.565], "radius": 0.2}
+              ]
+            }
+          },
+          "delivery.navigation.local_map.local_map_postprocessing": {
+            "cleanup": {
+              "additional_clear_region": [[-0.85, 0.35], [-0.72, 0.72]]
+            }
+          }
+        }
+      }
+    },
+    "dolly_pose_on_robot": {
+      "PoseTreeRelink": {
+        "current_lhs_frame": "odom",
+        "desired_lhs_frame": "robot",
+        "rhs_frame": "dolly"
+      }
+    },
+    "drive_to_dolly_dropoff": {
+      "ParallelBehavior": {
+        "success_threshold": 1
+      },
+      "NodeGroup": {
+        "node_names": [
+          "$(fullname navigation.go_to.go_to_behavior)",
+          "$(fullname goal_drive_to_dolly_dropoff)",
+          "$(fullname navigation.localization.viewers)",
+          "$(fullname navigation.planner.planner_switch_behavior)"
+        ]
+      }
+    },
+    "goal_drive_to_dolly_dropoff": {
+      "MapWaypointAsGoal": {
+        "waypoint": "dropoff_9",
+        "tick_period": "250ms"
+      }
+    },
+    "drop_dolly": {
+      "ParallelBehavior": {
+        "success_threshold": 1
+      },
+      "NodeGroup": {
+        "node_names": [
+          "$(fullname drop_command)",
+          "$(fullname drop_timer)",
+          "$(fullname navigation.localization.viewers)",
+          "$(fullname navigation.planner.planner_switch_behavior)"
+        ]
+      }
+    },
+    "drop_command": {
+      "DifferentialBaseControlGenerator": {
+        "linear_speed": -1.0,
+        "angular_speed": 0.0,
+        "tick_period": "100Hz"
+      }
+    },
+    "lift_timer": {
+      "TimerBehavior": {
+        "delay": 3.0
+      }
+    },
+    "config_for_robot_shape_without_dolly": {
+      "ConfigLoader": {
+        "config": {
+          "delivery.navigation.shared_robot_model": {
+            "SphericalRobotShapeComponent": {
+              "circles": [
+                { "center": [-0.745, 0.0], "radius": 0.315},
+                { "center": [-0.485, 0.0], "radius": 0.315},
+                { "center": [-0.20,  0.0], "radius": 0.315},
+                { "center": [ 0.075, 0.0], "radius": 0.315},
+                { "center": [-0.955,  0.21], "radius": 0.105},
+                { "center": [-0.955, -0.21], "radius": 0.105},
+                { "center": [ 0.285,  0.21], "radius": 0.105},
+                { "center": [ 0.285, -0.21], "radius": 0.105}
+              ]
+            }
+          },
+          "delivery.navigation.local_map.local_map_postprocessing": {
+            "cleanup": {
+              "additional_clear_region": [[-0.01, 0.01], [-0.01, 0.01]]
+            }
+          }
+        }
+      }
+    },
+    "dolly_pose_in_world": {
+      "PoseTreeRelink": {
+        "current_lhs_frame": "robot",
+        "desired_lhs_frame": "world",
+        "rhs_frame": "dolly"
+      }
+    },
+    "drive_out_from_under_dolly": {
+      "ParallelBehavior": {
+        "success_threshold": 1
+      },
+      "NodeGroup": {
+        "node_names": [
+          "$(fullname navigation.go_to.go_to_behavior)",
+          "$(fullname goal_drive_out_from_under_dolly)",
+          "$(fullname dolly_wheels_as_static_obstacle)",
+          "$(fullname navigation.localization.viewers)",
+          "$(fullname plan_to_out_dolly)"
+        ]
+      }
+    },
+    "goal_drive_out_from_under_dolly": {
+      "PoseAsGoal": {
+        "goal_frame": "out_dolly",
+        "tick_period": "250ms"
+      }
+    },
+    "plan_to_out_dolly": {
+      "Plan2Generator": {
+        "frames": ["out_dolly"],
+        "plan_frame": "odom",
+        "static_frame": "odom",
+        "tick_period": "250ms"
+      }
+    },
+    "drive_home": {
+      "ParallelBehavior": {
+        "success_threshold": 1
+      },
+      "NodeGroup": {
+        "node_names": [
+          "$(fullname navigation.go_to.go_to_behavior)",
+          "$(fullname goal_drive_home)",
+          "$(fullname navigation.localization.viewers)",
+          "$(fullname navigation.planner.planner_switch_behavior)"
+        ]
+      }
+    },
+    "goal_drive_home": {
+      "MapWaypointAsGoal": {
+        "waypoint": "robot_home",
+        "tick_period": "250ms"
+      }
+    },
+    "detection_pose_estimation.object_detection.detection_viewer": {
+      "disable_automatic_start": true
+    },
+    "sight_widgets": {
+      "Camera View": {
+        "type": "2d",
+        "channels": [
+          {
+            "name": "$(fullname detection_pose_estimation.object_detection.color_camera_visualizer/isaac.viewers.ColorCameraViewer/Color)"
+          },
+          {
+            "name": "$(fullname detection_pose_estimation.viewers/Detections3Viewer/bounding_box)",
+            "size": 1.5
+          },
+          {
+            "name": "$(fullname detection_pose_estimation.object_detection.detection_viewer/isaac.viewers.DetectionsViewer/detections)"
+          },
+          {
+            "name": "$(fullname target_dolly_viewer/ObjectViewer/bounding_box)",
+            "size": 1.5
+          },
+          {
+            "name": "$(fullname navigation.control.lqr/isaac.planner.DifferentialBaseLqrPlanner/plan)"
+          },
+          {
+            "name": "$(fullname navigation.local_map.binary_map_viewer/BinaryMapViewer/stencils)"
+          },
+          {
+            "name": "$(fullname detections_filter/Detections3Filter/roi_2D)"
+          }
+        ]
+      }
+    }
+  }
+}

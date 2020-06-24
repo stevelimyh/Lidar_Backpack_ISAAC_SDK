@@ -1,0 +1,109 @@
+{
+  "name": "superpixels",
+  "modules": [
+    "message_generators",
+    "viewers"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "camera",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "left_rgb_pose",
+            "type": "isaac::alice::PoseInitializer"
+          },
+          {
+            "name": "image_loader",
+            "type": "isaac::message_generators::ImageLoader"
+          },
+          {
+            "name": "viewer",
+            "type": "isaac::viewers::ColorCameraViewer"
+          }
+        ]
+      },
+      {
+        "name": "superpixels",
+        "subgraph": "packages/superpixels/apps/superpixels.subgraph.json"
+      }
+    ],
+    "edges": [
+      {
+        "source": "camera/image_loader/color",
+        "target": "superpixels.subgraph/interface/color"
+      },
+      {
+        "source": "camera/image_loader/depth",
+        "target": "superpixels.subgraph/interface/depth"
+      }
+    ]
+  },
+  "config": {
+    "camera": {
+      "image_loader": {
+        "color_filename": "packages/rgbd_processing/assets/sample_1_color.png",
+        "depth_filename": "packages/rgbd_processing/assets/sample_1_depth.png",
+        "tick_period": "25Hz",
+        "focal_length": [240, 240],
+        "optical_center": [240, 320]
+      },
+      "left_rgb_pose": {
+        "lhs_frame": "robot",
+        "rhs_frame": "camera",
+        "pose": [0.270598, -0.653281, 0.653281, -0.270598, 0.0, 0.0, 0.775]
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "port": 3000,
+        "ui_config": {
+          "windows": {
+            "color": {
+              "renderer": "2d",
+              "dims": { "width": 640, "height": 480 },
+              "channels": [
+                { "name": "superpixels/superpixels.camera_viewer/viewer/Color" },
+                { "name": "superpixels/superpixels.superpixels/superpixels/superpixel_color" }
+              ]
+            },
+            "depth": {
+              "renderer": "2d",
+              "dims": { "width": 640, "height": 480 },
+              "channels": [
+                { "name": "superpixels/superpixels.rgbd/points/depth" },
+                { "name": "superpixels/superpixels.rgbd/points/points" },
+                { "name": "superpixels/superpixels.superpixels/superpixels/superpixel_indices" }
+              ]
+            },
+            "normals": {
+              "renderer": "2d",
+              "dims": { "width": 640, "height": 480 },
+              "channels": [
+                { "name": "superpixels/superpixels.rgbd/normals/normals" },
+                { "name": "superpixels/superpixels.rgbd/edges/edges" },
+                { "name": "superpixels/superpixels.superpixels/superpixels/superpixel_normals" }
+              ]
+            },
+            "affinity": {
+              "renderer": "2d",
+              "dims": { "width": 640, "height": 480 },
+              "channels": [
+                { "name": "superpixels/superpixels.superpixels/superpixels/affinity0" },
+                { "name": "superpixels/superpixels.superpixels/superpixels/affinity1" },
+                { "name": "superpixels/superpixels.superpixels/superpixels/affinity2" },
+                { "name": "superpixels/superpixels.superpixels/superpixels/affinity3" },
+                { "name": "superpixels/superpixels.superpixels/superpixels/affinity_weight" },
+                { "name": "superpixels/superpixels.superpixels/superpixels/affinity_index" }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

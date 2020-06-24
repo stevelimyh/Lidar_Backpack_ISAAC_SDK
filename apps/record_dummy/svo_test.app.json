@@ -1,0 +1,316 @@
+{
+    "name": "svo_test",
+    "modules": [
+      "perception:stereo_visual_odometry",
+      "perception",
+      "utils",
+      "viewers",
+      "message_generators"
+    ],
+    "graph": {
+      "nodes": [
+        {
+            "name": "camera_generator",
+            "components": [
+                {
+                    "name": "message_ledger",
+                    "type": "isaac::alice::MessageLedger"
+                },
+                {
+                    "name": "camera_generator",
+                    "type": "isaac::message_generators::CameraGenerator"
+                }
+            ]
+        },
+        {
+            "name": "imu_generator",
+            "subgraph": "apps/record_dummy/imu_generator.subgraph.json"
+        },
+        {
+          "name": "camera_splitter_left",
+          "components": [
+            {
+              "name": "MessageLedger",
+              "type": "isaac::alice::MessageLedger"
+            },
+            {
+              "name": "ColorCameraProtoSplitter",
+              "type": "isaac::utils::ColorCameraProtoSplitter"
+            }
+          ]
+        },
+        {
+          "name": "camera_splitter_right",
+          "components": [
+            {
+              "name": "MessageLedger",
+              "type": "isaac::alice::MessageLedger"
+            },
+            {
+              "name": "ColorCameraProtoSplitter",
+              "type": "isaac::utils::ColorCameraProtoSplitter"
+            }
+          ]
+        },
+        {
+          "name": "tracker",
+          "components": [
+            {
+              "name": "MessageLedger",
+              "type": "isaac::alice::MessageLedger"
+            },
+            {
+              "name": "StereoVisualOdometry",
+              "type": "isaac::StereoVisualOdometry"
+            }
+          ]
+        },
+        {
+          "name": "image_keypoint_viewer",
+          "components": [
+            {
+              "name": "isaac.alice.MessageLedger",
+              "type": "isaac::alice::MessageLedger"
+            },
+            {
+              "name": "isaac.viewers.ImageKeypointViewer",
+              "type": "isaac::viewers::ImageKeypointViewer"
+            }
+          ]
+        },
+        {
+          "name": "color_camera_viewer",
+          "components": [
+            {
+              "name": "isaac.alice.MessageLedger",
+              "type": "isaac::alice::MessageLedger"
+            },
+            {
+              "name": "isaac.viewers.ColorCameraViewer",
+              "type": "isaac::viewers::ColorCameraViewer"
+            }
+          ]
+        },
+        {
+            "name": "color_convert_left",
+            "components": [
+              {
+                "name": "MessageLedger",
+                "type": "isaac::alice::MessageLedger"
+              },
+              {
+                "name": "converter",
+                "type": "isaac::perception::ColorSpaceConverter"
+              }
+            ]
+          },
+          {
+            "name": "color_convert_right",
+            "components": [
+              {
+                "name": "MessageLedger",
+                "type": "isaac::alice::MessageLedger"
+              },
+              {
+                "name": "converter",
+                "type": "isaac::perception::ColorSpaceConverter"
+              }
+            ]
+          },
+          {
+            "name": "pose_initializer",
+            "components": [
+              {
+                "name": "MessageLedger",
+                "type": "isaac::alice::MessageLedger"
+              },
+              {
+                "name": "imu_initializer",
+                "type": "isaac::alice::PoseInitializer"
+              },
+              {
+                "name": "left_camera_initializer",
+                "type": "isaac::alice::PoseInitializer"
+              },
+              {
+                "name": "right_camera_initializer",
+                "type": "isaac::alice::PoseInitializer"
+              }
+            ]
+          },
+          {
+            "name": "stereo_rectification",
+            "components": [
+              {
+                "name": "MessageLedger",
+                "type": "isaac::alice::MessageLedger"
+              },
+              {
+                "name": "rectifier",
+                "type": "isaac::perception::StereoRectification"
+              }
+            ]
+        }
+      ],
+      "edges": [
+        {
+          "source": "camera_generator/camera_generator/color_left",
+          "target": "camera_splitter_left/ColorCameraProtoSplitter/color_camera"
+        },
+        {
+          "source": "camera_splitter_left/ColorCameraProtoSplitter/image",
+          "target": "color_convert_left/converter/input_image"
+        },
+        {
+          "source": "color_convert_left/converter/output_image",
+          "target": "tracker/StereoVisualOdometry/left_image"
+        },
+        {
+          "source": "camera_splitter_left/ColorCameraProtoSplitter/intrinsics",
+          "target": "tracker/StereoVisualOdometry/left_intrinsics"
+        },
+        {
+          "source": "camera_generator/camera_generator/color_right",
+          "target": "camera_splitter_right/ColorCameraProtoSplitter/color_camera"
+        },
+        {
+          "source": "camera_splitter_right/ColorCameraProtoSplitter/image",
+          "target": "color_convert_right/converter/input_image"
+        },
+        {
+          "source": "color_convert_right/converter/output_image",
+          "target": "tracker/StereoVisualOdometry/right_image"
+        },
+        {
+          "source": "camera_splitter_right/ColorCameraProtoSplitter/intrinsics",
+          "target": "tracker/StereoVisualOdometry/right_intrinsics"
+        },
+        {
+          "source": "imu_generator.subgraph/interface/imu_raw",
+          "target": "tracker/StereoVisualOdometry/imu"
+        },
+        {
+          "source": "tracker/StereoVisualOdometry/coordinates",
+          "target": "image_keypoint_viewer/isaac.viewers.ImageKeypointViewer/coordinates"
+        },
+        {
+          "source": "tracker/StereoVisualOdometry/features",
+          "target": "image_keypoint_viewer/isaac.viewers.ImageKeypointViewer/features"
+        },
+        {
+          "source": "camera_generator/camera_generator/color_left",
+          "target": "color_camera_viewer/isaac.viewers.ColorCameraViewer/color_listener"
+        }
+      ]
+    },
+    "config": {
+        "camera_generator": {
+            "camera_generator": {
+                "tick_period": "0.5s"
+            }
+        },
+      "camera_splitter_left": {
+        "ColorCameraProtoSplitter": {
+          "only_pinhole": false
+        }
+      },
+      "camera_splitter_right": {
+        "ColorCameraProtoSplitter": {
+          "only_pinhole": false
+        }
+      },
+      "tracker": {
+        "StereoVisualOdometry": {
+          "horizontal_stereo_camera": false,
+          "process_imu_readings": true,
+          "lhs_camera_frame": "left_camera_frame",
+          "rhs_camera_frame": "right_camera_frame",
+          "imu_frame": "imu"
+        }
+      },
+      "color_camera_viewer": {
+        "isaac.viewers.ColorCameraViewer": {
+          "target_fps": 100
+        }
+      },
+      "pose_initializer": {
+        "imu_initializer": {
+          "lhs_frame": "backpack",
+          "rhs_frame": "imu_frame",
+          "pose": [1.0, 0.0, 0.0, 0.0, -0.06, 0.0, 0.62]
+        },
+        "left_camera_initializer": {
+          "lhs_frame": "backpack",
+          "rhs_frame": "left_camera_frame",
+          "pose": [0.5, -0.5, 0.5, -0.5, 0.11, 0.06, 0.55]
+        },
+        "right_camera_initializer": {
+          "lhs_frame": "backpack",
+          "rhs_frame": "right_camera_frame",
+          "pose": [0.5, -0.5, 0.5, -0.5, 0.11, -0.06, 0.55]
+        }
+      },
+      "websight": {
+        "WebsightServer": {
+          "port": 2020,
+          "ui_config": {
+            "windows": {
+              "Camera Pose": {
+                "renderer": "3d",
+                "dims": {
+                  "width": 1100,
+                  "height": 450
+                },
+                "channels": [
+                  {
+                    "name": "svo_test/tracker/StereoVisualOdometry/current_pose",
+                    "active": true
+                  },
+                  {
+                    "name": "svo_test/tracker/StereoVisualOdometry/pose_trail",
+                    "active": true
+                  }
+                ]
+              },
+              "xy": {
+                "renderer": "plot",
+                "channels": [
+                  {
+                    "name": "svo_test/tracker/StereoVisualOdometry/vo.pos_x"
+                  },
+                  {
+                    "name": "svo_test/tracker/StereoVisualOdometry/vo.pos_y"
+                  }
+                ]
+              },
+              "up": {
+                "renderer": "plot",
+                "channels": [
+                  {
+                    "name": "svo_test/tracker/StereoVisualOdometry/vo.pos_z"
+                  }
+                ]
+              },
+              "2d Features": {
+                "renderer": "2d",
+                "dims": {
+                  "width": 512,
+                  "height": 512
+                },
+                "channels": [
+                  {
+                    "name": "svo_test/color_camera_viewer/isaac.viewers.ColorCameraViewer/Color",
+                    "active": true
+                  },
+                  {
+                    "name": "svo_test/image_keypoint_viewer/isaac.viewers.ImageKeypointViewer/keypoints",
+                    "active": true
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  }

@@ -1,0 +1,144 @@
+{
+  "name": "carter_delivery",
+  "modules": [
+    "//apps/carter/carter_delivery:carter_delivery_codelet",
+    "communications",
+    "navigation"
+  ],
+  "config_files": [
+    "apps/carter/carter_delivery/operators/operator_oguz.config.json",
+    "apps/assets/maps/nvidia_R_meeting_rooms_181213b.config.json"
+  ],
+  "graph_files": [
+    "apps/assets/maps/nvidia_R_meeting_rooms_181213b.graph.json"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "carter_delivery",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "carter_delivery",
+            "type": "isaac::CarterDelivery"
+          }
+        ]
+      },
+      {
+        "name": "waypoint_as_goal",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.navigation.MapWaypointAsGoal",
+            "type": "isaac::navigation::MapWaypointAsGoal"
+          }
+        ]
+      },
+      {
+        "name": "simulation",
+        "subgraph": "packages/flatsim/apps/2d_differential_base_simulation.subgraph.json"
+      },
+      {
+        "name": "navigation",
+        "subgraph": "packages/navigation/apps/differential_base_navigation.subgraph.json"
+      },
+      {
+        "name": "slackbot",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "slackbot",
+            "type": "isaac::SlackBot"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "navigation.subgraph/interface/command",
+        "target": "simulation.subgraph/interface/diff_base_command"
+      },
+      {
+        "source": "simulation.subgraph/interface/flatscan",
+        "target": "navigation.subgraph/interface/flatscan_for_localization"
+      },
+      {
+        "source": "simulation.subgraph/interface/flatscan",
+        "target": "navigation.subgraph/interface/flatscan_for_obstacles"
+      },
+      {
+        "source": "simulation.subgraph/interface/diff_base_state",
+        "target": "navigation.subgraph/interface/state"
+      },
+      {
+        "source": "slackbot/slackbot/user_instruction",
+        "target": "carter_delivery/carter_delivery/incoming_message"
+      },
+      {
+        "source": "carter_delivery/carter_delivery/outgoing_message",
+        "target": "slackbot/slackbot/slack_message"
+      },
+      {
+        "source": "carter_delivery/carter_delivery/target_waypoint",
+        "target": "waypoint_as_goal/isaac.navigation.MapWaypointAsGoal/desired_waypoint"
+      },
+      {
+        "source": "navigation.subgraph/interface/feedback",
+        "target": "carter_delivery/carter_delivery/goal_feedback"
+      },
+      {
+        "source": "waypoint_as_goal/isaac.navigation.MapWaypointAsGoal/goal",
+        "target": "navigation.subgraph/interface/goal"
+      }
+    ]
+  },
+  "config": {
+    "simulation.base_simulation": {
+      "DifferentialBasePhysics": {
+        "robot_model": "navigation.shared_robot_model"
+      },
+      "DifferentialBaseSimulator": {
+        "robot_model": "navigation.shared_robot_model"
+      }
+    },
+    "navigation.imu_odometry.odometry": {
+      "DifferentialBaseWheelImuOdometry": {
+        "use_imu": false
+      }
+    },
+    "simulation.robot_spawn_pose": {
+      "PoseInitializer": {
+        "lhs_frame": "world",
+        "rhs_frame": "robot_init_gt",
+        "pose": [0.0, 0.0, 0.0, 1.0, 57.5, 32.0, 0.0]
+      }
+    },
+    "carter_delivery": {
+      "carter_delivery": {
+        "tick_period": "10ms",
+        "popcorn_pickup_waypoint": "kitchen",
+        "navigation_mode": "navigation.control.navigation_mode/isaac.navigation.GroupSelectorBehavior"
+      }
+    },
+    "slackbot": {
+      "slackbot": {
+        "bot_token": "bot_token_here"
+      }
+    },
+    "waypoint_as_goal": {
+      "isaac.navigation.MapWaypointAsGoal": {
+        "map_layer": "map/waypoints",
+        "tick_period": "50ms"
+      }
+    }
+  }
+}

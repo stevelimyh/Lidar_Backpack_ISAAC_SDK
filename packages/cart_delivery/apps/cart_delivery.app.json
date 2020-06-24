@@ -1,0 +1,109 @@
+{
+  "name": "cart_delivery",
+  "modules": [
+    "behavior_tree",
+    "map"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "delivery",
+        "subgraph": "packages/cart_delivery/apps/cart_delivery.subgraph.json"
+      },
+      {
+        "name": "simulation",
+        "subgraph": "packages/navsim/apps/navsim_navigation.subgraph.json"
+      },
+      {
+        "name": "navigate_after_scenario_loads",
+        "components": [
+          {
+            "name": "NodeGroup",
+            "type": "isaac::behavior_tree::NodeGroup"
+          },
+          {
+            "name": "MemorySequenceBehavior",
+            "type": "isaac::behavior_tree::MemorySequenceBehavior"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "simulation.interface/noisy/flatscan",
+        "target": "delivery.interface/subgraph/flatscan"
+      },
+      {
+        "source": "simulation.interface/noisy/flatscan_2",
+        "target": "delivery.interface/subgraph/flatscan_2"
+      },
+      {
+        "source": "simulation.interface/output/base_state",
+        "target": "delivery.interface/subgraph/base_state"
+      },
+      {
+        "source": "simulation.interface/output/imu_raw",
+        "target": "delivery.interface/subgraph/imu_raw"
+      },
+      {
+        "source": "delivery.interface/subgraph/base_command",
+        "target": "simulation.interface/input/base_command"
+      },
+      {
+        "source": "simulation.interface/output/color",
+        "target": "delivery.interface/subgraph/color"
+      },
+      {
+        "source": "simulation.interface/output/depth",
+        "target": "delivery.interface/subgraph/depth"
+      },
+      {
+        "source": "delivery.interface/subgraph/smooth_plan",
+        "target": "simulation.interface/sight/global_plan"
+      },
+      {
+        "source": "delivery.interface/subgraph/plan",
+        "target": "simulation.interface/sight/local_plan"
+      },
+      {
+        "source": "delivery.interface/subgraph/lift_command",
+        "target": "simulation.interface/input/lift_command"
+      }
+    ]
+  },
+  "config": {
+    "delivery.navigation.localization.localization_behavior": {
+      "disable_automatic_start": true
+    },
+    "navigate_after_scenario_loads": {
+      "NodeGroup": {
+        "node_names": [
+          "simulation.scenario_manager",
+          "delivery.navigation.localization.localization_behavior"
+        ]
+      }
+    },
+    "delivery.navigation.imu_odometry.odometry": {
+      "DifferentialBaseWheelImuOdometry": {
+        "use_imu": false
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "webroot": "packages/sight/webroot",
+        "assetroot": "external/industrial_dolly_pose_estimation_cnn_model",
+        "port": 3000,
+        "ui_config": {
+          "assets": {
+            "dolly": {
+              "obj": "/apps/assets/industrial_dolly_frame.obj",
+              "rotation": [0.70710678118, 0.70710678118, 0, 0],
+              "translation": [0, 0, 0.4],
+              "scale": 1.0
+            }
+          }
+        }
+      }
+    }
+  }
+}

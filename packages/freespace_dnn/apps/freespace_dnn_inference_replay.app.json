@@ -1,0 +1,28 @@
+{
+  "name": "freespace_dnn_inference_replay",
+  "graph": {
+    "nodes": [
+      {
+        "name": "replay",
+        "subgraph": "packages/record_replay/apps/replay.subgraph.json"
+      },
+      {
+        "name": "inference",
+        "subgraph": "packages/freespace_dnn/apps/freespace_dnn_inference.subgraph.json"
+      }
+    ],
+    "edges": [
+      {
+        "source": "replay.interface/output/image",
+        "target": "inference.subgraph/interface/rgb_image"
+      }
+    ]
+  },
+  "config": {
+    "replay.interface": {
+      "output": {
+        "cask_directory": "./external/path_segmentation_logs/warehouse"
+      }
+    }
+  }
+}

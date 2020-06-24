@@ -1,0 +1,4 @@
+{
+  "graphs": ["REAL_PATH_TO/carter_full_graph.json"],
+  "configs": ["REAL_PATH_TO/carter_full_config.json"]
+}

@@ -1,0 +1,278 @@
+{
+  "modules": [
+    "behavior_tree",
+    "flatscan_localization",
+    "navigation",
+    "utils",
+    "viewers"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "subgraph",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "interface",
+            "type": "isaac::alice::Subgraph"
+          }
+        ]
+      },
+      {
+        "name": "global_localization",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "Random",
+            "type": "isaac::alice::Random"
+          },
+          {
+            "name": "GridSearchLocalizer",
+            "type": "isaac::flatscan_localization::GridSearchLocalizer"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "scan_localization",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "Random",
+            "type": "isaac::alice::Random"
+          },
+          {
+            "name": "ParticleFilterLocalization",
+            "type": "isaac::flatscan_localization::ParticleFilterLocalization"
+          },
+          {
+            "name": "Pose2GaussianDistributionEstimation",
+            "type": "isaac::utils::Pose2GaussianDistributionEstimation"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "viewers",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "FlatscanViewer",
+            "type": "isaac::viewers::FlatscanViewer"
+          },
+          {
+            "name": "FlatscanViewer2",
+            "type": "isaac::viewers::FlatscanViewer"
+          },
+          {
+            "name": "PoseTrailViewer",
+            "type": "isaac::viewers::PoseTrailViewer"
+          },
+          {
+            "name": "RobotViewer",
+            "type": "isaac::navigation::RobotViewer"
+          }
+        ]
+      },
+      {
+        "name": "global_localization_from_config",
+        "components": [
+          {
+            "name": "PoseInitializer",
+            "type": "isaac::alice::PoseInitializer"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "localization_behavior",
+        "components": [
+          {
+            "name": "NodeGroup",
+            "type": "isaac::behavior_tree::NodeGroup"
+          },
+          {
+            "name": "MemorySequenceBehavior",
+            "type": "isaac::behavior_tree::MemorySequenceBehavior"
+          }
+        ]
+      },
+      {
+        "name": "global_localization_behavior",
+        "components": [
+          {
+            "name": "NodeGroup",
+            "type": "isaac::behavior_tree::NodeGroup"
+          },
+          {
+            "name": "SwitchBehavior",
+            "type": "isaac::behavior_tree::SwitchBehavior"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "global_localization_from_file",
+        "components": [
+          {
+            "name": "PoseFromFile",
+            "type": "isaac::alice::PoseFromFile"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "scan_localization_behavior",
+        "components": [
+          {
+            "name": "NodeGroup",
+            "type": "isaac::behavior_tree::NodeGroup"
+          },
+          {
+            "name": "ParallelBehavior",
+            "type": "isaac::behavior_tree::ParallelBehavior"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "localization_to_file",
+        "components": [
+          {
+            "name": "PoseToFile",
+            "type": "isaac::alice::PoseToFile"
+          }
+        ],
+        "disable_automatic_start": true
+      }
+    ],
+    "edges": [
+      {
+        "source": "subgraph/interface/flatscan",
+        "target": "scan_localization/ParticleFilterLocalization/flatscan"
+      },
+      {
+        "source": "subgraph/interface/flatscan_2",
+        "target": "scan_localization/ParticleFilterLocalization/flatscan_2"
+      },
+      {
+        "source": "scan_localization/ParticleFilterLocalization/samples",
+        "target": "scan_localization/Pose2GaussianDistributionEstimation/samples"
+      },
+      {
+        "source": "scan_localization/Pose2GaussianDistributionEstimation/mean_and_covariance",
+        "target": "viewers/RobotViewer/pose_estimate"
+      },
+      {
+        "source": "subgraph/interface/flatscan",
+        "target": "viewers/FlatscanViewer/flatscan"
+      },
+      {
+        "source": "subgraph/interface/flatscan_2",
+        "target": "viewers/FlatscanViewer2/flatscan"
+      },
+      {
+        "source": "subgraph/interface/flatscan",
+        "target": "global_localization/GridSearchLocalizer/flatscan"
+      },
+      {
+        "source": "subgraph/interface/flatscan_2",
+        "target": "global_localization/GridSearchLocalizer/flatscan_2"
+      }
+    ]
+  },
+  "config": {
+    "localization_behavior": {
+      "NodeGroup": {
+        "node_names": [
+          "$(fullname global_localization_behavior)",
+          "$(fullname scan_localization_behavior)"
+        ]
+      }
+    },
+    "global_localization_behavior": {
+      "SwitchBehavior": {
+        "desired_behavior": "$(fullname global_localization)"
+      },
+      "NodeGroup": {
+        "node_names": [
+          "$(fullname global_localization)",
+          "$(fullname global_localization_from_config)",
+          "$(fullname global_localization_from_file)"
+        ]
+      }
+    },
+    "global_localization": {
+      "GridSearchLocalizer": {
+        "tick_period": "250ms",
+        "use_second_flatscan": false
+      }
+    },
+    "global_localization_from_file": {
+      "PoseFromFile": {
+        "lhs_frame": "world",
+        "rhs_frame": "robot_init_global_localizer",
+        "filename": "/tmp/world_T_robot.json"
+      }
+    },
+    "scan_localization_behavior": {
+      "NodeGroup": {
+        "node_names": [
+          "$(fullname scan_localization)",
+          "$(fullname localization_to_file)"
+        ]
+      }
+    },
+    "localization_to_file": {
+      "PoseToFile": {
+        "tick_period": "1Hz",
+        "lhs_frame": "world",
+        "rhs_frame": "robot",
+        "filename": "/tmp/world_T_robot.json"
+      }
+    },
+    "viewers": {
+      "FlatscanViewer2": {
+        "flatscan_frame": "lidar_2"
+      },
+      "PoseTrailViewer": {
+        "tick_period": "10Hz",
+        "lhs_frame": "world",
+        "rhs_frame": "robot"
+      }
+    },
+    "scan_localization": {
+      "ParticleFilterLocalization": {
+        "output_best_percentile": 0.8
+      },
+      "Pose2GaussianDistributionEstimation": {
+        "lhs_frame": "world",
+        "rhs_frame": "robot"
+      }
+    },
+    "global_localization_from_config": {
+      "PoseInitializer": {
+        "attach_interactive_marker": true,
+        "report_success": true,
+        "lhs_frame": "world",
+        "rhs_frame": "robot_init_global_localizer",
+        "pose": {
+          "rotation": { "yaw_degrees": 180.0 },
+          "translation": [25.0, 20.0, 0.0]
+        }
+      }
+    }
+  }
+}

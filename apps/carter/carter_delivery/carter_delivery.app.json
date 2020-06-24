@@ -1,0 +1,139 @@
+{
+  "name": "carter_delivery",
+  "modules": [
+    "//apps/carter/carter_delivery:carter_delivery_codelet",
+    "communications",
+    "navigation"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "carter_delivery",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "carter_delivery",
+            "type": "isaac::CarterDelivery"
+          }
+        ]
+      },
+      {
+        "name": "waypoint_as_goal",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.navigation.MapWaypointAsGoal",
+            "type": "isaac::navigation::MapWaypointAsGoal"
+          }
+        ]
+      },
+      {
+        "name": "2d_carter",
+        "subgraph": "apps/carter/2d_carter.subgraph.json"
+      },
+      {
+        "name": "navigation",
+        "subgraph": "packages/navigation/apps/differential_base_navigation.subgraph.json"
+      },
+      {
+        "name": "commander",
+        "subgraph": "packages/navigation/apps/differential_base_commander.subgraph.json"
+      },
+      {
+        "name": "slackbot",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "slackbot",
+            "type": "isaac::SlackBot"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "commander.subgraph/interface/command",
+        "target": "2d_carter.subgraph/interface/diff_base_command"
+      },
+      {
+        "source": "2d_carter.subgraph/interface/flatscan",
+        "target": "navigation.subgraph/interface/flatscan_for_localization"
+      },
+      {
+        "source": "2d_carter.subgraph/interface/flatscan",
+        "target": "navigation.subgraph/interface/flatscan_for_obstacles"
+      },
+      {
+        "source": "2d_carter.subgraph/interface/diff_base_state",
+        "target": "navigation.subgraph/interface/state"
+      },
+      {
+        "source": "2d_carter.subgraph/interface/imu_raw",
+        "target": "navigation.subgraph/interface/imu_raw"
+      },
+      {
+        "source": "navigation.subgraph/interface/command",
+        "target": "commander.subgraph/interface/control"
+      },
+      {
+        "source": "slackbot/slackbot/user_instruction",
+        "target": "carter_delivery/carter_delivery/incoming_message"
+      },
+      {
+        "source": "carter_delivery/carter_delivery/outgoing_message",
+        "target": "slackbot/slackbot/slack_message"
+      },
+      {
+        "source": "carter_delivery/carter_delivery/target_waypoint",
+        "target": "waypoint_as_goal/isaac.navigation.MapWaypointAsGoal/desired_waypoint"
+      },
+      {
+        "source": "navigation.subgraph/interface/feedback",
+        "target": "carter_delivery/carter_delivery/goal_feedback"
+      },
+      {
+        "source": "waypoint_as_goal/isaac.navigation.MapWaypointAsGoal/goal",
+        "target": "navigation.subgraph/interface/goal"
+      }
+    ]
+  },
+  "config": {
+    "carter_delivery": {
+      "carter_delivery": {
+        "tick_period": "10ms",
+        "popcorn_pickup_waypoint": "kitchen",
+        "navigation_mode": "navigation.control.navigation_mode/isaac.navigation.GroupSelectorBehavior"
+      }
+    },
+    "navigation.control.lqr": {
+      "isaac.planner.DifferentialBaseLqrPlanner": {
+        "manual_mode_channel": "commander.robot_remote/isaac.navigation.RobotRemoteControl/manual_mode"
+      }
+    },
+    "navigation.control.control": {
+      "isaac.planner.DifferentialBaseControl": {
+        "manual_mode_channel": "commander.robot_remote/isaac.navigation.RobotRemoteControl/manual_mode"
+      }
+    },
+    "slackbot": {
+      "slackbot": {
+        "bot_token": "bot_token_here"
+      }
+    },
+    "waypoint_as_goal": {
+      "isaac.navigation.MapWaypointAsGoal": {
+        "map_layer": "map/waypoints",
+        "tick_period": "50ms"
+      }
+    }
+  }
+}

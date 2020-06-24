@@ -1,0 +1,169 @@
+{
+  "modules": [
+    "ml",
+    "object_pose_refinement",
+    "surflets"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "subgraph",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "interface",
+            "type": "isaac::alice::Subgraph"
+          }
+        ]
+      },
+      {
+        "name": "object_pose_refinement",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "PoseRefinement",
+            "type": "isaac::object_pose_refinement::PoseRefinement"
+          }
+        ]
+      },
+      {
+        "name": "pose_initializers",
+        "components": [
+          {
+            "name": "camera_pose",
+            "type": "isaac::alice::PoseInitializer"
+          }
+        ]
+      },
+      {
+        "name": "model_atlas",
+        "components": [
+          {
+            "name": "object_model",
+            "type": "isaac::map::SurfletModelAtlas"
+          }
+        ]
+      },
+      {
+        "name": "surflet_assignment",
+        "components": [
+          {
+            "name": "surflet_assignment",
+            "type": "isaac::surflets::MinimumDistanceAssignment"
+          }
+        ]
+      },
+      {
+        "name": "surflet_distance",
+        "components": [
+          {
+            "name": "surflet_distance",
+            "type": "isaac::surflets::PointDistance"
+          }
+        ]
+      },
+      {
+        "name": "surflet_assignment_distance",
+        "components": [
+          {
+            "name": "surflet_assignment_distance",
+            "type": "isaac::surflets::PointDistance"
+          }
+        ]
+      },
+      {
+        "name": "surflet_masking",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "SurfletMasking",
+            "type": "isaac::surflets::SurfletMasking"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "subgraph/interface/measurement_surflets",
+        "target": "surflet_masking/SurfletMasking/surflets"
+      },
+      {
+        "source": "subgraph/interface/measurement_surflets",
+        "target": "object_pose_refinement/PoseRefinement/surflets"
+      },
+      {
+        "source": "subgraph/interface/input_detections",
+        "target": "surflet_masking/SurfletMasking/detections"
+      },
+      {
+        "source": "subgraph/interface/input_tensors",
+        "target": "surflet_masking/SurfletMasking/segmentation"
+      },
+      {
+        "source": "surflet_masking/SurfletMasking/assignment",
+        "target": "object_pose_refinement/PoseRefinement/object_assignment"
+      },
+      {
+        "source": "subgraph/interface/input_poses",
+        "target": "object_pose_refinement/PoseRefinement/raw_poses"
+      },
+      {
+        "source": "object_pose_refinement/PoseRefinement/refined_poses",
+        "target": "subgraph/interface/output_poses"
+      }
+    ]
+    },
+    "config": {
+    "pose_initializers": {
+      "camera_pose": {
+        "lhs_frame": "robot",
+        "rhs_frame": "camera",
+        "pose": [0.5, -0.5, 0.5, -0.5, 0.0, 0.0, 0.165]
+      }
+    },
+    "model_atlas": {
+      "object_model": {
+        "cask": "external/industrial_dolly_pose_refinement_data/surflet_full_dolly"
+      }
+    },
+    "object_pose_refinement": {
+      "PoseRefinement": {
+        "model_atlas": "object_pose_refinement.model_atlas",
+        "assignment_component_name": "object_pose_refinement.surflet_assignment",
+        "distance_component_name": "object_pose_refinement.surflet_distance",
+        "assignment_distance_component_name": "object_pose_refinement.surflet_assignment_distance",
+        "object_model_names": ["dolly", "ground_plane"],
+        "reference_frame_name": "camera",
+        "filename": "external/industrial_dolly_pose_refinement_data/surflet_full_dolly.json",
+        "gradient_descent_max_iterations": 30,
+        "line_search_tolerance": 1e-4,
+        "num_iterations": 50,
+        "line_search_step_factor": 0.5,
+        "line_search_armijo_factor": 0.5,
+        "line_search_max_iterations": 15,
+        "line_search_break_on_failure": true,
+        "distance_threshold": 1e-5,
+        "mesh_pose_offset": [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.375]
+      }
+    },
+    "surflet_assignment": {
+      "surflet_assignment": {
+        "scale": 0.08
+      }
+    },
+    "surflet_masking": {
+      "SurfletMasking": {
+        "threshold": 0.8
+      }
+    }
+  }
+}

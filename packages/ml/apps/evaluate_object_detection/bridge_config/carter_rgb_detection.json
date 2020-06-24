@@ -1,0 +1,4 @@
+{
+  "graphs": ["carter_rgb_detection.graph.json"],
+  "configs": ["carter_rgb_detection.config.json"]
+}

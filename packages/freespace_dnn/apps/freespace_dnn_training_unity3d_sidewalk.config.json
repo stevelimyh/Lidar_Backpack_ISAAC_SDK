@@ -1,0 +1,36 @@
+{
+  "training.segmentation_encoder": {
+    "SegmentationEncoder": {
+      "class_label_names": [
+        "grass",
+        "road",
+        "curb",
+        "sidewalk",
+        "obstacle"
+      ],
+      "offset": 0
+    }
+  },
+  "training.camera_teleportation": {
+    "Teleportation": {
+      "name": "Camera Group",
+      "base_mode": "spline",
+      "offset_pose": {
+        "rotation": {
+          "roll_degrees": -180.0,
+          "pitch_degrees": 68.5,
+          "yaw_degrees": 90.0
+        },
+        "translation": [0.0, 0.0, 0.9]
+      },
+      "spline_distance": 0.005,
+      "spline_speed": 0.005,
+      "translation_standard_deviation": [0.3, 0.3, 0.2],
+      "roll_pitch_yaw_standard_deviation": [0.1, 0.15, 0.5],
+      "tick_period": "30Hz"
+    },
+    "Spline": {
+      "filename": "<path_to_navsim>/ThirdParty/Scenes/sidewalk/data/spline.json"
+    }
+  }
+}

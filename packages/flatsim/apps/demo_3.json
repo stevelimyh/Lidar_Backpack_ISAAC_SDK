@@ -1,0 +1,115 @@
+{
+  "modules": [
+    "map",
+    "navigation"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "map",
+        "start_order": -100,
+        "components": [
+          {
+            "name": "isaac.map.Map",
+            "type": "isaac::map::Map"
+          },
+          {
+            "name": "map",
+            "type": "isaac::navigation::NavigationMap"
+          },
+          {
+            "name": "occupancy",
+            "type": "isaac::map::OccupancyGridMapLayer"
+          },
+          {
+            "name": "waypoints",
+            "type": "isaac::map::WaypointMapLayer"
+          },
+          {
+            "name": "restricted_area",
+            "type": "isaac::map::PolygonMapLayer"
+          }
+        ]
+      }
+    ]
+  },
+  "config": {
+    "flatsim.navigation.shared_robot_model": {
+      "SphericalRobotShapeComponent": {
+        "circles": [
+          { "center": [-0.17 ,0.0], "radius": 0.31},
+          { "center": [-0.43 ,0.0], "radius": 0.31},
+          { "center": [ 0.1 , 0.0], "radius": 0.31},
+          { "center": [-0.7 , 0.0], "radius": 0.31},
+          { "center": [ 0.31, 0.21], "radius": 0.105},
+          { "center": [-0.91,-0.21], "radius": 0.105},
+          { "center": [-0.91, 0.21], "radius": 0.105},
+          { "center": [ 0.31,-0.21], "radius": 0.105}
+        ]
+      }
+    },
+    "flatsim.navigation.local_map.local_map": {
+      "isaac.navigation.LocalMap": {
+        "cell_size": 0.03,
+        "map_decay_factor": 0.999,
+        "odom_frame": "world",
+        "dimensions": [396, 396]
+      }
+    },
+    "flatsim.navigation.local_map.local_map_postprocessing": {
+      "isaac.navigation.OccupancyToBinaryMap": {
+        "standard_deviation_threshold": 96,
+        "is_optimistic": true
+      },
+      "cleanup": {
+        "clear_region": [[-1.015, 0.415],[-0.315, 0.315]]
+      }
+    },
+    "flatsim.navigation.control.lqr": {
+      "isaac.planner.DifferentialBaseLqrPlanner": {
+        "target_distance": 0.25,
+        "speed_gradient_target_distance": 1.0,
+        "min_distance": 0.1,
+        "min_speed": -0.10,
+        "max_speed": 0.65,
+        "max_angular_speed": 0.25,
+        "use_predicted_position": true,
+        "reset_robot_position": 10,
+        "distance_to_waypoint": 0.25,
+        "angle_to_waypoint": 0.0872665,
+        "max_predicted_position_error": 0.5
+      }
+    },
+    "flatsim.simulation.sim_range_scan": {
+      "SimRangeScan": {
+        "num_beams": 360,
+        "max_range": 40.0,
+        "min_angle": -1.5708,
+        "max_angle": 1.5708
+      },
+      "robot_T_lidar": {
+        "pose": [1.0, 0.0, 0.0, 0.0, 0.32, 0.15, 0.17]
+      },
+      "robot_gt_T_lidar_gt": {
+        "pose": [1.0, 0.0, 0.0, 0.0, 0.32, 0.15, 0.17]
+      }
+    },
+    "map": {
+      "occupancy": {
+        "cell_size": 0.03,
+        "filename": "apps/assets/maps/corridor_office.png"
+      },
+      "waypoints": {
+        "tick_period": "1.0"
+      },
+      "restricted_area": {
+        "tick_period": "1.0"
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "port": 3000
+      }
+    }
+  }
+}

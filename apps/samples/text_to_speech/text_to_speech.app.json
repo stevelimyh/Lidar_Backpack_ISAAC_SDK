@@ -1,0 +1,116 @@
+{
+  "name": "text_to_speech",
+  "modules": [
+    "audio",
+    "ml:torch",
+    "utils"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "text_to_mel",
+        "components": [
+          {
+            "name": "ml",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.utils.SendTextMessages",
+            "type": "isaac::utils::SendTextMessages"
+          },
+          {
+            "name": "isaac.audio.TextToMel",
+            "type": "isaac::audio::TextToMel"
+          }
+        ]
+      },
+      {
+        "name": "vocoder",
+        "components": [
+          {
+            "name": "ml",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.ml.Vocoder",
+            "type": "isaac::ml::TorchInference"
+          },
+          {
+            "name": "isaac.audio.TensorToAudioDecoder",
+            "type": "isaac::audio::TensorToAudioDecoder"
+          }
+        ]
+      },
+      {
+        "name": "audio_playback",
+        "components": [
+          {
+            "name": "ml",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.audio.AudioPlayback",
+            "type": "isaac::audio::AudioPlayback"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "text_to_mel/isaac.utils.SendTextMessages/text_output",
+        "target": "text_to_mel/isaac.audio.TextToMel/text"
+      },
+      {
+        "source": "text_to_mel/isaac.audio.TextToMel/mel_spectrogram",
+        "target": "vocoder/isaac.ml.Vocoder/input"
+      },
+      {
+        "source": "vocoder/isaac.ml.Vocoder/output",
+        "target": "vocoder/isaac.audio.TensorToAudioDecoder/tensors"
+      },
+      {
+        "source": "vocoder/isaac.audio.TensorToAudioDecoder/audio",
+        "target": "audio_playback/isaac.audio.AudioPlayback/audio_playback_input"
+      }
+    ]
+  },
+  "config": {
+    "text_to_mel": {
+      "ml": {
+        "history": 10
+      },
+      "isaac.audio.TextToMel": {
+        "session_timeout_value": 25.0
+      },
+      "isaac.utils.SendTextMessages": {
+        "text_list": [
+          "Welcome",
+          "There are eight planets in our solar system, mercury is the smallest and jupiter is the biggest of them.",
+          "Jaded zombies acted quaintly but kept driving their oxen forward.",
+          "The quick brown fox jumps over the lazy dog.",
+          "Pack my box with five dozen liquor jugs.",
+          "The five boxing wizards jump quickly.",
+          "We promptly judged antique ivory buckles for the next prize.",
+          "A bank is a place that will lend you money if you can prove that you dont need it.",
+          "{HH AH0 L OW1} {AY1} {W AA1 N T} {T UW1} {G OW1} {T UW1} {S AE1 N T AH0} {K L AE1 R AH0} {AH0 N D} {SH AA1 P} {TH IH1 NG Z} {AE1 T} {EH2 L AH0 M EH1 N T AH0 L}."
+        ],
+        "tick_period": "10s",
+        "initial_delay": 25.0
+      }
+    },
+    "vocoder": {
+      "ml": {
+        "history": 10
+      },
+      "isaac.ml.Vocoder": {
+        "model_file_path": "external/waveglow_model/waveglow_randVect_noiseTrunc_fp16.ts",
+        "message_time_to_live": 8.0
+      }
+    },
+    "audio_playback": {
+      "ml": {
+        "history": 10
+      }
+    }
+  }
+}

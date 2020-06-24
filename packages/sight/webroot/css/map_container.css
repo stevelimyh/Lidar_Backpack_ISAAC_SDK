@@ -1,0 +1,126 @@
+/*
+Copyright (c) 2018, NVIDIA CORPORATION. All rights reserved.
+
+NVIDIA CORPORATION and its licensors retain all intellectual property
+and proprietary rights in and to this software, related documentation
+and any modifications thereto. Any use, reproduction, disclosure or
+distribution of this software and related documentation without an express
+license agreement from NVIDIA CORPORATION is strictly prohibited.
+*/
+
+#map-node-color-picker {
+  width: 56px;
+  height: 56px;
+  top: -8px;
+  right: -8px;
+  border: none;
+  position: absolute;
+  cursor: pointer;
+}
+
+#map-node-color-picker-div {
+  position: absolute;
+  width: 25px;
+  height: 25px;
+  z-index: 999999;
+  border: solid 2px #ddd;
+  overflow: hidden;
+  margin-left: 10px;
+  margin-top: 10px;
+  cursor: pointer;
+  visibility: hidden;
+}
+
+#map_editing_tools {
+  position: absolute;
+  z-index: 999999;
+  display: inline-flex;
+}
+
+#map-container-layer-canvas-wrapper {
+  width: 450px;
+  height: 550px;
+  overflow: auto;
+  resize: both;
+}
+
+.map-container-layer-dialog-input-text {
+  color: #1a1a1a;
+  font-weight: normal;
+  font-size: 16px;
+  line-height: 18px;
+}
+
+.map-container-layer-dialog-button-primary {
+  background: #76b900;
+  color: #ffffff;
+  font-weight: bold;
+  font-size: 14px;
+  border: none;
+  display: inline-block;
+}
+
+.map-container-layer-dialog-button-secondary {
+  background: transparent;
+  color: #76b900;
+  font-weight: bold;
+  font-size: 14px;
+  border: none;
+  padding: 0px;
+  display: inline-block;
+}
+
+.map-container-editing-tools-icon {
+  position: relative;
+  top: 10px;
+  margin-left: 25px;
+  cursor: pointer;
+}
+
+.map-container-add-new-layer-icon {
+  width: 30px;
+  height: 25px;
+  margin-left: 15px;
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+.map-container-add-new-layer-icon:hover {
+  background-color: #72b900;
+}
+
+.map-container-layer-options {
+  width: 20px;
+  height: 20px;
+  margin-left: 5px;
+}
+
+.nvidia-color-on-hover:hover {
+  background-color: #72b900;
+}
+
+.map-container-delete-layer-option:hover {
+  /* TODO(apatole): Modify this once we support deleting layers. */
+  background-color: #d3d3d3;
+}
+
+.map-container-layer-input-field {
+  margin-left: 5px;
+  position: relative;
+  display: inline-block;
+}
+
+.map-container-layer-input-div {
+  position: absolute;
+  z-index: 999999;
+  background-color: #D3D3D3;
+  padding: 5px;
+}
+
+.map-container-label-text {
+  font-size: 14px;
+  font-family: DINPRO;
+  color: #1a1a1a;
+  line-height: 18px;
+  font-weight: normal;
+}

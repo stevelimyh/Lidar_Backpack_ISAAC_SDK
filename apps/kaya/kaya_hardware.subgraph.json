@@ -1,0 +1,183 @@
+{
+  "modules": [
+    "dynamixel",
+    "imu",
+    "kaya",
+    "realsense",
+    "viewers"
+  ],
+  "config": {
+    "kaya_base": {
+      "holonomic_to_wheels": {
+        "max_linear_speed": 0.5,
+        "max_angular_speed": 2.0
+      }
+    },
+    "dynamixels": {
+      "driver": {
+        "tick_period": "50 Hz",
+        "port": "/dev/ttyACM0",
+        "servo_ids": [3, 1, 2]
+      },
+      "isaac.alice.Failsafe": {
+        "name": "robot_failsafe"
+      }
+    },
+    "camera": {
+      "realsense": {
+        "rows": 480,
+        "cols": 848,
+        "rgb_framerate": 30,
+        "depth_framerate": 30
+      },
+      "realsense_pose": {
+        "lhs_frame": "robot",
+        "rhs_frame": "camera",
+        "pose": {
+          "rotation": {
+            "roll_degrees": -180.0,
+            "pitch_degrees": 70.0,
+            "yaw_degrees": 90.0
+          },
+          "translation": [0.08, 0.04, 0.17]
+        }
+      },
+      "depth_viewer": {
+        "camera_name": "camera",
+        "max_visualization_depth": 2
+      },
+      "color_viewer": {
+        "camera_name": "camera"
+      }
+    },
+    "imu": {
+      "imu_hw": {
+        "i2c_device_id": 1,
+        "tick_period": "100Hz"
+      }
+    }
+  },
+  "graph": {
+    "nodes": [
+      {
+        "name": "subgraph",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "interface",
+            "type": "isaac::alice::Subgraph"
+          }
+        ]
+      },
+      {
+        "name": "kaya_base",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "holonomic_to_wheels",
+            "type": "isaac::kaya::KayaBaseDriver"
+          }
+        ]
+      },
+      {
+        "name": "dynamixels",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "driver",
+            "type": "isaac::dynamixel::DynamixelDriver"
+          },
+          {
+            "name": "isaac.alice.Failsafe",
+            "type": "isaac::alice::Failsafe"
+          }
+        ]
+      },
+      {
+        "name": "camera",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "realsense_pose",
+            "type": "isaac::alice::PoseInitializer"
+          },
+          {
+            "name": "realsense",
+            "type": "isaac::RealsenseCamera"
+          },
+          {
+            "name": "depth_viewer",
+            "type": "isaac::viewers::DepthCameraViewer"
+          },
+          {
+            "name": "color_viewer",
+            "type": "isaac::viewers::ColorCameraViewer"
+          }
+        ]
+      },
+      {
+        "name": "imu",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "imu_hw",
+            "type": "isaac::imu::IioBmi160"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "subgraph/interface/base_command",
+        "target": "kaya_base/holonomic_to_wheels/base_command"
+      },
+      {
+        "source": "kaya_base/holonomic_to_wheels/base_state",
+        "target": "subgraph/interface/base_state"
+      },
+      {
+        "source": "dynamixels/driver/state",
+        "target": "kaya_base/holonomic_to_wheels/wheel_state"
+      },
+      {
+        "source": "kaya_base/holonomic_to_wheels/wheel_command",
+        "target": "dynamixels/driver/command"
+      },
+      {
+        "source": "camera/realsense/depth",
+        "target": "subgraph/interface/realsense_depth"
+      },
+      {
+        "source": "camera/realsense/color",
+        "target": "subgraph/interface/realsense_color"
+      },
+      {
+        "source": "camera/realsense/depth",
+        "target": "camera/depth_viewer/depth_listener"
+      },
+      {
+        "source": "camera/realsense/color",
+        "target": "camera/color_viewer/color_listener"
+      },
+      {
+        "source": "imu/imu_hw/imu_raw",
+        "target": "subgraph/interface/imu_raw"
+      }
+    ]
+  }
+}

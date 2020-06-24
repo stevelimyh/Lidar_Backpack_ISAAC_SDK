@@ -1,0 +1,132 @@
+{
+  "name": "pose_refinement_replay",
+  "modules": [
+    "object_pose_refinement",
+    "sight",
+    "viewers"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "replay",
+        "subgraph": "packages/record_replay/apps/replay.subgraph.json"
+      },
+      {
+        "name": "detection_pose_estimation",
+        "subgraph": "packages/object_pose_estimation/apps/pose_cnn_decoder/detection_pose_estimation_cnn_inference.subgraph.json"
+      },
+      {
+        "name": "superpixels",
+        "subgraph": "packages/superpixels/apps/superpixels.subgraph.json"
+      },
+      {
+        "name": "object_pose_refinement",
+        "subgraph": "packages/object_pose_refinement/apps/pose_refinement.subgraph.json"
+      },
+      {
+        "name": "viewers",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "ObjectRefinementViewer",
+            "type": "isaac::viewers::Detections3Viewer"
+          }
+        ]
+      },
+      {
+        "name": "depthviewer",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "DepthCameraViewer",
+            "type": "isaac::viewers::DepthCameraViewer"
+          }
+        ]
+      },
+      {
+        "name": "sight_widgets",
+        "components": [
+          {
+            "name": "SightWidget",
+            "type": "isaac::sight::SightWidget"
+          },
+          {
+            "name": "ObjectRefinement3DViewer",
+            "type": "isaac::sight::SightWidget"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "replay.interface/output/color",
+        "target": "detection_pose_estimation.interface/Subgraph/color"
+      },
+      {
+        "source": "replay.interface/output/color",
+        "target": "superpixels.subgraph/interface/color"
+      },
+      {
+        "source": "replay.interface/output/depth",
+        "target": "superpixels.subgraph/interface/depth"
+      },
+      {
+        "source": "replay.interface/output/depth",
+        "target": "depthviewer/DepthCameraViewer/depth_listener"
+      },
+      {
+        "source": "superpixels.subgraph/interface/surflets",
+        "target": "object_pose_refinement.subgraph/interface/measurement_surflets"
+      },
+      {
+        "source": "detection_pose_estimation.object_detection.subgraph/interface/detections",
+        "target": "object_pose_refinement.subgraph/interface/input_detections"
+      },
+      {
+        "source": "detection_pose_estimation.interface/Subgraph/output_tensors",
+        "target": "object_pose_refinement.subgraph/interface/input_tensors"
+      },
+      {
+        "source": "detection_pose_estimation.interface/Subgraph/output_poses",
+        "target": "object_pose_refinement.subgraph/interface/input_poses"
+      },
+      {
+        "source": "object_pose_refinement.subgraph/interface/output_poses",
+        "target": "viewers/ObjectRefinementViewer/detections"
+      }
+    ]
+  },
+  "config": {
+    "replay.interface": {
+      "output": {
+        "cask_directory": "external/industrial_dolly_pose_estimation_data/dolly_logs_2020_04_16"
+      }
+    },
+    "detection_pose_estimation.object_detection.detection_decoder": {
+      "isaac.detect_net.DetectNetDecoder": {
+        "output_scale": [480, 848]
+      }
+    },
+    "detection_pose_estimation.object_pose_estimation.detection_convertor": {
+      "BoundingBoxEncoder": {
+        "image_dimensions": [480, 848]
+      }
+    },
+    "object_pose_refinement.object_pose_refinement": {
+      "PoseRefinement": {
+        "line_search_max_iterations": 30
+      }
+    },
+    "object_pose_refinement.surflet_assignment": {
+      "surflet_assignment": {
+        "scale": 0.08
+      }
+    }
+  }
+}

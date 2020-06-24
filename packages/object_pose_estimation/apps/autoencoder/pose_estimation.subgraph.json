@@ -1,0 +1,178 @@
+{
+  "modules": [
+    "ml",
+    "object_pose_estimation"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "subgraph",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "interface",
+            "type": "isaac::alice::Subgraph"
+          }
+        ]
+      },
+      {
+        "name": "detection_filter",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "FilterDetectionsByLabel",
+            "type": "isaac::ml::FilterDetectionsByLabel"
+          }
+        ]
+      },
+      {
+        "name": "crop_downsample",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "CropAndDownsample",
+            "type": "isaac::ml::DetectionImageExtraction"
+          }
+        ]
+      },
+      {
+        "name": "pose_encoder",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "TensorRTInference",
+            "type": "isaac::ml::TensorRTInference"
+          }
+        ]
+      },
+      {
+        "name": "codebook_lookup",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "CodebookLookup",
+            "type": "isaac::object_pose_estimation::CodebookLookup"
+          }
+        ]
+      },
+      {
+        "name": "object_pose_estimation",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "PoseEstimation",
+            "type": "isaac::object_pose_estimation::PoseEstimation"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "subgraph/interface/input_image",
+        "target": "crop_downsample/CropAndDownsample/input_image"
+      },
+      {
+        "source": "subgraph/interface/input_image",
+        "target": "object_pose_estimation/PoseEstimation/input_image"
+      },
+      {
+        "source": "subgraph/interface/input_detections",
+        "target": "detection_filter/FilterDetectionsByLabel/input_detections"
+      },
+      {
+        "source": "detection_filter/FilterDetectionsByLabel/output_detections",
+        "target": "object_pose_estimation/PoseEstimation/input_detections"
+      },
+      {
+        "source": "detection_filter/FilterDetectionsByLabel/output_detections",
+        "target": "crop_downsample/CropAndDownsample/input_detections"
+      },
+      {
+        "source": "crop_downsample/CropAndDownsample/output_tensors",
+        "target": "pose_encoder/TensorRTInference/input_tensors"
+      },
+      {
+        "source": "pose_encoder/TensorRTInference/output_tensors",
+        "target": "codebook_lookup/CodebookLookup/features"
+      },
+      {
+        "source": "codebook_lookup/CodebookLookup/codes",
+        "target": "object_pose_estimation/PoseEstimation/codes"
+      },
+      {
+        "source": "codebook_lookup/CodebookLookup/correlations",
+        "target": "object_pose_estimation/PoseEstimation/correlations"
+      },
+      {
+        "source": "object_pose_estimation/PoseEstimation/output_poses",
+        "target": "subgraph/interface/output_poses"
+      },
+      {
+        "source": "pose_encoder/TensorRTInference/output_tensors",
+        "target": "subgraph/interface/output_tensors"
+      }
+    ]
+  },
+  "config": {
+    "detection_filter": {
+      "FilterDetectionsByLabel": {
+        "whitelist_labels": ["Dolly", "dolly"]
+      }
+    },
+    "crop_downsample": {
+      "CropAndDownsample": {
+        "downsample_size": [128, 128],
+        "pixel_normalization_mode": "Unit",
+        "tensor_index_order": "201"
+      }
+    },
+    "pose_encoder": {
+      "TensorRTInference": {
+        "model_file_path": "external/dolly_pose_estimation_model/dolly_ae_model.uff",
+        "inference_mode": "FP16",
+        "max_workspace_size": 16777216,
+        "force_engine_update": false,
+        "max_batch_size": 4,
+        "input_tensor_info": [
+          {
+            "use_batch_dimension": true,
+            "operation_name": "encoder_input",
+            "channel": "input_tensors",
+            "dims": [-1, 3, 128, 128],
+            "uff_input_order": "channels_last"
+          }
+        ],
+        "output_tensor_info": [
+          {
+            "operation_name": "encoder_output/BiasAdd",
+            "channel": "output_tensors",
+            "dims": [-1, 128]
+          }
+        ]
+      }
+    },
+    "codebook_lookup": {
+      "CodebookLookup": {
+        "codebook_path": "external/dolly_pose_estimation_model/dolly_codebook.jsonl"
+      }
+    }
+  }
+}

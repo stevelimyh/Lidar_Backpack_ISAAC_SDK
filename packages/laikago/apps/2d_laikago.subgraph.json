@@ -1,0 +1,62 @@
+{
+  "graph": {
+    "nodes": [
+      {
+        "name": "subgraph",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "interface",
+            "type": "isaac::alice::Subgraph"
+          }
+        ]
+      },
+      {
+        "name": "laikago_hardware",
+        "subgraph": "packages/laikago/apps/laikago_hardware.subgraph.json"
+      },
+      {
+        "name": "scan_flattener",
+        "subgraph": "packages/navigation/apps/scan_flattener.subgraph.json"
+      }
+    ],
+    "edges": [
+      {
+        "source": "subgraph/interface/base_command",
+        "target": "laikago_hardware.subgraph/interface/base_command"
+      },
+      {
+        "source": "laikago_hardware.subgraph/interface/base_state",
+        "target": "subgraph/interface/base_state"
+      },
+      {
+        "source": "laikago_hardware.subgraph/interface/imu",
+        "target": "subgraph/interface/imu"
+      },
+      {
+        "source": "scan_flattener.subgraph/interface/flatscan",
+        "target": "subgraph/interface/flatscan"
+      },
+      {
+        "source": "laikago_hardware.subgraph/interface/scan",
+        "target": "scan_flattener.subgraph/interface/scan"
+      }
+    ]
+  },
+  "config": {
+    "scan_flattener.scan_accumulator": {
+      "isaac.perception.ScanAccumulator": {
+        "min_count": 900
+      }
+    },
+    "scan_flattener.range_scan_flattening": {
+      "isaac.perception.RangeScanFlattening": {
+        "height_min": -0.44,
+        "height_max": 0.71
+      }
+    }
+  }
+}

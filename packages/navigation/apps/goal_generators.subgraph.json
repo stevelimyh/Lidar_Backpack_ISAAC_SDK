@@ -1,0 +1,269 @@
+{
+  "modules": [
+    "behavior_tree",
+    "navigation"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "subgraph",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "interface",
+            "type": "isaac::alice::Subgraph"
+          }
+        ]
+      },
+      {
+        "name": "random_walk",
+        "components": [
+          {
+            "name": "isaac.navigation.RandomWalk",
+            "type": "isaac::navigation::RandomWalk"
+          },
+          {
+            "name": "isaac.navigation.RobotPoseGenerator",
+            "type": "isaac::navigation::RobotPoseGenerator"
+          },
+          {
+            "name": "random",
+            "type": "isaac::alice::Random"
+          },
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          }
+        ]
+      },
+      {
+        "name": "waypoint_as_goal",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.navigation.MapWaypointAsGoal",
+            "type": "isaac::navigation::MapWaypointAsGoal"
+          }
+        ]
+      },
+      {
+        "name": "pose_as_goal",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.navigation.PoseAsGoal",
+            "type": "isaac::navigation::PoseAsGoal"
+          }
+        ]
+      },
+      {
+        "name": "pose_as_goal_frame",
+        "components": [
+          {
+            "name": "PoseInitializer",
+            "type": "isaac::alice::PoseInitializer"
+          }
+        ]
+      },
+      {
+        "name": "patrol",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "MapWaypointsAsPlan",
+            "type": "isaac::navigation::MapWaypointsAsPlan"
+          },
+          {
+            "name": "FollowPath",
+            "type": "isaac::navigation::FollowPath"
+          }
+        ]
+      },
+      {
+        "name": "path",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "Plan2Generator",
+            "type": "isaac::message_generators::Plan2Generator"
+          },
+          {
+            "name": "FollowPath",
+            "type": "isaac::navigation::FollowPath"
+          }
+        ]
+      },
+      {
+        "name": "goal_behavior",
+        "components": [
+          {
+            "name": "isaac.alice.Behavior",
+            "type": "isaac::behavior_tree::deprecated::Behavior"
+          },
+          {
+            "name": "isaac.navigation.SelectorBehavior",
+            "type": "isaac::behavior_tree::deprecated::SelectorBehavior"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "run_on_start",
+        "components": [
+          {
+            "name": "SwitchBehavior",
+            "type": "isaac::behavior_tree::SwitchBehavior"
+          },
+          {
+            "name": "NodeGroup",
+            "type": "isaac::behavior_tree::NodeGroup"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "random_walk/isaac.navigation.RandomWalk/goal",
+        "target": "subgraph/interface/goal"
+      },
+      {
+        "source": "subgraph/interface/feedback",
+        "target": "random_walk/isaac.navigation.RandomWalk/feedback"
+      },
+      {
+        "source": "waypoint_as_goal/isaac.navigation.MapWaypointAsGoal/goal",
+        "target": "subgraph/interface/goal"
+      },
+      {
+        "source": "pose_as_goal/isaac.navigation.PoseAsGoal/goal",
+        "target": "subgraph/interface/goal"
+      },
+      {
+        "source": "patrol/FollowPath/goal",
+        "target": "subgraph/interface/goal"
+      },
+      {
+        "source": "patrol/MapWaypointsAsPlan/plan",
+        "target": "patrol/FollowPath/plan"
+      },
+      {
+        "source": "subgraph/interface/feedback",
+        "target": "patrol/FollowPath/feedback"
+      },
+      {
+        "source": "path/FollowPath/goal",
+        "target": "subgraph/interface/goal"
+      },
+      {
+        "source": "path/Plan2Generator/plan",
+        "target": "path/FollowPath/plan"
+      },
+      {
+        "source": "subgraph/interface/feedback",
+        "target": "path/FollowPath/feedback"
+      }
+    ]
+  },
+  "config": {
+    "random_walk": {
+      "isaac.navigation.RandomWalk": {
+        "robot_radius": 0.5,
+        "tick_period": "250ms",
+        "timeout": 10.0
+      }
+    },
+    "waypoint_as_goal": {
+      "isaac.navigation.MapWaypointAsGoal": {
+        "tick_period": "250ms"
+      }
+    },
+    "pose_as_goal": {
+      "isaac.navigation.PoseAsGoal": {
+        "goal_frame": "pose_as_goal",
+        "tick_period": "250ms"
+      }
+    },
+    "pose_as_goal_frame": {
+      "PoseInitializer": {
+        "lhs_frame": "world",
+        "rhs_frame": "pose_as_goal",
+        "pose": [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        "attach_interactive_marker": true
+      }
+    },
+    "patrol": {
+      "MapWaypointsAsPlan": {
+        "waypoints": [
+        ],
+        "tick_period": "250ms"
+      },
+      "FollowPath": {
+        "loop": true,
+        "num_waypoints_to_show": 0,
+        "stationary_wait_time": 20.0,
+        "tick_period": "250ms"
+      }
+    },
+    "path": {
+      "Plan2Generator": {
+        "waypoints": [
+        ],
+        "tick_period": "250ms"
+      },
+      "FollowPath": {
+        "loop": false,
+        "num_waypoints_to_show": 0,
+        "stationary_wait_time": 20.0,
+        "tick_period": "250ms"
+      }
+    },
+    "goal_behavior": {
+      "isaac.navigation.SelectorBehavior": {
+        "desired_behavior": "random",
+        "tick_period": "50ms"
+      },
+      "isaac.alice.Behavior": {
+        "aliases": [
+          "random",
+          "waypoint",
+          "pose",
+          "patrol",
+          "path"
+        ],
+        "nodes": [
+          "$(fullname random_walk)",
+          "$(fullname waypoint_as_goal)",
+          "$(fullname pose_as_goal)",
+          "$(fullname patrol)",
+          "$(fullname path)"
+        ]
+      },
+      "disable_automatic_start": true
+    },
+    "run_on_start": {
+      "SwitchBehavior": {
+        "desired_behavior": "$(fullname goal_behavior)"
+      },
+      "NodeGroup": {
+        "node_names": [
+          "$(fullname goal_behavior)"
+        ]
+      }
+    }
+  }
+}

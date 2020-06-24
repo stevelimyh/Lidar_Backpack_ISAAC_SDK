@@ -1,0 +1,159 @@
+{
+  "modules": [
+    "behavior_tree",
+    "message_generators",
+    "navigation",
+    "planner"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "subgraph",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "interface",
+            "type": "isaac::alice::Subgraph"
+          }
+        ]
+      },
+      {
+        "name": "lqr",
+        "components": [
+          {
+            "name": "isaac.planner.HolonomicBaseLqrPlanner",
+            "type": "isaac::planner::HolonomicBaseLqrPlanner"
+          },
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          }
+        ]
+      },
+      {
+        "name": "control",
+        "components": [
+          {
+            "name": "isaac.planner.HolonomicBaseControl",
+            "type": "isaac::planner::HolonomicBaseControl"
+          },
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          }
+        ]
+      },
+      {
+        "name": "stop",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "HolonomicBaseControlGenerator",
+            "type": "isaac::message_generators::HolonomicBaseControlGenerator"
+          }
+        ]
+      },
+      {
+        "name": "navigation_mode",
+        "components": [
+          {
+            "name": "isaac.navigation.GroupSelectorBehavior",
+            "type": "isaac::behavior_tree::deprecated::GroupSelectorBehavior"
+          },
+          {
+            "name": "isaac.alice.Behavior",
+            "type": "isaac::behavior_tree::deprecated::Behavior"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "lqr/isaac.planner.HolonomicBaseLqrPlanner/plan",
+        "target": "control/isaac.planner.HolonomicBaseControl/plan"
+      },
+      {
+        "source": "control/isaac.planner.HolonomicBaseControl/cmd",
+        "target": "subgraph/interface/command"
+      },
+      {
+        "source": "stop/HolonomicBaseControlGenerator/command",
+        "target": "subgraph/interface/command"
+      },
+      {
+        "source": "subgraph/interface/odometry",
+        "target": "lqr/isaac.planner.HolonomicBaseLqrPlanner/odometry"
+      },
+      {
+        "source": "subgraph/interface/plan",
+        "target": "lqr/isaac.planner.HolonomicBaseLqrPlanner/global_plan"
+      }
+    ]
+  },
+  "config": {
+    "navigation_mode": {
+      "isaac.alice.Behavior": {
+        "aliases": [
+          "lqr",
+          "control",
+          "stop"
+        ],
+        "nodes": [
+          "$(fullname lqr)",
+          "$(fullname control)",
+          "$(fullname stop)"
+        ]
+      },
+      "isaac.navigation.GroupSelectorBehavior": {
+        "behavior_map": {
+          "navigate": [
+            "lqr",
+            "control"
+          ],
+          "stop": [
+            "stop"
+          ]
+        },
+        "desired_behavior": "navigate",
+        "tick_period": "50ms"
+      }
+    },
+    "lqr": {
+      "isaac.planner.HolonomicBaseLqrPlanner": {
+        "robot_model": "shared_robot_model/SphericalRobotShapeComponent",
+        "max_speed": 0.25,
+        "num_controls": 50,
+        "min_distance": 0.01,
+        "target_distance": 0.02,
+        "gain_to_end_position_x": 20.0,
+        "gain_to_end_position_y": 20.0,
+        "gain_to_end_angle": 5.0,
+        "gain_angular_acceleration": 0.2,
+        "gain_lat_acceleration": 2.5,
+        "gain_linear_acceleration": 2.5,
+        "obstacle_names": ["local_map", "map/restricted_area"],
+        "tick_period": "10Hz"
+      }
+    },
+    "control": {
+      "isaac.planner.HolonomicBaseControl": {
+        "tick_period": "100Hz",
+        "use_tick_time": true
+      }
+    },
+    "stop": {
+      "HolonomicBaseControlGenerator": {
+        "speed_linear_x": 0.0,
+        "speed_linear_y": 0.0,
+        "speed_angular": 0.0,
+        "tick_period": "100Hz"
+      }
+    }
+  }
+}

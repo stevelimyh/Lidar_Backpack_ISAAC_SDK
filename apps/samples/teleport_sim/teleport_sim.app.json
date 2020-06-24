@@ -1,0 +1,353 @@
+{
+  "name": "teleport_sim",
+  "modules": [
+    "ml",
+    "perception",
+    "viewers"
+  ],
+  "config": {
+    "LeftColorCameraViewer": {
+      "isaac.viewers.ColorCameraViewer": {
+        "camera_name": "color_camera",
+        "target_fps": 15
+      }
+    },
+    "LeftDepthCameraViewer": {
+      "isaac.viewers.DepthCameraViewer": {
+        "camera_name": "depth_camera",
+        "target_fps": 15
+      }
+    },
+    "LeftSegmentationCameraViewer": {
+      "isaac.viewers.SegmentationCameraViewer": {
+        "camera_name": "segmentation_camera",
+        "target_fps": 15
+      }
+    },
+    "RightColorCameraViewer": {
+      "isaac.viewers.ColorCameraViewer": {
+        "target_fps": 15
+      }
+    },
+    "LidarSubscriber": {
+      "isaac.alice.TcpSubscriber": {
+        "port": 5000,
+        "host": "localhost"
+      }
+    },
+    "RigidBodySubscriber": {
+      "isaac.alice.TcpSubscriber": {
+        "port": 5001,
+        "host": "localhost"
+      }
+    },
+    "LeftCameraSubscriber": {
+      "isaac.alice.TcpSubscriber": {
+        "port": 5003,
+        "host": "localhost"
+      }
+    },
+    "RightCameraSubscriber": {
+      "isaac.alice.TcpSubscriber": {
+        "port": 5004,
+        "host": "localhost"
+      }
+    },
+    "ActorPublisher": {
+      "isaac.alice.TcpPublisher": {
+        "port": 5005,
+        "host": "localhost"
+      }
+    },
+    "Teleportation": {
+      "Teleport": {
+        "name": "actor_1",
+        "min": [
+          -26.30,
+          61.00,
+          0.92
+        ],
+        "max": [
+          5.40,
+          65.50,
+          1.0
+        ],
+        "min_roll": 0.0,
+        "max_roll": 6.28,
+        "min_pitch": 0.0,
+        "max_pitch": 6.28,
+        "min_yaw": 0.0,
+        "max_yaw": 6.28,
+        "enable_translation_x": true,
+        "enable_translation_y": true,
+        "enable_translation_z": true,
+        "enable_roll": true,
+        "enable_pitch": true,
+        "enable_yaw": true,
+        "tick_period": "10.0"
+      },
+      "random": {
+        "use_random_seed": true
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "port": 3000,
+        "ui_config": {
+          "windows": {
+            "teleport sim - Left Color": {
+              "renderer": "2d",
+              "dims": {
+                "width": 480,
+                "height": 270
+              },
+              "channels": [
+                {
+                  "name": "teleport_sim/LeftColorCameraViewer/isaac.viewers.ColorCameraViewer/Color",
+                  "active": true
+                }
+              ]
+            },
+            "teleport sim - Left Depth": {
+              "renderer": "2d",
+              "dims": {
+                "width": 480,
+                "height": 270
+              },
+              "channels": [
+                {
+                  "name": "teleport_sim/LeftDepthCameraViewer/isaac.viewers.DepthCameraViewer/Depth",
+                  "active": true
+                }
+              ]
+            },
+            "teleport sim - Left Segmentation": {
+              "renderer": "2d",
+              "dims": {
+                "width": 480,
+                "height": 270
+              },
+              "channels": [
+                {
+                  "name": "teleport_sim/LeftSegmentationCameraViewer/isaac.viewers.SegmentationCameraViewer/Classes",
+                  "active": true
+                },
+                {
+                  "name": "teleport_sim/LeftSegmentationCameraViewer/isaac.viewers.SegmentationCameraViewer/Instances",
+                  "active": true
+                }
+              ]
+            },
+            "teleport sim - Right Color": {
+              "renderer": "2d",
+              "dims": {
+                "width": 480,
+                "height": 270
+              },
+              "channels": [
+                {
+                  "name": "teleport_sim/RightColorCameraViewer/isaac.viewers.ColorCameraViewer/Color",
+                  "active": true
+                }
+              ]
+            },
+            "teleport sim - Lidar": {
+              "renderer": "2d",
+              "dims": {
+                "width": 900,
+                "height": 30
+              },
+              "channels": [
+                {
+                  "name": "teleport_sim/LidarViewer/isaac.viewers.LidarViewer/Lidar",
+                  "active": true
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "graph": {
+    "nodes": [
+      {
+        "components": [
+          {
+            "name": "isaac.alice.MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.alice.TcpSubscriber",
+            "type": "isaac::alice::TcpSubscriber"
+          }
+        ],
+        "name": "LidarSubscriber"
+      },
+      {
+        "components": [
+          {
+            "name": "isaac.alice.MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.perception.ScanAccumulator",
+            "type": "isaac::perception::ScanAccumulator"
+          }
+        ],
+        "name": "ScanAccumulator"
+      },
+      {
+        "components": [
+          {
+            "name": "isaac.alice.MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.viewers.ColorCameraViewer",
+            "type": "isaac::viewers::ColorCameraViewer"
+          }
+        ],
+        "name": "LeftColorCameraViewer"
+      },
+      {
+        "components": [
+          {
+            "name": "isaac.alice.MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.viewers.DepthCameraViewer",
+            "type": "isaac::viewers::DepthCameraViewer"
+          }
+        ],
+        "name": "LeftDepthCameraViewer"
+      },
+      {
+        "components": [
+          {
+            "name": "isaac.alice.MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.viewers.SegmentationCameraViewer",
+            "type": "isaac::viewers::SegmentationCameraViewer"
+          }
+        ],
+        "name": "LeftSegmentationCameraViewer"
+      },
+      {
+        "components": [
+          {
+            "name": "isaac.alice.MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.viewers.ColorCameraViewer",
+            "type": "isaac::viewers::ColorCameraViewer"
+          }
+        ],
+        "name": "RightColorCameraViewer"
+      },
+      {
+        "components": [
+          {
+            "name": "isaac.alice.MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.alice.TcpSubscriber",
+            "type": "isaac::alice::TcpSubscriber"
+          }
+        ],
+        "name": "LeftCameraSubscriber"
+      },
+      {
+        "components": [
+          {
+            "name": "isaac.alice.MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.alice.TcpSubscriber",
+            "type": "isaac::alice::TcpSubscriber"
+          }
+        ],
+        "name": "RightCameraSubscriber"
+      },
+      {
+        "components": [
+          {
+            "name": "isaac.alice.MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.viewers.LidarViewer",
+            "type": "isaac::viewers::LidarViewer"
+          }
+        ],
+        "name": "LidarViewer"
+      },
+      {
+        "components": [
+          {
+            "name": "isaac.alice.MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.alice.TcpPublisher",
+            "type": "isaac::alice::TcpPublisher"
+          }
+        ],
+        "name": "ActorPublisher"
+      },
+      {
+        "name": "Teleportation",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "random",
+            "type": "isaac::alice::Random"
+          },
+          {
+            "name": "Teleport",
+            "type": "isaac::ml::Teleportation"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "Teleportation/Teleport/rigid_command",
+        "target": "ActorPublisher/isaac.alice.TcpPublisher/rigid_command"
+      },
+      {
+        "source": "LidarSubscriber/isaac.alice.TcpSubscriber/LidarSensor",
+        "target": "ScanAccumulator/isaac.perception.ScanAccumulator/scan"
+      },
+      {
+        "source": "ScanAccumulator/isaac.perception.ScanAccumulator/fullscan",
+        "target": "LidarViewer/isaac.viewers.LidarViewer/fullscan"
+      },
+      {
+        "source": "LeftCameraSubscriber/isaac.alice.TcpSubscriber/ColorSensor",
+        "target": "LeftColorCameraViewer/isaac.viewers.ColorCameraViewer/color_listener"
+      },
+      {
+        "source": "LeftCameraSubscriber/isaac.alice.TcpSubscriber/DepthSensor",
+        "target": "LeftDepthCameraViewer/isaac.viewers.DepthCameraViewer/depth_listener"
+      },
+      {
+        "source": "LeftCameraSubscriber/isaac.alice.TcpSubscriber/SegmentationSensor",
+        "target": "LeftSegmentationCameraViewer/isaac.viewers.SegmentationCameraViewer/segmentation_listener"
+      },
+      {
+        "source": "RightCameraSubscriber/isaac.alice.TcpSubscriber/ColorSensor",
+        "target": "RightColorCameraViewer/isaac.viewers.ColorCameraViewer/color_listener"
+      }
+    ]
+  }
+}

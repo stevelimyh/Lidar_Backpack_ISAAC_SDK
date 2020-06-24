@@ -1,0 +1,153 @@
+{
+  "name": "navigate",
+  "modules": [
+    "behavior_tree",
+    "viewers"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "simulation",
+        "subgraph": "packages/navsim/apps/navsim_navigation.subgraph.json"
+      },
+      {
+        "name": "navigation",
+        "subgraph": "packages/navigation/apps/differential_base_navigation.subgraph.json"
+      },
+      {
+        "name": "goals",
+        "subgraph": "packages/navigation/apps/goal_generators.subgraph.json"
+      },
+      {
+        "name": "camera_viewer",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "color_viewer",
+            "type": "isaac::viewers::ColorCameraViewer"
+          },
+          {
+            "name": "depth_viewer",
+            "type": "isaac::viewers::DepthCameraViewer"
+          }
+        ]
+      },
+      {
+        "name": "navigate_after_scenario_loads",
+        "components": [
+          {
+            "name": "NodeGroup",
+            "type": "isaac::behavior_tree::NodeGroup"
+          },
+          {
+            "name": "MemorySequenceBehavior",
+            "type": "isaac::behavior_tree::MemorySequenceBehavior"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "navigation.subgraph/interface/feedback",
+        "target": "goals.subgraph/interface/feedback"
+      },
+      {
+        "source": "goals.subgraph/interface/goal",
+        "target": "navigation.subgraph/interface/goal"
+      },
+      {
+        "source": "simulation.interface/noisy/flatscan",
+        "target": "navigation.subgraph/interface/flatscan_for_localization"
+      },
+      {
+        "source": "simulation.interface/noisy/flatscan",
+        "target": "navigation.subgraph/interface/flatscan_for_obstacles"
+      },
+      {
+        "source": "simulation.interface/output/base_state",
+        "target": "navigation.subgraph/interface/state"
+      },
+      {
+        "source": "simulation.interface/output/imu_raw",
+        "target": "navigation.subgraph/interface/imu_raw"
+      },
+      {
+        "source": "navigation.subgraph/interface/command",
+        "target": "simulation.interface/input/base_command"
+      },
+      {
+        "source": "simulation.interface/output/color",
+        "target": "camera_viewer/color_viewer/color_listener"
+      },
+      {
+        "source": "simulation.interface/output/depth",
+        "target": "camera_viewer/depth_viewer/depth_listener"
+      },
+      {
+        "source": "navigation.planner.global_plan_smoother/smoother/smooth_plan",
+        "target": "simulation.interface/sight/global_plan"
+      },
+      {
+        "source": "navigation.control.lqr/isaac.planner.DifferentialBaseLqrPlanner/plan",
+        "target": "simulation.interface/sight/local_plan"
+      }
+    ]
+  },
+  "config": {
+    "navigate_after_scenario_loads": {
+      "NodeGroup": {
+        "node_names": [
+          "simulation.scenario_manager",
+          "navigation.localization.localization_behavior"
+        ]
+      }
+    },
+    "navigation.localization.localization_behavior": {
+      "disable_automatic_start": true
+    },
+    "goals.goal_behavior": {
+      "isaac.navigation.SelectorBehavior": {
+        "desired_behavior": "pose"
+      }
+    },
+    "navigation.imu_odometry.odometry": {
+      "DifferentialBaseWheelImuOdometry": {
+        "use_imu": false
+      }
+    },
+    "goals.pose_as_goal": {
+      "isaac.navigation.PoseAsGoal": {
+        "goal_frame": "goal_from_sim"
+      }
+    },
+    "goals.patrol": {
+      "FollowPath": {
+        "stationary_wait_time": 30.0,
+        "wait_time": 0.0
+      }
+    },
+    "camera_viewer": {
+      "color_viewer": {
+        "target_fps": 20,
+        "reduce_scale": 4
+      },
+      "depth_viewer": {
+        "colormap": [
+          [ 128, 0, 0 ],
+          [ 255, 0, 0 ],
+          [ 255, 255, 0 ],
+          [ 0, 255, 255 ],
+          [ 0, 0, 255 ],
+          [ 0, 0, 128 ]
+        ],
+        "min_visualization_depth": 0.0,
+        "max_visualization_depth": 20.0,
+        "target_fps": 20,
+        "reduce_scale": 4
+      }
+    }
+  }
+}

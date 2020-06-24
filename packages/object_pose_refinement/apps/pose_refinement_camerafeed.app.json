@@ -1,0 +1,112 @@
+{
+  "name": "pose_refinement_camerafeed",
+  "modules": [
+    "object_pose_refinement",
+    "realsense",
+    "sight",
+    "viewers"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "camera",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "realsense",
+            "type": "isaac::RealsenseCamera"
+          }
+        ]
+      },
+      {
+        "name": "detection_pose_estimation",
+        "subgraph": "packages/object_pose_estimation/apps/pose_cnn_decoder/detection_pose_estimation_cnn_inference.subgraph.json"
+      },
+      {
+        "name": "superpixels",
+        "subgraph": "packages/superpixels/apps/superpixels.subgraph.json"
+      },
+      {
+        "name": "object_pose_refinement",
+        "subgraph": "packages/object_pose_refinement/apps/pose_refinement.subgraph.json"
+      },
+      {
+        "name": "viewers",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "ObjectRefinementViewer",
+            "type": "isaac::viewers::Detections3Viewer"
+          }
+        ]
+      },
+      {
+        "name": "sight_widgets",
+        "components": [
+          {
+            "type": "isaac::sight::SightWidget",
+            "name": "SightWidget"
+          },
+          {
+            "name": "ObjectRefinement3DViewer",
+            "type": "isaac::sight::SightWidget"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "camera/realsense/color",
+        "target": "detection_pose_estimation.interface/Subgraph/color"
+      },
+      {
+        "source": "camera/realsense/color",
+        "target": "superpixels.subgraph/interface/color"
+      },
+      {
+        "source": "camera/realsense/depth",
+        "target": "superpixels.subgraph/interface/depth"
+      },
+      {
+        "source": "superpixels.subgraph/interface/surflets",
+        "target": "object_pose_refinement.subgraph/interface/measurement_surflets"
+      },
+      {
+        "source": "detection_pose_estimation.object_detection.subgraph/interface/detections",
+        "target": "object_pose_refinement.subgraph/interface/input_detections"
+      },
+      {
+        "source": "detection_pose_estimation.interface/Subgraph/output_tensors",
+        "target": "object_pose_refinement.subgraph/interface/input_tensors"
+      },
+      {
+        "source": "detection_pose_estimation.interface/Subgraph/output_poses",
+        "target": "object_pose_refinement.subgraph/interface/input_poses"
+      },
+      {
+        "source": "object_pose_refinement.subgraph/interface/output_poses",
+        "target": "viewers/ObjectRefinementViewer/detections"
+      }
+    ]
+  },
+  "config": {
+    "camera": {
+      "realsense": {
+        "rows": 720,
+        "cols": 1280,
+        "rgb_framerate": 15,
+        "depth_framerate": 15,
+        "enable_ir_stereo": false,
+        "align_to_color": true,
+        "frame_queue_size": 2,
+        "auto_exposure_priority": false
+      }
+    }
+  }
+}

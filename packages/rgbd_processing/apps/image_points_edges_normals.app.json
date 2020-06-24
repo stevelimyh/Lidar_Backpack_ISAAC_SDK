@@ -1,0 +1,144 @@
+{
+  "name": "image_points_edges_normals",
+  "modules": [
+    "message_generators",
+    "rgbd_processing",
+    "viewers"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "camera",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "image_loader",
+            "type": "isaac::message_generators::ImageLoader"
+          },
+          {
+            "name": "viewer",
+            "type": "isaac::viewers::ColorCameraViewer"
+          }
+        ]
+      },
+      {
+        "name": "points",
+        "components": [
+          {
+            "name": "isaac.alice.MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "points",
+            "type": "isaac::rgbd_processing::DepthPoints"
+          }
+        ]
+      },
+      {
+        "name": "edges",
+        "components": [
+          {
+            "name": "isaac.alice.MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "edges",
+            "type": "isaac::rgbd_processing::DepthEdges"
+          }
+        ]
+      },
+      {
+        "name": "normals",
+        "components": [
+          {
+            "name": "isaac.alice.MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "normals",
+            "type": "isaac::rgbd_processing::DepthNormals"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "camera/image_loader/color",
+        "target": "camera/viewer/color_listener"
+      },
+      {
+        "source": "camera/image_loader/depth",
+        "target": "points/points/depth"
+      },
+      {
+        "source": "camera/image_loader/depth",
+        "target": "edges/edges/depth"
+      },
+      {
+        "source": "points/points/points",
+        "target": "normals/normals/points"
+      },
+      {
+        "source": "edges/edges/edges",
+        "target": "normals/normals/edges"
+      }
+    ]
+  },
+  "config": {
+    "camera": {
+      "image_loader": {
+        "color_filename": "packages/rgbd_processing/assets/sample_1_color.png",
+        "depth_filename": "packages/rgbd_processing/assets/sample_1_depth.png",
+        "tick_period": "25Hz",
+        "focal_length": [300, 300],
+        "optical_center": [240, 320]
+      }
+    },
+    "edges": {
+      "edges": {
+        "min_depth": 0.05,
+        "max_depth": 3.0
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "port": 3000,
+        "ui_config": {
+          "windows": {
+            "color": {
+              "renderer": "2d",
+              "dims": { "width": 640, "height": 480 },
+              "channels": [
+                { "name": "image_points_edges_normals/camera/viewer/Color" }
+              ]
+            },
+            "depth": {
+              "renderer": "2d",
+              "dims": { "width": 640, "height": 480 },
+              "channels": [
+                { "name": "image_points_edges_normals/points/points/depth" }
+              ]
+            },
+            "edges": {
+              "renderer": "2d",
+              "dims": { "width": 640, "height": 480 },
+              "channels": [
+                { "name": "image_points_edges_normals/edges/edges/edges" }
+              ]
+            },
+            "normals": {
+              "renderer": "2d",
+              "dims": { "width": 640, "height": 480 },
+              "channels": [
+                { "name": "image_points_edges_normals/normals/normals/normals" }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

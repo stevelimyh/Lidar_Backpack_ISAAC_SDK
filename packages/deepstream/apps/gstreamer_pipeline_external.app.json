@@ -1,0 +1,27 @@
+{
+  "name": "gstreamer_pipeline_external",
+  "modules": [
+    "deepstream"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "deepstream",
+        "components": [
+          {
+            "name": "pipeline",
+            "type": "isaac::deepstream::Pipeline"
+          }
+        ]
+      }
+    ],
+    "edges": []
+  },
+  "config": {
+    "deepstream": {
+      "pipeline": {
+        "pipeline": "videotestsrc ! videoconvert ! autovideosink audiotestsrc ! audioconvert ! autoaudiosink"
+      }
+    }
+  }
+}

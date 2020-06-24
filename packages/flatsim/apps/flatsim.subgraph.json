@@ -1,0 +1,68 @@
+{
+  "graph": {
+    "nodes": [
+      {
+        "name": "simulation",
+        "subgraph": "packages/flatsim/apps/2d_differential_base_simulation.subgraph.json"
+      },
+      {
+        "name": "navigation",
+        "subgraph": "packages/flatsim/apps/differential_base_navigation_slam.subgraph.json"
+      },
+      {
+        "name": "goals",
+        "subgraph": "packages/navigation/apps/goal_generators.subgraph.json"
+      }
+    ],
+    "edges": [
+      {
+        "source": "goals.subgraph/interface/goal",
+        "target": "navigation.subgraph/interface/goal"
+      },
+      {
+        "source": "navigation.subgraph/interface/feedback",
+        "target": "goals.subgraph/interface/feedback"
+      },
+      {
+        "source": "simulation.subgraph/interface/flatscan",
+        "target": "navigation.subgraph/interface/flatscan_for_localization"
+      },
+      {
+        "source": "simulation.subgraph/interface/flatscan",
+        "target": "navigation.subgraph/interface/flatscan_for_obstacles"
+      },
+      {
+        "source": "simulation.subgraph/interface/flatscan",
+        "target": "navigation.subgraph/interface/flatscan_for_slam"
+      },
+      {
+        "source": "simulation.subgraph/interface/diff_base_state",
+        "target": "navigation.subgraph/interface/state"
+      },
+      {
+        "source": "navigation.subgraph/interface/command",
+        "target": "simulation.subgraph/interface/diff_base_command"
+      }
+    ]
+  },
+  "config": {
+    "simulation.base_simulation": {
+      "DifferentialBasePhysics": {
+        "robot_model": "$(fullname navigation.shared_robot_model)"
+      },
+      "DifferentialBaseSimulator": {
+        "robot_model": "$(fullname navigation.shared_robot_model)"
+      }
+    },
+    "navigation.imu_odometry.odometry": {
+      "DifferentialBaseWheelImuOdometry": {
+        "use_imu": false
+      }
+    },
+    "goals.random_walk": {
+      "isaac.navigation.RobotPoseGenerator": {
+        "robot_model": "$(fullname navigation.shared_robot_model)"
+      }
+    }
+  }
+}

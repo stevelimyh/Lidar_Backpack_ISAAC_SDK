@@ -1,0 +1,314 @@
+{
+  "name": "mosaic",
+  "modules": [
+    "ml",
+    "viewers"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "server",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "output",
+            "type": "isaac::alice::TcpSubscriber"
+          },
+          {
+            "name": "time_sync",
+            "type": "isaac::alice::TimeSynchronizer"
+          }
+        ]
+      },
+      {
+        "name": "viewer",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "birdeye",
+            "type": "isaac::viewers::ColorCameraViewer"
+          },
+          {
+            "name": "mosaic",
+            "type": "isaac::viewers::MosaicViewer"
+          }
+        ]
+      },
+      {
+        "name": "client_0",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "output",
+            "type": "isaac::alice::TcpSubscriber"
+          },
+          {
+            "name": "encoder",
+            "type": "isaac::ml::ColorCameraEncoderCpu"
+          }
+        ]
+      },
+      {
+        "name": "client_1",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "output",
+            "type": "isaac::alice::TcpSubscriber"
+          },
+          {
+            "name": "encoder",
+            "type": "isaac::ml::ColorCameraEncoderCpu"
+          }
+        ]
+      },
+      {
+        "name": "client_2",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "output",
+            "type": "isaac::alice::TcpSubscriber"
+          },
+          {
+            "name": "encoder",
+            "type": "isaac::ml::ColorCameraEncoderCpu"
+          }
+        ]
+      },
+      {
+        "name": "client_3",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "output",
+            "type": "isaac::alice::TcpSubscriber"
+          },
+          {
+            "name": "encoder",
+            "type": "isaac::ml::ColorCameraEncoderCpu"
+          }
+        ]
+      },
+      {
+        "name": "client_4",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "output",
+            "type": "isaac::alice::TcpSubscriber"
+          },
+          {
+            "name": "encoder",
+            "type": "isaac::ml::ColorCameraEncoderCpu"
+          }
+        ]
+      },
+      {
+        "name": "client_5",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "output",
+            "type": "isaac::alice::TcpSubscriber"
+          },
+          {
+            "name": "encoder",
+            "type": "isaac::ml::ColorCameraEncoderCpu"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "server/output/color",
+        "target": "viewer/birdeye/color_listener"
+      },
+      {
+        "source": "client_0/output/color",
+        "target": "client_0/encoder/rgb_image"
+      },
+      {
+        "source": "client_0/encoder/tensor",
+        "target": "viewer/mosaic/sample_0"
+      },
+      {
+        "source": "client_1/output/color",
+        "target": "client_1/encoder/rgb_image"
+      },
+      {
+        "source": "client_1/encoder/tensor",
+        "target": "viewer/mosaic/sample_1"
+      },
+      {
+        "source": "client_2/output/color",
+        "target": "client_2/encoder/rgb_image"
+      },
+      {
+        "source": "client_2/encoder/tensor",
+        "target": "viewer/mosaic/sample_2"
+      },
+      {
+        "source": "client_3/output/color",
+        "target": "client_3/encoder/rgb_image"
+      },
+      {
+        "source": "client_3/encoder/tensor",
+        "target": "viewer/mosaic/sample_3"
+      },
+      {
+        "source": "client_4/output/color",
+        "target": "client_4/encoder/rgb_image"
+      },
+      {
+        "source": "client_4/encoder/tensor",
+        "target": "viewer/mosaic/sample_4"
+      },
+      {
+        "source": "client_5/output/color",
+        "target": "client_5/encoder/rgb_image"
+      },
+      {
+        "source": "client_5/encoder/tensor",
+        "target": "viewer/mosaic/sample_5"
+      }
+    ]
+  },
+  "config": {
+    "server": {
+      "output": {
+        "port": 46000,
+        "host": "localhost"
+      }
+    },
+    "viewer": {
+      "mosaic": {
+        "tick_period": "30hz",
+        "colormap": [
+          [118, 185, 0],
+          [185,0,108],
+          [185, 141,0],
+          [61,167,207],
+          [75,75,75],
+          [200,200,200]
+        ]
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "webroot": "packages/sight/webroot",
+        "assetroot": "../isaac_assets",
+        "port": 2998,
+        "ui_config": {
+          "windows": {
+            "NavSim Mosaic - BirdEye Viewer": {
+              "renderer": "2d",
+              "dims": {
+                "width": 1280,
+                "height": 720
+              },
+              "channels": [
+                {
+                  "name": "mosaic/viewer/birdeye/Color",
+                  "active": true
+                }
+              ]
+            },
+            "NavSim Mosaic - Mosaic Viewer": {
+              "renderer": "2d",
+              "dims": {
+                "width": 1280,
+                "height": 720
+              },
+              "channels": [
+                {
+                  "name": "mosaic/viewer/mosaic/mosaic",
+                  "active": true
+                }
+              ]
+            }
+          },
+          "assets": {}
+        }
+      }
+    },
+    "client_0": {
+      "output": {
+        "port": 55000,
+        "host": "localhost"
+      },
+      "encoder": {
+        "pixel_normalization_mode": "Unit"
+      }
+    },
+    "client_1": {
+      "output": {
+        "port": 55010,
+        "host": "localhost"
+      },
+      "encoder": {
+        "pixel_normalization_mode": "Unit"
+      }
+    },
+    "client_2": {
+      "output": {
+        "port": 55020,
+        "host": "localhost"
+      },
+      "encoder": {
+        "pixel_normalization_mode": "Unit"
+      }
+    },
+    "client_3": {
+      "output": {
+        "port": 55030,
+        "host": "localhost"
+      },
+      "encoder": {
+        "pixel_normalization_mode": "Unit"
+      }
+    },
+    "client_4": {
+      "output": {
+        "port": 55040,
+        "host": "localhost"
+      },
+      "encoder": {
+        "pixel_normalization_mode": "Unit"
+      }
+    },
+    "client_5": {
+      "output": {
+        "port": 55050,
+        "host": "localhost"
+      },
+      "encoder": {
+        "pixel_normalization_mode": "Unit"
+      }
+    }
+  }
+}

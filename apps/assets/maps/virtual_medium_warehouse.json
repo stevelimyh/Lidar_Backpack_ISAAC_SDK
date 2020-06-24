@@ -1,0 +1,113 @@
+{
+  "graph": {
+    "nodes": [
+      {
+        "name": "map",
+        "start_order": -100,
+        "components": [
+          {
+            "name": "isaac.map.Map",
+            "type": "isaac::map::Map"
+          },
+          {
+            "name": "map",
+            "type": "isaac::navigation::NavigationMap"
+          },
+          {
+            "name": "occupancy",
+            "type": "isaac::map::OccupancyGridMapLayer"
+          },
+          {
+            "name": "waypoints",
+            "type": "isaac::map::WaypointMapLayer"
+          },
+          {
+            "name": "restricted_area",
+            "type": "isaac::map::PolygonMapLayer"
+          },
+          {
+            "name": "unity_initializer",
+            "type": "isaac::alice::PoseInitializer"
+          }
+        ]
+      }
+    ],
+    "edges": []
+  },
+  "config": {
+    "simulation.scenario_manager" : {
+      "scenario_manager": {
+        "scene": "medium_warehouse"
+      }
+    },
+    "map": {
+      "occupancy": {
+        "filename": "apps/assets/maps/virtual_medium_warehouse.png",
+        "cell_size": 0.1
+      },
+      "waypoints": {
+        "vis_cell_size": 0.1,
+        "waypoints": {
+          "pickup0": {
+            "pose": [0,0,0,1,19,8.0,0],
+            "color": [255,128,0]
+          },
+          "pickup1": {
+            "pose": [0,0,0,1,19,10.0,0],
+            "color": [32,220,64]
+          },
+          "delivery0": {
+            "pose": [-0.7074,0,0,0.7074,25.5,47,0],
+            "color": [220,16,16]
+          },
+          "delivery1": {
+            "pose": [1,0,0,0,1,24.5,0],
+            "color": [230,16,230]
+          },
+          "storage0": {
+            "pose": [0,0,0,1,24,28,0],
+            "color": [230,16,230]
+          },
+          "storage1": {
+            "pose": [1,0,0,0,4,12,0],
+            "color": [230,16,230]
+          },
+          "storage2": {
+            "pose": [-0.7074,0,0,0.7074,9,32,0],
+            "color": [230,16,230]
+          }
+        },
+        "tick_period": "1.0"
+      },
+      "restricted_area": {
+        "tick_period": "1.0",
+        "polygons": {
+          "left_clusters": {
+            "points": [
+              [17, 0.5],[17, 6.5],[29.5, 6.5],[29.5, 0.5]
+            ]
+          },
+          "right_clusters": {
+            "points": [
+              [27.5, 40],[27.5, 46],[29.5, 46],[29.5, 40]
+            ]
+          }
+        }
+      },
+      "unity_initializer": {
+        "lhs_frame": "world",
+        "rhs_frame": "unity",
+        "attach_interactive_marker": true,
+        "pose": [
+          0.7074,
+          0.0,
+          0.0,
+          0.7074,
+          15.0050058,
+          24.0000019,
+          0.0
+        ]
+      }
+    }
+  }
+}

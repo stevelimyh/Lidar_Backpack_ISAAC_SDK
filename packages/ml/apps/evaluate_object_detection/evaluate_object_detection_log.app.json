@@ -1,0 +1,207 @@
+{
+  "name": "evaluate_object_detection",
+  "modules": [
+    "ml",
+    "ml:evaluation",
+    "viewers"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "replay",
+        "subgraph": "packages/record_replay/apps/replay.subgraph.json"
+      },
+      {
+        "name": "detect_net_inference",
+        "subgraph": "packages/detect_net/apps/detect_net_inference.subgraph.json"
+      },
+      {
+        "name": "ground_truth_bbox_viewer",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "viewer",
+            "type": "isaac::viewers::DetectionsViewer"
+          }
+        ]
+      },
+      {
+        "name": "detection_comparer",
+        "components": [
+          {
+            "name": "ml",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.ml.DetectionComparer",
+            "type": "isaac::ml::DetectionComparer"
+          }
+        ]
+      },
+      {
+        "name": "metrics_aggregator",
+        "components": [
+          {
+            "name": "ml",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.ml.ConfusionMatrixAggregator",
+            "type": "isaac::ml::ConfusionMatrixAggregator"
+          }
+        ]
+      },
+      {
+        "name": "color_camera_viewer",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.viewers.ColorCameraViewer",
+            "type": "isaac::viewers::ColorCameraViewer"
+          }
+        ]
+      },
+      {
+        "name": "object_detection_metrics_verifier",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.alice.PyCodelet",
+            "type": "isaac::alice::PyCodelet"
+          }
+        ]
+      },
+      {
+        "name": "bounding_boxes",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "conversion",
+            "type": "isaac::ml::LabelToBoundingBox"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "replay.interface/output/segmentation",
+        "target": "bounding_boxes/conversion/segmentation"
+      },
+      {
+        "source": "bounding_boxes/conversion/detections",
+        "target": "detection_comparer/isaac.ml.DetectionComparer/ground_truth_detection"
+      },
+      {
+        "source": "bounding_boxes/conversion/detections",
+        "target": "ground_truth_bbox_viewer/viewer/detections"
+      },
+      {
+        "source": "replay.interface/output/color",
+        "target": "detect_net_inference.subgraph/interface/image"
+      },
+      {
+        "source": "replay.interface/output/color",
+        "target": "color_camera_viewer/isaac.viewers.ColorCameraViewer/color_listener"
+      },
+      {
+        "source": "detect_net_inference.subgraph/interface/detections",
+        "target": "detection_comparer/isaac.ml.DetectionComparer/predicted_detection"
+      },
+      {
+        "source": "detection_comparer/isaac.ml.DetectionComparer/metrics",
+        "target": "metrics_aggregator/isaac.ml.ConfusionMatrixAggregator/sample_metrics"
+      },
+      {
+        "source": "metrics_aggregator/isaac.ml.ConfusionMatrixAggregator/accumulated_metrics",
+        "target": "object_detection_metrics_verifier/isaac.alice.PyCodelet/object_detection_metrics"
+      }
+    ]
+  },
+  "config": {
+    "replay.interface": {
+      "output": {
+        "cask_directory": "external/dolly_detection_test_data/cart_delivery_log",
+        "replay_time_offset": 0,
+        "use_recorded_message_time": false,
+        "loop": true
+      }
+    },
+    "detection_comparer": {
+      "isaac.ml.DetectionComparer": {
+        "class_names": [
+          "Dolly"
+        ]
+      }
+    },
+    "metrics_aggregator": {
+      "isaac.ml.ConfusionMatrixAggregator": {
+        "slice_index": 6
+      }
+    },
+    "object_detection_metrics_verifier": {
+      "isaac.alice.PyCodelet": {
+        "class_names": [
+          "Dolly"
+        ]
+      }
+    },
+    "detect_net_inference.detection_decoder": {
+      "isaac.detect_net.DetectNetDecoder": {
+        "labels": [
+          "Dolly"
+        ]
+      }
+    },
+    "detect_net_inference.detection_viewer": {
+      "isaac.viewers.DetectionsViewer": {
+        "enable_labels": false
+      }
+    },
+    "ground_truth_bbox_viewer": {
+      "viewer": {
+        "enable_labels": false,
+        "border_background_color": [0, 0, 0],
+        "border_foreground_color": [0, 0, 0]
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "port": 3000,
+        "ui_config": {
+          "windows": {
+            "Object Detection Test: Detections": {
+              "renderer": "2d",
+              "dims": {
+                "width": 500,
+                "height": 500
+              },
+              "channels": [
+                {
+                  "name": "evaluate_object_detection/color_camera_viewer/isaac.viewers.ColorCameraViewer/Color"
+                },
+                {
+                  "name": "evaluate_object_detection/detect_net_inference.detection_viewer/isaac.viewers.DetectionsViewer/detections"
+                },
+                {
+                  "name": "evaluate_object_detection/ground_truth_bbox_viewer/viewer/detections"
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "name": "freespace_dnn_inference_unity3d",
+  "modules": [
+    "map",
+    "ml"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "simulation",
+        "subgraph": "packages/navsim/apps/navsim_training.subgraph.json"
+      },
+      {
+        "name": "inference",
+        "subgraph": "packages/freespace_dnn/apps/freespace_dnn_inference.subgraph.json"
+      },
+      {
+        "name": "camera_teleportation",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "random",
+            "type": "isaac::alice::Random"
+          },
+          {
+            "name": "Spline",
+            "type": "isaac::map::Spline"
+          },
+          {
+            "name": "Teleportation",
+            "type": "isaac::ml::Teleportation"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "simulation.interface/output/color",
+        "target": "inference.subgraph/interface/rgb_image"
+      },
+      {
+        "source": "camera_teleportation/Teleportation/rigid_command",
+        "target": "simulation.interface/input/teleport_command"
+      }
+    ]
+  },
+  "config": {
+    "camera_teleportation": {
+      "random": {
+        "use_random_seed": true
+      },
+      "Teleportation": {
+        "tick_period": "30Hz"
+      }
+    }
+  }
+}

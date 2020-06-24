@@ -1,0 +1,244 @@
+{
+  "A_CarterGroup": {
+    "ActorGroup": {
+      "actors": [
+        {
+          "name": "carter_1",
+          "reference": "Blueprint'/Game/Actors/CubeActor.CubeActor'",
+          "pose": [1, 0, 0, 0, -11.01, 63.47, 0.92]
+        },
+        {
+          "name": "bp_controller",
+          "reference": "Blueprint'/Game/Blueprints/IsaacSimController_BP.IsaacSimController_BP'",
+          "pose": [1, 0, 0, 0, 0, 0, 0],
+          "spawn_config": {
+            "blueprint_variables": [
+              {
+                "properties": [
+                  {
+                    "name": "bDisableRendering",
+                    "value": false,
+                    "type": "bool"
+                  },
+                  {
+                    "name": "bSetFixedFrameRate",
+                    "value": true,
+                    "type": "bool"
+                  },
+                  { "name": "FixedFrameRate", "value": 60, "type": "float" }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "A_DRGroup": {
+    "ActorGroup": {
+      "actors": [
+        {
+          "name": "actor_1",
+          "reference": "Blueprint'/Game/Blueprints/DomainRandomization/GroupActorManager_BP.GroupActorManager_BP'",
+          "pose": [1, 0, 0, 0, 0, 0, 0],
+          "domain_randomization_config": {
+            "mesh_config": {
+              "random_meshes":[
+                {
+                  "class": "Ball",
+                  "mesh_component": {
+                    "mesh_list": ["/Game/ArtAssets/SportBallsPack/Meshes/prop_basketball_a",
+                                  "/Game/ArtAssets/SportBallsPack/Meshes/prop_basketball_b",
+                                  "/Game/ArtAssets/SportBallsPack/Meshes/prop_basketball_d"
+                                 ],
+                    "should_randomize": true,
+                    "randomization_duration_interval": [0.5, 2.0]
+                  },
+                  "movement_component": {
+                    "should_randomize": true,
+                    "x_range": [-25.8, 4.8],
+                    "y_range": [60.2, 65.2],
+                    "z_range": [0.0, 0.1],
+                    "should_teleport": true,
+                    "check_collision": true,
+                    "randomization_duration_interval": [0.25, 0.5]
+                  },
+                  "rotation_component":{
+                    "should_randomize": true,
+                    "random_cone_half_angle": 45.0,
+                    "yaw_range": [-180, 180],
+                    "randomization_duration_interval": [0.125, 0.25]
+                  },
+                  "scale_component":{
+                    "should_randomize": false
+                  }
+                },
+                {
+                  "class": "Bowling_Pin",
+                  "mesh_component": {
+                    "mesh_list": ["/Game/ArtAssets/Pub_Games/Meshes/SM_Bowling_Skittle"],
+                    "should_randomize": true,
+                    "randomization_duration_interval": [0.5, 2.0]
+                  },
+                  "movement_component": {
+                    "should_randomize": true,
+                    "x_range": [-25.8, 4.8],
+                    "y_range": [60.2, 65.2],
+                    "z_range": [0.0, 0.1],
+                    "should_teleport": true,
+                    "check_collision": true,
+                    "randomization_duration_interval": [0.25, 0.5]
+                  },
+                  "rotation_component":{
+                    "should_randomize": true,
+                    "random_cone_half_angle": 45.0,
+                    "yaw_range": [-180, 180],
+                    "randomization_duration_interval": [0.125, 0.25]
+                  },
+                  "scale_component":{
+                    "should_randomize": false
+                  }
+                },
+                {
+                  "class": "Chair",
+                  "mesh_component": {
+                    "mesh_list": ["/Game/Art/Furniture/chair_2",
+                                  "/Game/Art/Furniture/OfficeChair",
+                                  "/Game/Art/Furniture/TallFabricChair"
+                                 ],
+                    "should_randomize": true,
+                    "randomization_duration_interval": [0.5, 2.0]
+                  },
+                  "movement_component": {
+                    "should_randomize": true,
+                    "x_range": [-25.8, 4.8],
+                    "y_range": [60.2, 65.2],
+                    "z_range": [0.0, 0.1],
+                    "should_teleport": true,
+                    "check_collision": true,
+                    "randomization_duration_interval": [0.25, 0.5]
+                  },
+                  "rotation_component":{
+                    "should_randomize": true,
+                    "random_cone_half_angle": 45.0,
+                    "yaw_range": [-180, 180],
+                    "randomization_duration_interval": [0.125, 0.25]
+                  },
+                  "scale_component":{
+                    "should_randomize": false
+                  }
+                },
+                {
+                  "class": "Plants",
+                  "mesh_component": {
+                    "mesh_list": ["/Game/ArtAssets/iFlowersAndPlants/001_StaticMeshes/001_Alocasia_01/001_Alocasia_01",
+                                  "/Game/ArtAssets/iFlowersAndPlants/001_StaticMeshes/003_Spathiphyllum_01/003_Spathi_01",
+                                  "/Game/ArtAssets/iFlowersAndPlants/001_StaticMeshes/005_Adiantum_01/005_Adiantum_01",
+                                  "/Game/ArtAssets/iFlowersAndPlants/001_StaticMeshes/007_Chlorophytum_01/007_Chloro_01",
+                                  "/Game/ArtAssets/iFlowersAndPlants/001_StaticMeshes/009_Monstera_01/009_Monstera_01"],
+                    "should_randomize": true,
+                    "randomization_duration_interval": [0.5, 2.0]
+                  },
+                  "movement_component": {
+                    "should_randomize": true,
+                    "x_range": [-25.8, 4.8],
+                    "y_range": [60.2, 65.2],
+                    "z_range": [0.0, 0.1],
+                    "should_teleport": true,
+                    "check_collision": true,
+                    "randomization_duration_interval": [0.25, 0.5]
+                  },
+                  "rotation_component":{
+                    "should_randomize": true,
+                    "random_cone_half_angle": 45.0,
+                    "yaw_range": [-180, 180],
+                    "randomization_duration_interval": [0.125, 0.25]
+                  },
+                  "scale_component":{
+                    "should_randomize": false
+                  }
+                },
+                {
+                  "class": "Trashcan",
+                  "mesh_component": {
+                    "mesh_list": ["/Game/ArtAssets/ToolShedVOL2/Meshes/SM_Trashcan_01a",
+                                  "/Game/ArtAssets/ToolShedVOL2/Meshes/SM_Trashbarrel_01a"
+                                 ],
+                    "should_randomize": true,
+                    "randomization_duration_interval": [0.5, 2.0]
+                  },
+                  "movement_component": {
+                    "should_randomize": true,
+                    "x_range": [-25.8, 4.8],
+                    "y_range": [60.2, 65.2],
+                    "z_range": [0.0, 0.1],
+                    "should_teleport": true,
+                    "check_collision": true,
+                    "randomization_duration_interval": [0.25, 0.5]
+                  },
+                  "rotation_component":{
+                    "should_randomize": true,
+                    "random_cone_half_angle": 45.0,
+                    "yaw_range": [-180, 180],
+                    "randomization_duration_interval": [0.125, 0.25]
+                  },
+                  "scale_component":{
+                    "should_randomize": false
+                  }
+                }
+              ],
+              "spawn_count_per_actor_range": [5, 10],
+              "spawn_count_total_range": [0, 0]
+            }
+          }
+        }
+      ]
+    }
+  },
+  "CarterLeftCamera": {
+    "CameraComponent": {
+      "parent_actor": "carter_1",
+      "parent_T_camera": [1, 0, 0, 0, 0, 0, 0],
+      "cols": 512,
+      "rows": 256,
+      "enable_rgb": true,
+      "enable_depth": false,
+      "enable_segmentation": true,
+      "enable_bounding_box": true,
+      "min_depth": 0,
+      "max_depth": 100.0,
+      "bounding_box_settings": {
+        "all_bounding_boxes": false,
+        "occlusion_check": true,
+        "occlusion_threshold" : 0.8,
+        "classes": [
+          {
+            "name": "Ball"
+          },
+          {
+            "name": "Bowling_Pin"
+          },
+          {
+            "name": "Chair"
+          },
+          {
+            "name": "Plants"
+          },
+          {
+            "name": "Trashcan"
+          }
+        ]
+      }
+    }
+  },
+  "TimeSyncedTcpConnections": {
+    "LeftCameraPublisher": {
+      "port": 5003,
+      "host": "localhost"
+    },
+    "ActorGroupRigidCommandSubscriber": {
+      "port": 5004,
+      "host": "localhost"
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "name": "freespace_dnn_inference_v4l2",
+  "modules": [
+    "sensors:v4l2_camera"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "camera",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "V4L2Camera",
+            "type": "isaac::V4L2Camera"
+          }
+        ]
+      },
+      {
+        "name": "inference",
+        "subgraph": "packages/freespace_dnn/apps/freespace_dnn_inference.subgraph.json"
+      }
+    ],
+    "edges": [
+      {
+        "source": "camera/V4L2Camera/frame",
+        "target": "inference.subgraph/interface/rgb_image"
+      }
+    ]
+  },
+  "config": {
+    "camera": {
+      "V4L2Camera": {
+        "device_id": 0,
+        "rows": 448,
+        "cols": 800,
+        "rate_hz": 30
+      }
+    }
+  }
+}

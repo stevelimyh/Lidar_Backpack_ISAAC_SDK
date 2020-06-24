@@ -1,0 +1,209 @@
+{
+  "name": "realsense_camera",
+  "modules": [
+    "realsense",
+    "rgbd_processing",
+    "viewers"
+  ],
+  "config": {
+    "camera": {
+      "realsense": {
+        "rows": 360,
+        "cols": 640,
+        "depth_framerate": 15,
+        "ir_framerate": 15,
+        "rgb_framerate": 30,
+        "enable_depth": true,
+        "enable_ir_stereo": true,
+        "enable_rgb": true,
+        "enable_depth_laser": false,
+        "align_to_color": false,
+        "frame_queue_size": 2,
+        "auto_exposure_priority": false
+      }
+    },
+    "viewer": {
+      "color": {
+        "reduce_scale": 2
+      },
+      "depth": {
+        "reduce_scale": 2,
+        "min_visualization_depth": 0.2,
+        "max_visualization_depth": 5.0,
+        "camera_name": "Realsense",
+        "colormap": [
+          [128,   0,   0],
+          [255,   0,   0],
+          [255, 255,   0],
+          [0,   255, 255],
+          [0,     0, 255],
+          [0,     0, 128]
+        ]
+      }
+    },
+    "point_cloud": {
+      "depth_to_pointcloud": {
+        "use_color": true
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "port": 3000,
+        "ui_config": {
+          "windows": {
+            "Realsense - Left IR": {
+              "renderer": "2d",
+              "dims": {
+                "width": 640,
+                "height": 360
+              },
+              "channels": [
+                {
+                  "name": "realsense_camera/viewer/left_ir/Color"
+                }
+              ]
+            },
+            "Realsense - Right IR": {
+              "renderer": "2d",
+              "dims": {
+                "width": 640,
+                "height": 360
+              },
+              "channels": [
+                {
+                  "name": "realsense_camera/viewer/right_ir/Color"
+                }
+              ]
+            },
+            "Realsense - Color": {
+              "renderer": "2d",
+              "dims": {
+                "width": 640,
+                "height": 360
+              },
+              "channels": [
+                {
+                  "name": "realsense_camera/viewer/color/Color"
+                }
+              ]
+            },
+            "Realsense - Depth": {
+              "renderer": "2d",
+              "dims": {
+                "width": 640,
+                "height": 360
+              },
+              "channels": [
+                {
+                  "name": "realsense_camera/viewer/depth/Depth"
+                }
+              ]
+            },
+            "Realsense - Points": {
+              "renderer": "3d",
+              "dims": {
+                "width": 640,
+                "height": 480
+              },
+              "channels": [
+                {
+                  "name": "realsense_camera/point_cloud/viewer/points"
+                }
+              ]
+            }
+          },
+          "assets": {}
+        }
+      }
+    }
+  },
+  "graph": {
+    "nodes": [
+      {
+        "name": "camera",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "realsense",
+            "type": "isaac::RealsenseCamera"
+          }
+        ]
+      },
+      {
+        "name": "viewer",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "depth",
+            "type": "isaac::viewers::DepthCameraViewer"
+          },
+          {
+            "name": "color",
+            "type": "isaac::viewers::ColorCameraViewer"
+          },
+          {
+            "name": "left_ir",
+            "type": "isaac::viewers::ColorCameraViewer"
+          },
+          {
+            "name": "right_ir",
+            "type": "isaac::viewers::ColorCameraViewer"
+          }
+        ]
+      },
+      {
+        "name": "point_cloud",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "depth_to_pointcloud",
+            "type": "isaac::rgbd_processing::DepthImageToPointCloud"
+          },
+          {
+            "name": "viewer",
+            "type": "isaac::viewers::PointCloudViewer"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "camera/realsense/depth",
+        "target": "viewer/depth/depth_listener"
+      },
+      {
+        "source": "camera/realsense/color",
+        "target": "viewer/color/color_listener"
+      },
+      {
+        "source": "camera/realsense/left_ir",
+        "target": "viewer/left_ir/color_listener"
+      },
+      {
+        "source": "camera/realsense/right_ir",
+        "target": "viewer/right_ir/color_listener"
+      },
+      {
+        "source": "camera/realsense/depth",
+        "target": "point_cloud/depth_to_pointcloud/depth"
+      },
+      {
+        "source": "camera/realsense/color",
+        "target": "point_cloud/depth_to_pointcloud/color"
+      },
+      {
+        "source": "point_cloud/depth_to_pointcloud/cloud",
+        "target": "point_cloud/viewer/cloud"
+      }
+    ]
+  }
+}

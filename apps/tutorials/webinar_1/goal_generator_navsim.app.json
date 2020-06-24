@@ -1,0 +1,104 @@
+{
+  "name": "goal_generator_navsim",
+  "modules": [
+    "behavior_tree",
+    "//apps/tutorials/webinar_1:goal_generator"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "simulation",
+        "subgraph": "packages/navsim/apps/navsim_navigation.subgraph.json"
+      },
+      {
+        "name": "navigation",
+        "subgraph": "packages/navigation/apps/differential_base_navigation.subgraph.json"
+      },
+      {
+        "name": "goal_generator",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "GoalGenerator",
+            "type": "isaac::tutorials::GoalGenerator"
+          }
+        ]
+      },
+      {
+        "name": "navigate_after_scenario_loads",
+        "components": [
+          {
+            "name": "NodeGroup",
+            "type": "isaac::behavior_tree::NodeGroup"
+          },
+          {
+            "name": "MemorySequenceBehavior",
+            "type": "isaac::behavior_tree::MemorySequenceBehavior"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "navigation.subgraph/interface/feedback",
+        "target": "goal_generator/GoalGenerator/feedback"
+      },
+      {
+        "source": "goal_generator/GoalGenerator/goal",
+        "target": "navigation.subgraph/interface/goal"
+      },
+      {
+        "source": "simulation.interface/noisy/flatscan",
+        "target": "navigation.subgraph/interface/flatscan_for_localization"
+      },
+      {
+        "source": "simulation.interface/noisy/flatscan",
+        "target": "navigation.subgraph/interface/flatscan_for_obstacles"
+      },
+      {
+        "source": "simulation.interface/output/base_state",
+        "target": "navigation.subgraph/interface/state"
+      },
+      {
+        "source": "navigation.subgraph/interface/command",
+        "target": "simulation.interface/input/base_command"
+      },
+      {
+        "source": "navigation.planner.global_plan_smoother/smoother/smooth_plan",
+        "target": "simulation.interface/sight/global_plan"
+      },
+      {
+        "source": "navigation.control.lqr/isaac.planner.DifferentialBaseLqrPlanner/plan",
+        "target": "simulation.interface/sight/local_plan"
+      }
+    ]
+  },
+  "config": {
+    "navigate_after_scenario_loads": {
+      "NodeGroup": {
+        "node_names": [
+          "simulation.scenario_manager",
+          "navigation.localization.localization_behavior"
+        ]
+      }
+    },
+    "navigation.localization.localization_behavior": {
+      "disable_automatic_start": true
+    },
+    "goal_generator" : {
+      "GoalGenerator" : {
+        "desired_position": [26.0, 22.0],
+        "tick_period" : "10Hz"
+      }
+    },
+    "navigation.imu_odometry.odometry": {
+      "DifferentialBaseWheelImuOdometry": {
+        "use_imu": false
+      }
+    }
+  }
+}
+

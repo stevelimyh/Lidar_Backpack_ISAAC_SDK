@@ -1,0 +1,96 @@
+{
+  "A_CarterGroup": {
+    "ActorGroup": {
+      "actors": [
+        {
+          "name": "actor_1",
+          "reference": "Blueprint'/Game/Actors/CubeActor.CubeActor'",
+          "pose": [1, 0, 0, 0, -11.01, 63.47, 0.92]
+        }
+      ]
+    }
+  },
+  "CarterLidar": {
+    "LidarComponent": {
+      "parent_actor": "actor_1",
+      "parent_T_lidar": [1, 0, 0, 0, -0.06, 0.0, 0.38],
+      "horizontal_fov": 360.0,
+      "vertical_fov":  120,
+      "rotation_rate": 20.0,
+      "horizontal_resolution": 0.4,
+      "vertical_resolution": 2.0,
+      "min_range": 1.0,
+      "max_range": 100.0
+    }
+  },
+  "CarterLeftCamera": {
+    "CameraComponent": {
+      "parent_actor": "actor_1",
+      "parent_T_camera": [1, 0, 0, 0, 0.11, 0.06, 0.31],
+      "cols": 960,
+      "rows": 540,
+      "fov": 90.0,
+      "enable_rgb": true,
+      "enable_depth": true,
+      "enable_segmentation": true,
+      "min_depth": 0,
+      "max_depth": 100.0,
+      "segmentation_classes": {
+        "static_mesh": [
+          {
+            "name": "box"
+          },
+          {
+            "name": "floor"
+          },
+          {
+            "name": "wall"
+          },
+          {
+            "name": "rack"
+          }
+        ]
+      }
+    }
+  },
+  "CarterRightCamera": {
+    "CameraComponent": {
+      "parent_actor": "actor_1",
+      "parent_T_camera": [1, 0, 0, 0, 0.11, -0.06, 0.31],
+      "cols": 960,
+      "rows": 540,
+      "fov": 90.0,
+      "enable_rgb": true
+    }
+  },
+  "LidarPublisher": {
+    "isaac.alice.TcpPublisher": {
+      "port": 5000,
+      "host": "localhost"
+    }
+  },
+  "ActorPublisher": {
+    "isaac.alice.TcpPublisher": {
+      "port": 5001,
+      "host": "localhost"
+    }
+  },
+  "LeftCameraPublisher": {
+    "isaac.alice.TcpPublisher": {
+      "port": 5003,
+      "host": "localhost"
+    }
+  },
+  "RightCameraPublisher": {
+    "isaac.alice.TcpPublisher": {
+      "port": 5004,
+      "host": "localhost"
+    }
+  },
+  "ActorSubscriber": {
+    "isaac.alice.TcpSubscriber": {
+      "port": 5005,
+      "host": "localhost"
+    }
+  }
+}

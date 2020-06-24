@@ -1,0 +1,74 @@
+{
+  "name": "stereo_dummy",
+  "modules": [
+    "message_generators",
+    "viewers"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "dummy",
+        "components": [
+          {
+            "name": "isaac.alice.MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "CameraGenerator",
+            "type": "isaac::message_generators::CameraGenerator"
+          }
+        ]
+      },
+      {
+        "name": "depth_visualization",
+        "components": [
+          {
+            "name": "isaac.alice.MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.viewers.DepthCameraViewer",
+            "type": "isaac::viewers::DepthCameraViewer"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "dummy/CameraGenerator/depth",
+        "target": "depth_visualization/isaac.viewers.DepthCameraViewer/depth_listener"
+      }
+    ]
+  },
+  "config": {
+    "dummy": {
+      "CameraGenerator": {
+        "rows": 240,
+        "cols": 320,
+        "tick_period": "50ms"
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "port": 3000,
+        "ui_config": {
+          "windows": {
+            "Dummy Camera": {
+              "renderer": "2d",
+              "channels": [
+                {
+                  "name": "stereo_dummy/depth_visualization/isaac.viewers.DepthCameraViewer/Depth"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "depth_visualization": {
+      "isaac.viewers.DepthCameraViewer": {
+        "max_visualization_depth": 20.0
+      }
+    }
+  }
+}

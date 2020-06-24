@@ -1,0 +1,80 @@
+{
+  "name": "dolly_demo_sim",
+  "modules": [
+    "ml",
+    "ml:tensorflow",
+    "navigation",
+    "planner",
+    "//packages/rl/components:rl",
+    "//packages/rl/apps/dolly_navigation/components:dolly_navigation_task"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "rl_inference",
+        "subgraph": "packages/rl/apps/dolly_navigation/py_components/robot_inference.subgraph.json"
+      },
+      {
+        "name": "simulation",
+        "subgraph": "packages/navsim/apps/navsim_navigation.subgraph.json"
+      },
+      {
+        "name": "odometry",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "DifferentialBaseOdometry",
+            "type": "isaac::navigation::DifferentialBaseOdometry"
+          }
+        ]
+      },
+      {
+        "name": "scan_flattener",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+          "name": "RangeScanFlattening",
+          "type": "isaac::perception::RangeScanFlattening"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "rl_inference.subgraph/interface/base_command",
+        "target": "simulation.interface/input/base_command1"
+      },
+      {
+        "source": "simulation.interface/output/base_state1",
+        "target": "odometry/DifferentialBaseOdometry/state"
+      },
+      {
+        "source": "odometry/DifferentialBaseOdometry/odometry",
+        "target": "rl_inference.subgraph/interface/base_state"
+      },
+      {
+        "source": "simulation.interface/output/rangescan1",
+        "target": "scan_flattener/RangeScanFlattening/scan"
+      },
+      {
+        "source": "scan_flattener/RangeScanFlattening/flatscan",
+        "target": "rl_inference.subgraph/interface/flatscan"
+      }
+    ]
+  },
+  "config": {
+    "odometry": {
+      "DifferentialBaseOdometry": {
+        "tick_period": "100Hz",
+        "odometry_frame": "odom",
+        "robot_frame": "robot"
+      }
+    }
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "config": {
+    "detection_pose_estimation.object_detection.tensor_r_t_inference": {
+      "isaac.ml.TensorRTInference": {
+        "model_file_path": "external/sortbot_pose_estimation_models/resnet18_detector_kltSmall.etlt",
+        "etlt_password": "sortbot_2020",
+        "force_engine_update": false
+      }
+    },
+    "detection_pose_estimation.object_detection.detection_decoder": {
+      "isaac.detect_net.DetectNetDecoder": {
+        "labels": ["box"],
+        "non_maximum_suppression_threshold": 0.3,
+        "confidence_threshold": 0.55
+      }
+    },
+    "detection_pose_estimation.object_pose_estimation.pose_encoder": {
+      "TensorRTInference": {
+        "model_file_path": "external/sortbot_pose_estimation_models/pose_estimation_cnn_kltSmall.uff",
+        "force_engine_update": false
+      }
+    },
+    "detection_pose_estimation.object_pose_estimation.detection_convertor": {
+      "BoundingBoxEncoder": {
+        "class_names": ["Box", "box"]
+      }
+    },
+    "detection_pose_estimation.viewers": {
+      "Detections3Viewer": {
+        "frame": "camera",
+        "object_T_box_center": [1.0, 0, 0, 0, 0, 0, 0.075],
+        "box_dimensions": [0.2, 0.3, 0.15],
+        "mesh_name": "box"
+      }
+    },
+    "detection_pose_estimation.object_pose_estimation.detection_filter": {
+      "FilterDetectionsByLabel": {
+        "whitelist_labels": [
+          "Box",
+          "box"
+        ]
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "webroot": "packages/sight/webroot",
+        "assetroot": "external/sortbot_pose_estimation_models",
+        "port": 3000,
+        "ui_config": {
+          "assets": {
+            "box": {
+              "obj": "/apps/assets/KLTSmall.obj",
+              "rotation": [
+                0.70710678118,
+                0.70710678118,
+                0,
+                0
+              ],
+              "translation": [
+                0,
+                0,
+                0.0
+              ],
+              "scale": 1.0
+            }
+          }
+        }
+      }
+    }
+  }
+}

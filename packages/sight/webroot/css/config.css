@@ -1,0 +1,60 @@
+/*
+Copyright (c) 2018, NVIDIA CORPORATION. All rights reserved.
+
+NVIDIA CORPORATION and its licensors retain all intellectual property
+and proprietary rights in and to this software, related documentation
+and any modifications thereto. Any use, reproduction, disclosure or
+distribution of this software and related documentation without an express
+license agreement from NVIDIA CORPORATION is strictly prohibited.
+*/
+
+.panel-title {
+  font-size: 1em;
+}
+
+.panel-heading {
+  padding: 5px 15px 5px 15px;
+}
+
+.panel-body {
+  padding: 5px 15px 5px 15px;
+}
+
+.panel-body h4 {
+  font-size: 1em;
+  font-weight: bold;
+}
+
+.form-group {
+  margin-bottom: 5px;
+}
+
+.control-label {
+  font-size: 1em;
+  font-weight: normal;
+}
+
+.col-sm-4 {
+  width: 50%;
+}
+
+.col-sm-8 {
+  width: 50%;
+}
+
+.form-control {
+  font-size: 1em;
+  height: 28px;
+}
+
+.has-feedback .form-control {
+  padding-right: 0px;
+}
+
+.config-pending-change {
+  background: #72b900;
+}
+
+.config-input:invalid, input[data-validity='false'], textarea[data-validity='false'] {
+  border:1px solid red;
+}

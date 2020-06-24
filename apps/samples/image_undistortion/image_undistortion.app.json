@@ -1,0 +1,84 @@
+{
+  "name" : "image_undistortion",
+  "modules" : [
+      "//packages/perception",
+      "sensors:v4l2_camera"
+  ],
+  "graph":
+  {
+    "nodes": [
+        {
+            "name": "camera",
+            "components": [
+                {
+                    "name": "ml",
+                    "type": "isaac::alice::MessageLedger"
+                },
+                {
+                    "name": "isaac.V4L2Camera",
+                    "type": "isaac::V4L2Camera"
+                }
+            ]
+        },
+        {
+            "name": "image_undistortion",
+            "components": [
+                {
+                    "name": "ml",
+                    "type": "isaac::alice::MessageLedger"
+                },
+                {
+                    "name": "warp",
+                    "type": "isaac::perception::ImageWarp"
+                }
+            ]
+        }
+    ],
+    "edges": [
+        {
+            "source": "camera/isaac.V4L2Camera/frame",
+            "target": "image_undistortion/warp/input_image"
+        }
+    ]
+  },
+  "config":
+  {
+    "camera": {
+        "isaac.V4L2Camera": {
+            "device_id": 0,
+            "rows": 448,
+            "cols": 800,
+            "rate_hz": 30
+        }
+    },
+    "websight": {
+      "WebsightServer": {
+        "port": 3000,
+        "ui_config": {
+          "windows": {
+            "Image Undistortion": {
+              "renderer": "2d",
+              "dims": {
+                "width": 1344,
+                "height": 376
+              },
+              "channels": [
+                { "name": "image_undistortion/image_undistortion/warp/output" }
+              ]
+            },
+            "Original Image": {
+              "renderer": "2d",
+              "dims": {
+                "width": 1344,
+                "height": 376
+              },
+              "channels": [
+                { "name": "image_undistortion/image_undistortion/warp/input" }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

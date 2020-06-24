@@ -1,0 +1,58 @@
+{
+  "name": "camera_to_ros",
+  "modules": [
+    "sensors:v4l2_camera"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "camera",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "V4L2Camera",
+            "type": "isaac::V4L2Camera"
+          }
+        ]
+      },
+      {
+        "name": "camera_to_ros",
+        "subgraph": "packages/ros_bridge/apps/camera_to_ros.subgraph.json"
+      }
+    ],
+    "edges": [
+      {
+        "source": "camera/V4L2Camera/frame",
+        "target": "camera_to_ros.subgraph/interface/image"
+      }
+    ]
+  },
+  "config": {
+    "camera": {
+      "V4L2Camera": {
+        "device_id": 0,
+        "rows": 448,
+        "cols": 800,
+        "rate_hz": 10
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "port": 3000,
+        "ui_config": {
+          "windows": {
+            "Camera": {
+              "renderer": "2d",
+              "channels": [
+                { "name": "camera_to_ros/camera_to_ros.viewer/ColorCameraViewer/Color" }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

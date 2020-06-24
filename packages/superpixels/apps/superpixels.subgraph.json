@@ -1,0 +1,130 @@
+{
+  "name": "superpixels",
+  "modules": [
+    "rgbd_processing",
+    "superpixels",
+    "viewers"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "subgraph",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "interface",
+            "type": "isaac::alice::Subgraph"
+          }
+        ]
+      },
+      {
+        "name": "camera_viewer",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "viewer",
+            "type": "isaac::viewers::ColorCameraViewer"
+          }
+        ]
+      },
+      {
+        "name": "rgbd",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "points",
+            "type": "isaac::rgbd_processing::DepthPoints"
+          },
+          {
+            "name": "edges",
+            "type": "isaac::rgbd_processing::DepthEdges"
+          },
+          {
+            "name": "normals",
+            "type": "isaac::rgbd_processing::DepthNormals"
+          }
+        ]
+      },
+      {
+        "name": "superpixels",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "superpixels",
+            "type": "isaac::superpixels::RgbdSuperpixels"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "subgraph/interface/color",
+        "target": "camera_viewer/viewer/color_listener"
+      },
+      {
+        "source": "subgraph/interface/depth",
+        "target": "rgbd/points/depth"
+      },
+      {
+        "source": "subgraph/interface/depth",
+        "target": "rgbd/edges/depth"
+      },
+      {
+        "source": "rgbd/points/points",
+        "target": "rgbd/normals/points"
+      },
+      {
+        "source": "rgbd/edges/edges",
+        "target": "rgbd/normals/edges"
+      },
+      {
+        "source": "subgraph/interface/depth",
+        "target": "superpixels/superpixels/depth"
+      },
+      {
+        "source": "subgraph/interface/color",
+        "target": "superpixels/superpixels/color"
+      },
+      {
+        "source": "rgbd/points/points",
+        "target": "superpixels/superpixels/points"
+      },
+      {
+        "source": "rgbd/edges/edges",
+        "target": "superpixels/superpixels/edges"
+      },
+      {
+        "source": "rgbd/normals/normals",
+        "target": "superpixels/superpixels/normals"
+      },
+      {
+        "source": "superpixels/superpixels/superpixels",
+        "target": "subgraph/interface/superpixels"
+      },
+      {
+        "source": "superpixels/superpixels/surflets",
+        "target": "subgraph/interface/surflets"
+      }
+    ]
+  },
+  "config": {
+    "rgbd": {
+      "edges": {
+        "min_depth": 0.05,
+        "max_depth": 3.0
+      }
+    }
+  }
+}

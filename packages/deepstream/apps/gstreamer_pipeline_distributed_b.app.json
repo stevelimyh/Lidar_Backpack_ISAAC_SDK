@@ -1,0 +1,60 @@
+{
+  "name": "gstreamer_pipeline_distributed_b",
+  "modules": [
+    "deepstream",
+    "sight",
+    "viewers"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "receiver",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "pipeline",
+            "type": "isaac::deepstream::Pipeline"
+          },
+          {
+            "name": "viewer",
+            "type": "isaac::viewers::ColorCameraViewer"
+          },
+          {
+            "name": "viewer_widget",
+            "type": "isaac::sight::SightWidget"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "receiver/pipeline/received_image",
+        "target": "receiver/viewer/color_listener"
+      }
+    ]
+  },
+  "config": {
+    "receiver": {
+      "pipeline": {
+        "pipeline": "udpsrc port=5200 caps=\"application/x-rtp,media=video,clock-rate=90000,encoding-name=MP4V-ES,profile-level-id=1,config=000001b001000001b58913000001000000012000c48d8800cd3204709443000001b24c61766335362e312e30,payload=96,ssrc=2873740600,timestamp-offset=391825150,seqnum-offset=2980\" ! rtpmp4vdepay ! avdec_mpeg4 ! videoconvert ! video/x-raw,format=RGB ! videoconvert ! appsink name=received_image"
+      },
+      "viewer_widget": {
+        "title": "Viewer: Received",
+        "type": "2d",
+        "channels": [
+          {
+            "name": "receiver/viewer/Color"
+          }
+        ]
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "port": 3001
+      }
+    }
+  }
+}

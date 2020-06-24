@@ -1,0 +1,122 @@
+{
+  "graph": {
+    "nodes": [
+      {
+        "name": "map",
+        "start_order": -100,
+        "components": [
+          {
+            "name": "isaac.map.Map",
+            "type": "isaac::map::Map"
+          },
+          {
+            "name": "map",
+            "type": "isaac::navigation::NavigationMap"
+          },
+          {
+            "name": "occupancy",
+            "type": "isaac::map::OccupancyGridMapLayer"
+          },
+          {
+            "name": "waypoints",
+            "type": "isaac::map::WaypointMapLayer"
+          },
+          {
+            "name": "restricted_area",
+            "type": "isaac::map::PolygonMapLayer"
+          },
+          {
+            "name": "unity_initializer",
+            "type": "isaac::alice::PoseInitializer"
+          }
+        ]
+      }
+    ],
+    "edges": []
+  },
+  "config": {
+    "map": {
+      "occupancy": {
+        "filename": "apps/assets/maps/virtual_test_warehouse_1.png",
+        "cell_size": 0.05
+      },
+      "waypoints": {
+        "execution_queue_limit": 1,
+        "waypoints": {
+          "pickup_face_dolly_8": {
+            "color": [
+              0.0,
+              0.0,
+              255.0
+            ],
+            "pose": {
+              "rotation": {
+                "yaw_radians": 0
+              },
+              "translation": [
+                13.0,
+                20.0,
+                0.0
+              ],
+              "radius": 0.3
+            }
+          },
+          "dropoff_9": {
+            "color": [
+              0.0,
+              0.0,
+              255.0
+            ],
+            "pose": {
+              "rotation": {
+                "yaw_radians": 2.2
+              },
+              "translation": [
+                8.0,
+                26.0,
+                0.0
+              ],
+              "radius": 0.3
+            }
+          },
+          "robot_home": {
+            "color": [
+              0.0,
+              0.0,
+              255.0
+            ],
+            "pose": {
+              "rotation": {
+                "yaw_radians": 0
+              },
+              "translation": [
+                7.5,
+                13.5,
+                0.0
+              ],
+              "radius": 0.3
+            }
+          }
+        }
+      },
+      "restricted_area": {
+        "tick_period": "1.0"
+      },
+      "unity_initializer": {
+        "lhs_frame": "world",
+        "rhs_frame": "unity",
+        "attach_interactive_marker": true,
+        "pose": {
+          "rotation": {
+            "yaw_radians": 0
+          },
+          "translation": [
+            3.0,
+            11.5,
+            0.0
+          ]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "name": "navsim_server",
+  "modules": [],
+  "graph": {
+    "nodes": [
+      {
+        "name": "navsim",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "input",
+            "type": "isaac::alice::Subgraph"
+          },
+          {
+            "name": "output",
+            "type": "isaac::alice::TcpPublisher"
+          },
+          {
+            "name": "time_sync",
+            "type": "isaac::alice::TimeSynchronizer"
+          }
+        ]
+      },
+      {
+        "name": "robot",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "output",
+            "type": "isaac::alice::TcpPublisher"
+          },
+          {
+            "name": "input",
+            "type": "isaac::alice::TcpSubscriber"
+          },
+          {
+            "name": "time_sync",
+            "type": "isaac::alice::TimeSynchronizer"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "navsim/ledger/bodies",
+        "target": "robot/output/players"
+      }
+    ]
+  },
+  "config": {
+    "websight": {
+      "WebsightServer": {
+        "port": 2999
+      }
+    },
+    "robot": {
+      "output": {
+        "port": 45000
+      },
+      "input": {
+        "port": 45001,
+        "host": "localhost"
+      }
+    },
+    "navsim": {
+      "output": {
+        "port": 46000
+      }
+    }
+  }
+}

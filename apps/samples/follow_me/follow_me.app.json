@@ -1,0 +1,245 @@
+{
+  "name": "follow_me",
+  "modules": [
+    "navigation",
+    "perception",
+    "perception:april_tags",
+    "planner",
+    "segway",
+    "viewers",
+    "zed"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "segway_rmp",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "SegwayRmpDriver",
+            "type": "isaac::SegwayRmpDriver"
+          },
+          {
+            "name": "Failsafe",
+            "type": "isaac::alice::Failsafe"
+          }
+        ]
+      },
+      {
+        "name": "control",
+        "subgraph": "packages/navigation/apps/differential_base_control.subgraph.json"
+      },
+      {
+        "name": "commander",
+        "subgraph": "packages/navigation/apps/differential_base_commander.subgraph.json"
+      },
+      {
+        "name": "odometry",
+        "components": [
+          {
+            "name": "DifferentialBaseOdometry",
+            "type": "isaac::navigation::DifferentialBaseOdometry"
+          },
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          }
+        ]
+      },
+      {
+        "name": "shared_robot_model",
+        "components": [
+          {
+            "name": "SphericalRobotShapeComponent",
+            "type": "isaac::planner::SphericalRobotShapeComponent"
+          }
+        ]
+      },
+      {
+        "name": "camera",
+        "components": [
+          {
+            "name": "zed_left_camera_initializer",
+            "type": "isaac::alice::PoseInitializer"
+          },
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "ZedCamera",
+            "type": "isaac::ZedCamera"
+          },
+          {
+            "name": "ColorCameraViewer",
+            "type": "isaac::viewers::ColorCameraViewer"
+          }
+        ]
+      },
+      {
+        "name": "april_tags_detection",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "AprilTagsDetection",
+            "type": "isaac::perception::AprilTagsDetection"
+          },
+          {
+            "name": "FiducialsViewer",
+            "type": "isaac::viewers::FiducialsViewer"
+          }
+        ]
+      },
+      {
+        "name": "fiducial_as_goal",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "FiducialAsGoal",
+            "type": "isaac::perception::FiducialAsGoal"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "camera/ZedCamera/left_camera_rgb",
+        "target": "april_tags_detection/AprilTagsDetection/image"
+      },
+      {
+        "source": "camera/ZedCamera/left_camera_rgb",
+        "target": "camera/ColorCameraViewer/color_listener"
+      },
+      {
+        "source": "april_tags_detection/AprilTagsDetection/april_tags",
+        "target": "fiducial_as_goal/FiducialAsGoal/fiducials"
+      },
+      {
+        "source": "april_tags_detection/AprilTagsDetection/april_tags",
+        "target": "april_tags_detection/FiducialsViewer/fiducials"
+      },
+      {
+        "source": "odometry/DifferentialBaseOdometry/odometry",
+        "target": "control.subgraph/interface/odometry"
+      },
+      {
+        "source": "fiducial_as_goal/FiducialAsGoal/plan",
+        "target": "control.subgraph/interface/plan"
+      },
+      {
+        "source": "segway_rmp/SegwayRmpDriver/segway_state",
+        "target": "odometry/DifferentialBaseOdometry/state"
+      },
+      {
+        "source": "control.subgraph/interface/command",
+        "target": "commander.subgraph/interface/control"
+      },
+      {
+        "source": "commander.subgraph/interface/command",
+        "target": "segway_rmp/SegwayRmpDriver/segway_cmd"
+      }
+    ]
+  },
+  "config": {
+    "segway_rmp": {
+      "SegwayRmpDriver": {
+        "ip": "192.168.0.40",
+        "tick_period": "20ms"
+      },
+      "Failsafe": {
+        "name": "robot_failsafe"
+      }
+    },
+    "control.lqr": {
+      "isaac.planner.DifferentialBaseLqrPlanner": {
+        "static_frame": "odom",
+        "obstacle_names": [],
+        "robot_model": "shared_robot_model/SphericalRobotShapeComponent",
+        "manual_mode_channel": "commander.robot_remote/isaac.navigation.RobotRemoteControl/manual_mode"
+      }
+    },
+    "navigation.control.control": {
+      "isaac.planner.DifferentialBaseControl": {
+        "manual_mode_channel": "commander.robot_remote/isaac.navigation.RobotRemoteControl/manual_mode"
+      }
+    },
+    "odometry": {
+      "DifferentialBaseOdometry": {
+        "tick_period": "100Hz"
+      }
+    },
+    "april_tags_detection": {
+      "AprilTagsDetection": {
+        "max_tags": 50,
+        "tag_dimensions": 0.165
+      }
+    },
+    "fiducial_as_goal": {
+      "FiducialAsGoal": {
+        "target_fiducial_id": "tag36h11_1",
+        "robot_frame": "robot",
+        "camera_frame": "left_camera"
+      }
+    },
+    "shared_robot_model": {
+      "SphericalRobotShapeComponent": {
+        "circles": [
+          { "center": [0.0 ,0.0], "radius": 0.4},
+          { "center": [0.2 ,0.2], "radius": 0.2},
+          { "center": [0.2 ,-0.2], "radius": 0.2}
+        ]
+      }
+    },
+    "camera": {
+      "zed_left_camera_initializer": {
+        "lhs_frame": "robot",
+        "rhs_frame": "left_camera",
+        "pose": [
+          0.5,
+          -0.5,
+          0.5,
+          -0.5,
+          0.11,
+          0.06,
+          0.73
+        ]
+      },
+      "ZedCamera": {
+        "resolution": "1280x720",
+        "tick_period": "60Hz"
+      },
+      "ColorCameraViewer": {
+        "target_fps": 20,
+        "camera_name": "left_camera"
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "port": 3000,
+        "ui_config": {
+          "windows": {
+            "Camera": {
+              "renderer": "2d",
+              "channels": [
+                { "name": "follow_me/camera/ColorCameraViewer/Color" },
+                { "name": "follow_me/april_tags_detection/FiducialsViewer/fiducials" },
+                { "name": "follow_me/fiducial_as_goal/FiducialAsGoal/tag_pose" },
+                { "name": "follow_me/fiducial_as_goal/FiducialAsGoal/target" },
+                { "name": "follow_me/control.lqr/isaac.planner.DifferentialBaseLqrPlanner/plan" }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

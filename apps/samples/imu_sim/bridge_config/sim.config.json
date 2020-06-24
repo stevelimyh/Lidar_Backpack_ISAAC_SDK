@@ -1,0 +1,42 @@
+{
+  "A_CarterGroup": {
+    "ActorGroup": {
+      "actors": [
+        {
+          "name": "carter_1",
+          "reference": "Blueprint'/Game/Carter/VehicleRigs/Pawn_Carter_Empty.Pawn_Carter_Empty'",
+          "pose": [1, 0, 0, 0, -11.01, 63.47, 0.92]
+        },
+        {
+          "name": "imu_1",
+          "reference": "Blueprint'/Game/Actors/ImuActor.ImuActor'",
+          "parent_actor": "carter_1",
+          "pose": [1, 0, 0, 0, 0, 0, 0]
+        },
+        {
+          "name": "imu_2",
+          "reference": "Blueprint'/Game/Actors/ImuActor.ImuActor'",
+          "parent_actor": "carter_1",
+          "pose": [0.7071068, 0, 0, 0.7071068, 0, 0, 0]
+        }
+      ]
+    }
+  },
+  "CarterActuator": {
+    "ActuatorComponent": {
+      "parent_actor": "carter_1"
+    }
+  },
+  "ActorPublisher": {
+    "isaac.alice.TcpPublisher": {
+      "port": 5001,
+      "host": "localhost"
+    }
+  },
+  "ActuatorSubscriber": {
+    "isaac.alice.TcpSubscriber": {
+      "port": 5002,
+      "host": "localhost"
+    }
+  }
+}

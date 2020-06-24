@@ -1,0 +1,161 @@
+{
+  "name": "navigate",
+  "modules": [
+    "behavior_tree",
+    "map"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "simulation",
+        "subgraph": "packages/navsim/apps/navsim_navigation.subgraph.json"
+      },
+      {
+        "name": "navigation",
+        "subgraph": "packages/navigation/apps/differential_base_navigation.subgraph.json"
+      },
+      {
+        "name": "goals",
+        "subgraph": "packages/navigation/apps/goal_generators.subgraph.json"
+      },
+      {
+        "name": "commander",
+        "subgraph": "packages/navigation/apps/differential_base_commander.subgraph.json"
+      },
+      {
+        "name": "parameterized_lift",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "DifferentialBaseControlGenerator",
+            "type": "isaac::message_generators::DifferentialBaseControlGenerator"
+          }
+        ]
+      },
+      {
+        "name": "navigate_after_scenario_loads",
+        "components": [
+          {
+            "name": "NodeGroup",
+            "type": "isaac::behavior_tree::NodeGroup"
+          },
+          {
+            "name": "MemorySequenceBehavior",
+            "type": "isaac::behavior_tree::MemorySequenceBehavior"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "navigation.subgraph/interface/feedback",
+        "target": "goals.subgraph/interface/feedback"
+      },
+      {
+        "source": "goals.subgraph/interface/goal",
+        "target": "navigation.subgraph/interface/goal"
+      },
+      {
+        "source": "simulation.interface/noisy/flatscan",
+        "target": "navigation.subgraph/interface/flatscan_for_localization"
+      },
+      {
+        "source": "simulation.interface/noisy/flatscan_2",
+        "target": "navigation.subgraph/interface/flatscan_2_for_localization"
+      },
+      {
+        "source": "simulation.interface/noisy/flatscan",
+        "target": "navigation.subgraph/interface/flatscan_for_obstacles"
+      },
+      {
+        "source": "simulation.interface/noisy/flatscan_2",
+        "target": "navigation.subgraph/interface/flatscan_2_for_obstacles"
+      },
+      {
+        "source": "simulation.interface/output/base_state",
+        "target": "navigation.subgraph/interface/state"
+      },
+      {
+        "source": "simulation.interface/output/imu_raw",
+        "target": "navigation.subgraph/interface/imu_raw"
+      },
+      {
+        "source": "parameterized_lift/DifferentialBaseControlGenerator/command",
+        "target": "simulation.interface/input/lift_command"
+      },
+      {
+        "source": "navigation.subgraph/interface/command",
+        "target": "commander.subgraph/interface/control"
+      },
+      {
+        "source": "commander.subgraph/interface/command",
+        "target": "simulation.interface/input/base_command"
+      },
+      {
+        "source": "navigation.planner.global_plan_smoother/smoother/smooth_plan",
+        "target": "simulation.interface/sight/global_plan"
+      },
+      {
+        "source": "navigation.control.lqr/isaac.planner.DifferentialBaseLqrPlanner/plan",
+        "target": "simulation.interface/sight/local_plan"
+      }
+    ]
+  },
+  "config": {
+    "navigation.planner.pose2_graph_planner": {
+      "Pose2GraphPlanner": {
+        "graph_filename": "external/pose2_grid_graphs_factory/pose2_grid_graph_without_dolly.capnp.bin"
+      }
+    },
+    "navigation.control.lqr": {
+      "isaac.planner.DifferentialBaseLqrPlanner": {
+        "manual_mode_channel": "commander.robot_remote/isaac.navigation.RobotRemoteControl/manual_mode"
+      }
+    },
+    "navigation.control.control": {
+      "isaac.planner.DifferentialBaseControl": {
+        "manual_mode_channel": "commander.robot_remote/isaac.navigation.RobotRemoteControl/manual_mode"
+      }
+    },
+    "navigation.shared_robot_model": {
+      "SphericalRobotShapeComponent": {
+        "circles": [
+          { "center": [-0.745, 0.0], "radius": 0.315},
+          { "center": [-0.485, 0.0], "radius": 0.315},
+          { "center": [-0.20,  0.0], "radius": 0.315},
+          { "center": [ 0.075, 0.0], "radius": 0.315},
+          { "center": [-0.955,  0.21], "radius": 0.105},
+          { "center": [-0.955, -0.21], "radius": 0.105},
+          { "center": [ 0.285,  0.21], "radius": 0.105},
+          { "center": [ 0.285, -0.21], "radius": 0.105}
+        ]
+      }
+    },
+    "goals.goal_behavior": {
+      "isaac.navigation.SelectorBehavior": {
+        "desired_behavior": "pose"
+      }
+    },
+    "navigate_after_scenario_loads": {
+      "NodeGroup": {
+        "node_names": [
+          "simulation.scenario_manager",
+          "navigation.localization.localization_behavior"
+        ]
+      }
+    },
+    "navigation.localization.localization_behavior": {
+      "disable_automatic_start": true
+    },
+    "parameterized_lift": {
+      "DifferentialBaseControlGenerator": {
+        "linear_speed": 0.0,
+        "angular_speed": 0.0,
+        "tick_period": "100Hz"
+      }
+    }
+  }
+}

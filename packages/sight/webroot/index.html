@@ -1,0 +1,546 @@
+<!doctype html>
+<html>
+  <!--
+    Copyright (c) 2019, NVIDIA CORPORATION. All rights reserved.
+
+    NVIDIA CORPORATION and its licensors retain all intellectual property
+    and proprietary rights in and to this software, related documentation
+    and any modifications thereto. Any use, reproduction, disclosure or
+    distribution of this software and related documentation without an express
+    license agreement from NVIDIA CORPORATION is strictly prohibited.
+  -->
+  <head>
+    <title>Isaac Sight</title>
+    <link rel="stylesheet" type="text/css" href="lib/css/bootstrap.min.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="lib/css/bootstrap-slider.min.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="css/contextmenu.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="css/map_container.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="css/websightstyle.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="css/config.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="css/beautify.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="css/record_replay.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="css/virtual_gamepad.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="css/virtual_keypad_joystick.css" media="screen" />
+  </head>
+
+  <body height="100%">
+    <script type="text/javascript" src="lib/js/cytoscape.min.js"></script>
+    <script type="text/javascript" src="lib/js/cytoscape-cose-bilkent.min.js"></script>
+    <script type="text/javascript" src="lib/js/fabric.min.js"></script>
+    <script type="text/javascript" src="js/sight_utils.js"></script>
+    <script type="text/javascript" src="js/graph.js"></script>
+    <script type="text/javascript" src="js/statistics_widget.js"></script>
+    <script type="text/javascript" src="js/context_menu.js"></script>
+    <script type="text/javascript" src="js/window_manager.js"></script>
+    <script type="text/javascript" src="js/local_config.js"></script>
+
+    <script type="text/javascript" src="js/map/occupancy_grid_map_layer.js"></script>
+    <script type="text/javascript" src="js/map/waypoint_map_layer.js"></script>
+    <script type="text/javascript" src="js/map/polygon_map_layer.js"></script>
+    <script type="text/javascript" src="js/map/map.js"></script>
+    <script type="text/javascript" src="js/map/map_container.js"></script>
+
+    <script type="text/javascript" src="js/plotting.js"></script>
+    <script type="text/javascript" src="js/pose_tree.js"></script>
+    <script type="text/javascript" src="js/roto_translation_widget.js"></script>
+    <script type="text/javascript" src="js/markers_widget_3d.js"></script>
+    <script type="text/javascript" src="js/markers_widget_2d.js"></script>
+    <script type="text/javascript" src="js/interactive_markers_manager.js"></script>
+    <script type="text/javascript" src="js/tree_menu.js"></script>
+    <script type="text/javascript" src="js/text_filter.js"></script>
+
+    <script type="text/javascript" src="js/sight_rendering/asset_manager.js"></script>
+    <script type="text/javascript" src="js/sight_rendering/sight_channel.js"></script>
+    <script type="text/javascript" src="js/sight_rendering/sight_renderer.js"></script>
+    <script type="text/javascript" src="js/sight_rendering/sight_manager.js"></script>
+
+    <script type="text/javascript" src="js/sight_rendering/renderer_2d.js"></script>
+    <script type="text/javascript" src="js/sight_rendering/renderer_3d.js"></script>
+    <script type="text/javascript" src="js/sight_rendering/renderer_plot.js"></script>
+
+    <script type="text/javascript" src="js/webgl.js"></script>
+    <script type="text/javascript" src="lib/js/base64-binary.min.js"></script>
+    <script type="text/javascript" src="lib/js/inflate.min.js"></script>
+    <script type="text/javascript" src="lib/js/three/three.min.js"></script>
+    <script type="text/javascript" src="lib/js/three/FreeControls.js"></script>
+    <script type="text/javascript" src="lib/js/three/FBXLoader.min.js"></script>
+    <script type="text/javascript" src="lib/js/three/MTLLoader.min.js"></script>
+    <script type="text/javascript" src="lib/js/three/OBJLoader.min.js"></script>
+    <script type="text/javascript" src="lib/js/three/OrbitControls.min.js"></script>
+    <script type="text/javascript" src="lib/js/three/STLLoader.min.js"></script>
+    <script type="text/javascript" src="lib/js/three/TransformControls.min.js"></script>
+
+    <script type="text/javascript" src="lib/js/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript" src="lib/js/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="lib/js/bootstrap-slider.min.js"></script>
+
+    <script type="text/javascript">
+      let channel_mapping_ = {};
+      let channel_enabled_ = {};
+      let sight_version_ = null;
+
+      let context_menu_ = new ContextMenu([]);
+      document.body.appendChild(context_menu_.menu_);
+      // Update the context menu for the channel menu
+      function updateContextMenu(plots, sops, fullname) {
+        context_menu_.clear();
+        context_menu_.plots = plots;
+        context_menu_.sops = sops;
+        // If some of the channels are plots, we need offer the option to create/append plots
+        if (plots.length > 0) {
+          // Option to create a new plot
+          context_menu_.addItem({
+            text: "Create a new plot",
+            callback: function() {
+              let renderer = CreateNewWindow('plot', false /* show_config */, fullname + " - Plot");
+              if (renderer) {
+                for (let i = 0; i < context_menu_.plots.length; i++) {
+                  renderer.addSeries({name: context_menu_.plots[i]});
+                }
+                renderer.update();
+              }
+            }
+          });
+          // Check if there are some existing plots, if so, we create a submenu containing the list
+          const plot_renderers = RendererManager().getRendererByType(RendererPlot);
+          if (plot_renderers.length > 0) {
+            let items = [];
+            for (let  i = 0; i < plot_renderers.length; i++) {
+              let renderer = plot_renderers[i];
+              items.push({
+                text: renderer.getName(),
+                callback: function() {
+                  for (let id = 0; id < context_menu_.plots.length; id++) {
+                    renderer.addSeries({name: context_menu_.plots[id]});
+                  }
+                  renderer.update();
+                }
+              });
+            }
+            context_menu_.addItem({ text: "Add to a plot", submenu: items });
+          }
+        }
+        // If some of the channels are SOP, we provide 2d and 3d options:
+        if (sops.length > 0) {
+          for (let type of [{name: "2d", type: Renderer2D}, {name: "3d", type: Renderer3D}]) {
+            // Option to create a new renderer
+            context_menu_.addItem({
+              text: "Create a new "+ type.name +" Renderer",
+              callback: function() {
+                let renderer = CreateNewWindow(type.name, false /* show_config */,
+                                               fullname + " - " + type.name);
+                if (renderer) {
+                  for (let i = 0; i < context_menu_.sops.length; i++) {
+                    renderer.addChannel(RendererManager().getChannel(context_menu_.sops[i]));
+                  }
+                }
+              }
+            });
+          // Check if there are some existing 2d/3d, if so, we create a submenu containing the list
+            const renderers = RendererManager().getRendererByType(type.type);
+            if (renderers.length > 0) {
+              let items = [];
+              for (let  i = 0; i < renderers.length; i++) {
+                let renderer = renderers[i];
+                items.push({
+                  text: renderer.getName(),
+                  callback: function() {
+                    for (let id = 0; id < context_menu_.sops.length; id++) {
+                      renderer.addChannel(RendererManager().getChannel(context_menu_.sops[id]));
+                    }
+                  }
+                });
+              }
+              context_menu_.addItem({ text: "Add to a " + type.name + " rederer", submenu: items });
+            }
+          }
+        }
+      }
+
+
+      let tree_menu_ = new TreeMenu(function(name, status) {
+          RendererManager().changeChannelStatus(name, status);
+          channel_enabled_[name] = status;
+          saveConfig(name + "-checked", status);
+          my_socket.send(JSON.stringify({
+              type: "setTagsStatus",
+              data: {
+                value: name,
+                enable: status
+              }
+            }));
+        },
+        // Callback to get the status of a channel
+        function(name) {
+          return {open: getConfig(name + "-open", true) == 'true',
+                  checked: getConfig(name + "-checked", true) == 'true'}
+        },
+        // Callback when a checkbox changes
+        function(name, value) {
+          saveConfig(name + "-open", value)
+        },
+        // Callback when we right click on the menu (contextmenu)
+        function(evt, names, fullname) {
+          // Hide the current menu and see if we need to render a new menu
+          context_menu_.menu_.click();
+          let plots = [];
+          let sops = [];
+          // Split into sop channels and plot channels.
+          for (let i in names) {
+            let name = names[i];
+            if (plots_[name]) {
+              plots.push(name);
+            }
+            if (RendererManager().hasChannel(name)) {
+              sops.push(name);
+            }
+          }
+          // If non empty we display the menu.
+          if (plots.length + sops.length > 0) {
+            updateContextMenu(plots, sops, fullname.split("/").pop());
+            context_menu_.show(evt.clientX, evt.clientY);
+          }
+          return false;
+        }
+      );
+
+      // Recursively go through the list of channels and hide those not mathing the filter
+      function FilterChannels(input, event) {
+        // Erase the input when escape is pressed
+        if (event && event.keyCode == 27) {
+          input.value = "";
+        }
+        const filter = input.value;
+        const invalid = filter.length + 10;
+        let lists = [];
+        for (let i = 0; i <= filter.length + 2; i++) {
+          lists.push([]);
+        }
+
+        // Extract all the nodes recursively and populate list accordingly
+        let extractNodes = function(node) {
+          // If it's not a div, then we went too far
+          if (node.tagName != 'DIV') return invalid;
+          let render = invalid;
+          if (node.leaf) {
+            // Node is a leaf, let's compute the best split possible
+            render = TextFilter(node.title, filter, filter.length + 2);
+          } else if (node.children.length > 0) {
+            // Recursively call each children and update the best value.
+            for (let i = 0; i < node.children.length; i++) {
+              render = Math.min(extractNodes(node.children[i]), render);
+            }
+          }
+          if (render < invalid) lists[render].push(node);
+          return render;
+        };
+        // populate lists.
+        extractNodes(document.getElementById('gmenu-list'));
+        // Let's find the first non empty list
+        let first = 0;
+        while (lists[first].length == 0 && first < filter.length) first++;
+        // Mark all the items inside this list as visible
+        for (let i = 0; i < lists[first].length; i++) {
+          lists[first][i].classList.remove("filter-hidden");
+        }
+        // Mark all the items as hidden
+        for (let j = first+1; j < lists.length; j++) {
+          for (let i = 0; i < lists[j].length; i++) {
+            lists[j][i].classList.add("filter-hidden");
+          }
+        }
+      }
+
+      // Update the left side menu
+      function updateMenu(x) {
+        let gmenu = document.getElementById('gmenu-list');
+        // Reinitialize the root of the tree.
+        tree_menu_.reset();
+
+        gmenu.classList.add("control-group");
+        gmenu.classList.add("vertical-menu");
+        if (x.data) {
+          for (let keyvalue of x["data"]) {
+            channel_mapping_[keyvalue.uuid] =  keyvalue.name;
+            let pos = keyvalue.name.lastIndexOf("/");
+            tree_menu_.addToTree(keyvalue.name);
+            let checked = getConfig(keyvalue.name+"-checked", keyvalue.checked) == 'true';
+            channel_enabled_[keyvalue.name] = checked;
+            if (checked != keyvalue.checked) {
+              my_socket.send(JSON.stringify({
+                  type: "setTagsStatus",
+                  data: {
+                    value: keyvalue.name,
+                    enable: checked
+                  }
+                }));
+            }
+            RendererManager().changeChannelStatus(keyvalue.name, checked);
+            saveConfig(keyvalue.name + "-checked", checked);
+          }
+        }
+        // Delay rendering to prevent freezing
+        setTimeout(function() {
+          tree_menu_.renderTree(gmenu);
+          FilterChannels(document.getElementById("gmenu-list-filter"));
+        }, 50);
+      }
+
+      let list_channels_enabled;
+
+      let reconnect_timeout = 100;
+      let my_socket = null;
+      function startWebsocket()  {
+        my_socket = new WebSocket("ws://" + location.host);
+        function size_dict(d){c=0; for (i in d) ++c; return c}
+        // List of component that needs to be loaded.
+        my_socket.loading = ["open"];
+
+        my_socket.onerror = function(evt) {}
+
+        my_socket.onclose = function(evt) {
+          WindowManager().save();
+          RendererManager().save();
+          MapContainer().resetWebSocket();
+          RecorderWindow().resetWebSocket();
+          ReplayWindow().onDisconnect();
+          setTimeout(function(){startWebsocket()}, reconnect_timeout);
+        }
+
+        my_socket.onmessage = function(evt) {
+          const x = typeof evt.data === "string" ? JSON.parse(evt.data) : evt;
+          if (x.type == "config_reply") {
+            GenerateAccordion(x.data.config);
+          } else if (x.type === "getAllTags") {
+            updateMenu(x);
+          } else if (x.type === "getLatest") {
+            if (x.data) {
+              for (let i in x.data) {
+                my_socket.onmessage(x.data[i]);
+              }
+            }
+          } else if (x.type === "plot") {
+            sightPlotHandle(x);
+          } else if (x.type === "load_ui_config") {
+            RendererManager().setAppName(x.app_name);
+            RendererManager().parseConfig(x.config);
+            AssetManager().loadAssets(x.config);
+          } else if (x.type === "sop") {
+            sightDrawHandle(x);
+          } else if (x.type === "statistics_reply") {
+            UpdateAppGraph(x.data, GetGraphView());
+            UpdateStatistics(x.data);
+          } else if (x.type === "pose_tree_reply") {
+            PoseTree().loadFromConfig(x.data);
+          } else if (x.type === "map_reply") {
+            MapContainer().handleMapContainerMassage(x.data);
+          } else if (x.type === "recorder_reply") {
+            RecorderWindow().onWebsocketMessage(x.data);
+          } else if (x.type === "replay_reply") {
+            ReplayWindow().onWebsocketMessage(x.data);
+          } else if (x.type === "virtual_gamepad_reply") {
+            VirtualGamepadWindow().onWebsocketMessage(x.data);
+          } else if (x.type === "interactive_markers_reply") {
+            InteractiveMarkersManager().onWebSocketMessage(x.data);
+          } else if (x.type === "getVersion") {
+            const version = x.version;
+            if (sight_version_ != null && sight_version_ != version) {
+              // TODO: incremental change should trigger an alert while a bigger change should
+              // trigger an automatic refresh. Let's refresh for now.
+              location.reload(true);
+            }
+            sight_version_ = version;
+          }
+          my_socket.update(x.type);
+        };
+
+        // Notify that a component has been loaded. When all of them are loaded the spinner will be
+        // removed
+        my_socket.update = function(name) {
+          if (my_socket.loading.length == 0) return;
+          // We are still waiting for some component, make sure the spinner is visible
+          let spinner = document.getElementById("spinner");
+          spinner.classList.remove("fade-out");
+          spinner.style.display = "";
+          let id = my_socket.loading.indexOf(name);
+          // In case of multiple restart, it's possible some component are duplicated, we make sure
+          // to remove all of them. (Note that it's really unlikely to happen in practice).
+          while (id >= 0) {
+            my_socket.loading.splice(id, 1);
+            id = my_socket.loading.indexOf(name);
+          }
+          if (my_socket.loading.length == 0) {
+            spinner.classList.add("fade-out");
+            // Hiding the div is not enough, we need to remove it after the animation is complete
+            setTimeout(function() { spinner.style.display = "none"; }, 1000);
+          }
+        }
+
+        my_socket.onopen = function(evt) {
+          // Add some component to the list.
+          my_socket.loading.push(
+              "getVersion",
+              "getAllTags",
+              "getLatest",
+              "load_ui_config");
+          my_socket.update("open");
+          channel_mapping_ = {};
+          my_socket.send(JSON.stringify({type:"load_ui_config"}));
+          my_socket.send(JSON.stringify({type:"getVersion"}));
+          my_socket.send(JSON.stringify({type:"getAllTags"}));
+          LoadConfig();
+          my_socket.send(JSON.stringify({type:"statistics", data: { request: "graph" }}));
+          MapContainer().setWebSocket(my_socket);
+          RecorderWindow().setWebSocket(my_socket);
+          InteractiveMarkersManager().reset();
+          InteractiveMarkersManager().setWebSocket(my_socket);
+          my_socket.send(JSON.stringify({type:"map", data:{request:"discovery"}}));
+          my_socket.send(JSON.stringify({type:"getLatest"}));
+          PoseTree().reset();
+          ResetGraphView();
+          ResetStatisticsView();
+          AssetManager().removeAllAssets();
+        }
+      }
+
+      window.onbeforeunload = function (e) {
+        my_socket.close();
+        WindowManager().save();
+        RendererManager().save();
+      }
+
+      window.addEventListener("load", function(){
+        if (getConfig("config-status", "visible") === "hidden") {
+          hideConfig();
+        }
+        if (getConfig("left-menu-status", "visible") === "hidden") {
+          hideLeftMenu();
+        }
+        startWebsocket();
+      });
+
+      $(document).keyup(function(e) {
+        if (e.key === "Enter") {
+          WindowManager().rearrangeDivs();
+        }
+      });
+
+      // Hide the menu
+      function hideLeftMenu() {
+        let menu = document.getElementById("gmenu");
+        menu.children[0].style.display = "block";
+        for (let i = 1; i < menu.children.length; i++) {
+          menu.children[i].style.display = "none";
+        }
+        menu.style.width = "60px";
+        menu.style.webkitTransform = "translateX(-20px)";
+        menu.style.transition = "0.5s ease-in-out";
+        saveConfig("left-menu-status", "hidden");
+        let content = document.getElementById("data_windows");
+        content.style.left = "60px";
+        content.style.transition = "0.5s ease-in-out";
+      }
+
+      // Show the menu
+      function showLeftMenu() {
+        let menu = document.getElementById("gmenu");
+        setTimeout(function() {
+          for (let i = 0; i < menu.children.length; i++) {
+            menu.children[i].style.display = "";
+          }
+        }, 450);
+        menu.style.width = "";
+        menu.style.webkitTransform = "";
+        saveConfig("left-menu-status", "visible");
+        let content = document.getElementById("data_windows");
+        content.style.left = "";
+      }
+
+    </script>
+    <div>
+      <div id="spinner">
+        <div class="loader make-center"></div>
+        <img class="make-center" src="nvidia-logo.png"></div>
+      </div>
+      <div id="gmenu" class="container main-header-menu-div">
+        <div class="menu-header-rotate-div" onclick="showLeftMenu('gmenu')">
+          <h1>Isaac Sight
+          <img src="nvidia-logo-transparent.png" width="48px" style="margin: -5px 10px -5px 10px;">
+          </h1>
+          <i class="material-icons">add</i>
+        </div>
+        <h1 class="menu-header" onclick="hideLeftMenu('gmenu', -1)">
+          Isaac Sight
+          <img src="nvidia-logo-transparent.png" width="48px" style="margin: -5px 10px -5px 10px;">
+          <i class="material-icons">remove</i>
+        </h1>
+        <div class="main-menu-content">
+          <h2 title="List of windows displayed in the main area. Use check box to hide or show the window.">Windows</h2>
+          <div style="display: block; margin: 0px auto; margin-top: 10px; width: max-content">
+            <button type="button" class="btn btn-primary" onclick="CreateNewWindow('2d')"
+                    style="display: inline-block; margin: 0px auto">
+              Add 2D
+            </button>
+            <button type="button" class="btn btn-primary" onclick="CreateNewWindow('3d')"
+                    style="display: inline-block; margin: 0px auto">
+              Add 3D
+            </button>
+            <button type="button" class="btn btn-primary" onclick="CreateNewWindow('plot')"
+                    style="display: inline-block; margin: 0px auto">
+              Add plot
+            </button>
+          <div id="window_menu" style="display: grid;"></div>
+          </div>
+          <hr style="border-color: #aaa; margin-top: 10px; margin-bottom: 10px">
+          <h2 title="List of channels available for display. Use check box to stop streaming this channel from the application and to freeze it in all windows." class="filter-input" style="display: flex; align-items: center;">
+            Channels
+            <input type="text" placeholder="Filter" onkeyup="FilterChannels(this, event)" id ="gmenu-list-filter" />
+          </h2>
+          <div id="gmenu-list" style="margin-right:5px; overflow: auto;"></div>
+        </div>
+      </div>
+      <div id="data_windows" class="main-data-windows-div"></div>
+      <div id="config" class="main-config-menu-div">
+        <h1 class="config-header-hidden" onclick="showConfig()">
+          Application Configuration <i class="material-icons">add</i>
+        </h1>
+        <h1 class="config-header" onclick="hideConfig()">
+          Application Configuration <i class="material-icons">remove</i>
+        </h1>
+        <div class="container body-content config-main-content" style="width: 100%;">
+          <div class="row">
+            <div class="col-md-12">
+              <form class="form-horizontal">
+                <div class="config-filter config-filter-div">
+                  <input type="text" class="config-filter-input" placeholder="Filter" onkeyup="FilterConfig(this, event)" id="config-filter"/>
+                </div>
+                <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true"></div>
+                <div class="form-group" style="position: sticky; bottom: 5px; background: #efefef; padding: 20px 0px 55px 0px">
+                  <div style="margin: auto; width: max-content;">
+                    <div>
+                      <button id="config-submit" type="button" class="btn btn-primary" onclick="onSubmit()">Submit</button>
+                      &nbsp;&nbsp;
+                      <button type="reset" class="btn btn-default" onclick="onCancel()">Cancel</button>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script type="text/javascript" src="lib/js/smoothie.min.js"></script>
+    <script type="text/javascript" src="lib/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="lib/js/lodash.min.js"></script>
+    <script type="text/javascript" src="js/config.js"></script>
+    <script type="text/javascript" src="js/replay_window.js"></script>
+    <script type="text/javascript" src="js/recorder_window.js"></script>
+    <script type="text/javascript" src="js/gamepad_manager.js"></script>
+    <script type="text/javascript" src="js/gamepad_utils.js"></script>
+    <script type="text/javascript" src="js/virtual_keypad_joystick.js"></script>
+    <script type="text/javascript" src="js/virtual_mouse_joystick.js"></script>
+    <script type="text/javascript" src="js/virtual_gamepad_window.js"></script>
+  </body>
+
+</html>

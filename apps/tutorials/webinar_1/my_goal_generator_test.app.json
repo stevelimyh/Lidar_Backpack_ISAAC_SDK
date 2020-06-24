@@ -1,0 +1,60 @@
+{
+  "name": "my_goal_generator",
+  "modules": [
+    "//apps/tutorials/webinar_1:go_to_mockup",
+    "//apps/tutorials/webinar_1:my_goal_generator"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "go_to_mockup",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "GoToMockup",
+            "type": "isaac::tutorials::GoToMockup"
+          }
+        ]
+      },
+      {
+      	"name": "my_node",
+      	"components": [
+      		{
+      			"name": "message_ledger",
+      			"type": "isaac::alice::MessageLedger"
+      		},
+      		{
+      			"name": "my_component",
+      			"type": "isaac::tutorials::MyGoalGenerator"
+      		}
+      	]
+      }
+    ],
+    "edges": [
+    	{
+    		"source": "my_node/my_component/my_goal",
+    		"target": "go_to_mockup/GoToMockup/goal"
+    	},
+    	{
+    		"source": "go_to_mockup/GoToMockup/feedback",
+    		"target": "my_node/my_component/feedback_goal"
+    	}
+    ]
+  },
+  "config": {
+    "go_to_mockup" : {
+      "GoToMockup" : {
+        "tick_period" : "10ms"
+      }
+    },
+    "my_node" : {
+    	"my_component" : {
+    		"desired_location" : [9.0,25.0],
+    		"tick_period" : "10Hz"
+    	}
+    }
+  }
+}

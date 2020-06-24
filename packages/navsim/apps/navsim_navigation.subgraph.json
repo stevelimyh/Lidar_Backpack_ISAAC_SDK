@@ -1,0 +1,219 @@
+{
+  "modules": [
+    "imu",
+    "navsim",
+    "utils"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "interface",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "subgraph",
+            "type": "isaac::alice::Subgraph"
+          },
+          {
+            "name": "sight",
+            "type": "isaac::alice::Subgraph"
+          },
+          {
+            "name": "noisy",
+            "type": "isaac::alice::Subgraph"
+          },
+          {
+            "name": "input",
+            "type": "isaac::alice::TcpPublisher"
+          },
+          {
+            "name": "output",
+            "type": "isaac::alice::TcpSubscriber"
+          },
+          {
+            "name": "time_sync",
+            "type": "isaac::alice::TimeSynchronizer"
+          }
+        ]
+      },
+      {
+        "name": "imu",
+        "components": [
+          {
+            "name": "isaac.alice.MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "random",
+            "type": "isaac::alice::Random"
+          },
+          {
+            "name": "imusim",
+            "type": "isaac::imu::ImuSim"
+          }
+        ]
+      },
+      {
+        "name": "noisy_flatscan_1",
+        "subgraph": "packages/navsim/apps/noisy_scan_flattening.subgraph.json"
+      },
+      {
+        "name": "noisy_flatscan_2",
+        "subgraph": "packages/navsim/apps/noisy_scan_flattening.subgraph.json"
+      },
+      {
+        "name": "pose_injector",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "pose_injector",
+            "type": "isaac::alice::PoseMessageInjector"
+          }
+        ]
+      },
+      {
+        "name": "scenario_manager",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "scenario_manager",
+            "type": "isaac::navsim::ScenarioManager"
+          }
+        ]
+      },
+      {
+        "name": "plan_converter",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "global",
+            "type": "isaac::utils::Plan2Converter"
+          },
+          {
+            "name": "local",
+            "type": "isaac::utils::DifferentialTrajectoryToPlanConverter"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "interface/output/pose",
+        "target": "pose_injector/pose_injector/pose"
+      },
+      {
+        "source": "scenario_manager/scenario_manager/scenario_control",
+        "target": "interface/input/scenario_control"
+      },
+      {
+        "source": "scenario_manager/scenario_manager/robot",
+        "target": "interface/input/scenario_actors"
+      },
+      {
+        "source": "interface/output/scenario_reply",
+        "target": "scenario_manager/scenario_manager/scenario_reply"
+      },
+      {
+        "source": "interface/output/rangescan",
+        "target": "noisy_flatscan_1.interface/MessageLedger/rangescan"
+      },
+      {
+        "source": "interface/output/rangescan_2",
+        "target": "noisy_flatscan_2.interface/MessageLedger/rangescan"
+      },
+      {
+        "source": "noisy_flatscan_1.interface/MessageLedger/flatscan",
+        "target": "interface/noisy/flatscan"
+      },
+      {
+        "source": "noisy_flatscan_2.interface/MessageLedger/flatscan",
+        "target": "interface/noisy/flatscan_2"
+      },
+      {
+        "source": "interface/sight/global_plan",
+        "target": "plan_converter/global/original_plan"
+      },
+      {
+        "source": "plan_converter/global/plan",
+        "target": "interface/input/unity_global_plan"
+      },
+      {
+        "source": "interface/sight/local_plan",
+        "target": "plan_converter/local/original_trajectory"
+      },
+      {
+        "source": "plan_converter/local/plan",
+        "target": "interface/input/unity_local_plan"
+      },
+      {
+        "source": "interface/output/bodies",
+        "target": "imu/imusim/bodies"
+      },
+      {
+        "source": "imu/imusim/imu_raw",
+        "target": "interface/output/imu_raw"
+      }
+    ]
+  },
+  "config": {
+    "interface": {
+      "input": {
+        "port": 55001
+      },
+      "output": {
+        "port": 55000,
+        "host": "localhost"
+      }
+    },
+    "plan_converter": {
+      "global": {
+        "frame": "unity"
+      },
+      "local": {
+        "frame": "unity"
+      }
+    },
+    "scenario_manager": {
+      "scenario_manager": {
+        "ref_pose_name": "unity"
+      }
+    },
+    "imu": {
+      "imusim": {
+        "imu_name": "imu",
+        "accel_bias": [
+          0.2,
+          0.3,
+          0.4
+        ],
+        "gyro_bias": [
+          0.01,
+          0.02,
+          0.02
+        ],
+        "accel_noise": [
+          0.01,
+          0.01,
+          0.01
+        ],
+        "gyro_noise": [
+          0.001,
+          0.001,
+          0.001
+        ]
+      }
+    }
+  }
+}

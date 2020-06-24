@@ -1,0 +1,197 @@
+{
+  "name": "livox_lidar_visualization",
+  "modules": [
+    "livox",
+    "//packages/viewers",
+    "//packages/perception"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "livox_lidar_mid_40",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "pose",
+            "type": "isaac::alice::PoseInitializer"
+          },
+          {
+            "name": "driver",
+            "type": "isaac::LivoxLidar"
+          }
+        ]
+      },
+      {
+        "name": "point_cloud_accumulator",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "accumulator",
+            "type": "isaac::perception::PointCloudAccumulator"
+          }
+        ]
+      },
+      {
+        "name": "cloud_viewer",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "viewer",
+            "type": "isaac::viewers::PointCloudViewer"
+          }
+        ]
+      },
+      {
+        "name": "cloud_viewer_accumulated",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "viewer",
+            "type": "isaac::viewers::PointCloudViewer"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "livox_lidar_mid_40/driver/accumulated_point_cloud",
+        "target": "cloud_viewer/viewer/cloud"
+      },
+      {
+        "source": "livox_lidar_mid_40/driver/accumulated_point_cloud",
+        "target": "point_cloud_accumulator/accumulator/point_cloud"
+      },
+      {
+        "source": "point_cloud_accumulator/accumulator/accumulated_point_cloud",
+        "target": "cloud_viewer_accumulated/viewer/cloud"
+      }
+    ]
+  },
+  "config": {
+    "livox_lidar_mid_40": {
+      "driver": {
+        "device_ip": "192.168.1.13",
+        "port_command": 50001,
+        "port_data": 50002,
+        "batch_count": 10
+      },
+      "pose": {
+        "lhs_frame": "world",
+        "rhs_frame": "lidar",
+        "pose": [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+      }
+    },
+   "point_cloud_accumulator": {
+      "message_ledger": {
+        "history": 10
+      },
+      "accumulator": {
+        "point_count": 10000
+      }
+    },
+    "cloud_viewer": {
+      "message_ledger": {
+        "history": 10
+      },
+      "viewer": {
+        "max_distance": 500,
+        "skip": 1,
+        "target_fps": 30,
+        "frame": "world"
+      }
+    },
+    "cloud_viewer_accumulated": {
+      "message_ledger": {
+        "history": 10
+      },
+      "viewer": {
+        "max_distance": 500,
+        "skip": 1,
+        "target_fps": 10,
+        "frame": "world"
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "port": 3000,
+        "ui_config": {
+          "windows": {
+            "Livox Lidar: Cloud Viewer": {
+              "renderer": "3d",
+              "dims": {
+                "width": 1024,
+                "height": 768
+              },
+              "channels": [
+                {
+                  "name": "livox_lidar_visualization/cloud_viewer/viewer/points",
+                  "active": true
+                }
+              ]
+            },
+            "Livox Lidar: Cloud Viewer Accumulator": {
+              "renderer": "3d",
+              "dims": {
+                "width": 1024,
+                "height": 768
+              },
+              "channels": [
+                {
+                  "name": "livox_lidar_visualization/cloud_viewer_accumulated/viewer/points",
+                  "active": true
+                }
+              ]
+            },
+            "Livox Lidar: Driver Clocks Synchronization (ns)": {
+              "renderer": "plot",
+              "dims": {
+                "width": 1024,
+                "height": 200
+              },
+              "channels": [
+                {
+                  "name": "livox_lidar_visualization/livox_lidar_mid_40/driver/clocks_difference_nanoseconds" }
+              ]
+            },
+            "Livox Lidar: Points per Message": {
+              "renderer": "plot",
+              "dims": {
+                "width": 1024,
+                "height": 200
+              },
+              "channels": [
+                { "name" : "livox_lidar_visualization/livox_lidar_mid_40/driver/points_per_message_sent" },
+                { "name" : "livox_lidar_visualization/point_cloud_accumulator/accumulator/points_per_message_received" },
+                { "name" : "livox_lidar_visualization/point_cloud_accumulator/accumulator/points_per_message_sent" }
+              ]
+            },
+            "Livox Lidar: Messages per Second": {
+              "renderer": "plot",
+              "dims": {
+                "width": 1024,
+                "height": 200
+              },
+              "channels": [
+                { "name" : "livox_lidar_visualization/livox_lidar_mid_40/driver/messages_sent_per_second" },
+                { "name" : "livox_lidar_visualization/point_cloud_accumulator/accumulator/messages_received_per_second" },
+                { "name" : "livox_lidar_visualization/point_cloud_accumulator/accumulator/messages_sent_per_second" }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

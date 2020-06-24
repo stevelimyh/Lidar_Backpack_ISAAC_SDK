@@ -1,0 +1,335 @@
+{
+  "modules": [
+    "flatsim",
+    "map",
+    "navigation"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "map",
+        "start_order": -100,
+        "components": [
+          {
+            "name": "isaac.map.Map",
+            "type": "isaac::map::Map"
+          },
+          {
+            "name": "map",
+            "type": "isaac::navigation::NavigationMap"
+          },
+          {
+            "name": "occupancy",
+            "type": "isaac::map::OccupancyGridMapLayer"
+          },
+          {
+            "name": "waypoints",
+            "type": "isaac::map::WaypointMapLayer"
+          },
+          {
+            "name": "restricted_area",
+            "type": "isaac::map::PolygonMapLayer"
+          }
+        ]
+      },
+      {
+        "name": "sim_range_scan",
+        "components": [
+          {
+            "name": "SimRangeScan",
+            "type": "isaac::flatsim::SimRangeScan"
+          },
+          {
+            "name": "robot_T_lidar",
+            "type": "isaac::alice::PoseInitializer"
+          },
+          {
+            "name": "robot_gt_T_lidar_gt",
+            "type": "isaac::alice::PoseInitializer"
+          },
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          }
+        ]
+      },
+      {
+        "name": "flatscan_noiser",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "Random",
+            "type": "isaac::alice::Random"
+          },
+          {
+            "name": "FlatscanNoiser",
+            "type": "isaac::flatsim::FlatscanNoiser"
+          }
+        ]
+      },
+      {
+        "name": "flatmap_cost",
+        "start_order": -100,
+        "components": [
+          {
+            "name": "inside_round",
+            "type": "isaac::map::PolylineFlatmapCost"
+          },
+          {
+            "name": "outside_round",
+            "type": "isaac::map::PolylineFlatmapCost"
+          },
+          {
+            "name": "MultiplicationFlatmapCost",
+            "type": "isaac::map::MultiplicationFlatmapCost"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "flatscan_noiser/FlatscanNoiser/noisy_flatscan",
+        "target": "flatsim.navigation.subgraph/interface/flatscan_2_for_obstacles"
+      },
+      {
+        "source": "sim_range_scan/SimRangeScan/flatscan",
+        "target": "flatscan_noiser/FlatscanNoiser/flatscan"
+      },
+      {
+        "source": "flatscan_noiser/FlatscanNoiser/noisy_flatscan",
+        "target": "flatsim.navigation.subgraph/interface/flatscan_2_for_localization"
+      }
+    ]
+  },
+  "config": {
+    "flatsim.navigation.shared_robot_model": {
+      "SphericalRobotShapeComponent": {
+        "circles": [
+          { "center": [-0.17 ,0.0], "radius": 0.31},
+          { "center": [-0.43 ,0.0], "radius": 0.31},
+          { "center": [ 0.1 , 0.0], "radius": 0.31},
+          { "center": [-0.7 , 0.0], "radius": 0.31},
+          { "center": [ 0.31, 0.21], "radius": 0.105},
+          { "center": [-0.91,-0.21], "radius": 0.105},
+          { "center": [-0.91, 0.21], "radius": 0.105},
+          { "center": [ 0.31,-0.21], "radius": 0.105}
+        ]
+      }
+    },
+    "flatsim.simulation.robot_spawn_pose": {
+      "PoseInitializer": {
+        "pose": {
+          "rotation": { "yaw_degrees": 180.0 },
+          "translation": [21.0, 17.0, 0.0]
+        }
+      }
+    },
+    "flatsim.navigation.local_map.local_map": {
+      "isaac.navigation.LocalMap": {
+        "cell_size": 0.03,
+        "map_decay_factor": 0.999,
+        "dimensions": [396, 396]
+      }
+    },
+    "flatsim.navigation.local_map.local_map_postprocessing": {
+      "isaac.navigation.OccupancyToBinaryMap": {
+        "standard_deviation_threshold": 96,
+        "is_optimistic": true
+      },
+      "cleanup": {
+        "clear_region": [[-1.015, 0.415],[-0.315, 0.315]]
+      }
+    },
+    "flatsim.navigation.localization.viewers": {
+      "FlatscanViewer2": {
+        "flatscan_frame": "lidar_back"
+      }
+    },
+    "flatsim.navigation.localization.scan_localization": {
+      "ParticleFilterLocalization": {
+        "flatscan_2_frame": "lidar_back"
+      }
+    },
+    "flatsim.navigation.control.lqr": {
+      "isaac.planner.DifferentialBaseLqrPlanner": {
+        "target_distance": 0.25,
+        "speed_gradient_target_distance": 1.0,
+        "min_distance": 0.1,
+        "min_speed": -0.10,
+        "max_speed": 0.65,
+        "max_angular_speed": 0.25,
+        "use_predicted_position": true,
+        "reset_robot_position": 10,
+        "distance_to_waypoint": 0.25,
+        "angle_to_waypoint": 0.0872665,
+        "max_predicted_position_error": 0.5
+      }
+    },
+    "flatsim.simulation.sim_range_scan": {
+      "SimRangeScan": {
+        "num_beams": 577,
+        "max_range": 40.0,
+        "min_angle": -0.43633231299,
+        "max_angle": 3.49065850399
+      },
+      "robot_T_lidar": {
+        "pose": {
+          "rotation": { "yaw_degrees": -60.0 },
+          "translation": [ 0.335, 0.24, 0.17 ]
+        }
+      },
+      "robot_gt_T_lidar_gt": {
+        "pose": {
+          "rotation": { "yaw_degrees": -60.0 },
+          "translation": [ 0.335, 0.24, 0.17 ]
+        }
+      }
+    },
+    "flatsim.navigation.local_map.range_scan_2_to_observation_map": {
+      "isaac.navigation.RangeScanToObservationMap": {
+        "sensor_frame": "lidar_back",
+        "sensor_lattice_frame": "lidar_back_lat",
+        "dimensions": [396,396],
+        "map_offset_relative": [0.5,0.15]
+      }
+    },
+    "flatsim.navigation.local_map.range_scan_to_observation_map": {
+      "isaac.navigation.RangeScanToObservationMap": {
+        "dimensions": [396,396],
+        "map_offset_relative": [0.5,0.15]
+      }
+    },
+    "flatsim.navigation.range_scan_robot_removal_2": {
+      "RangeScanRobotRemoval": {
+        "sensor_frame": "lidar_back"
+      }
+    },
+    "sim_range_scan": {
+      "SimRangeScan": {
+        "num_beams": 577,
+        "max_range": 40.0,
+        "min_angle": -0.43633231299,
+        "max_angle": 3.49065850399,
+        "tick_period": "50ms",
+        "lidar_frame": "lidar_back_gt"
+      },
+      "robot_T_lidar": {
+        "lhs_frame": "robot",
+        "rhs_frame": "lidar_back",
+        "pose": {
+          "rotation": { "yaw_degrees": 120.0 },
+          "translation": [ -0.985, -0.24, 0.17 ]
+        }
+      },
+      "robot_gt_T_lidar_gt": {
+        "lhs_frame": "robot_gt",
+        "rhs_frame": "lidar_back_gt",
+        "pose": {
+          "rotation": { "yaw_degrees": 120.0 },
+          "translation": [ -0.985, -0.24, 0.17 ]
+        }
+      }
+    },
+    "map": {
+      "occupancy": {
+        "cell_size": 0.05,
+        "filename": "apps/assets/maps/virtual_factory_1.png"
+      },
+      "waypoints": {
+        "tick_period": "1.0"
+      },
+      "restricted_area": {
+        "tick_period": "1.0",
+        "polygons": {
+          "assembly_line": {
+            "points": [
+              [19.0, 20.0], [19.0, 105.5], [31.0, 105.5], [31.0, 20.0]
+            ]
+          }
+        }
+      }
+    },
+    "flatsim.navigation.planner.pose2_graph_planner": {
+      "Pose2GraphPlanner": {
+        "bucket_size": 0.5,
+        "graph_filename": "/tmp/pose2_grid_graph.capnp.bin"
+      }
+    },
+    "flatsim.navigation.planner.planner_switch_behavior": {
+      "SwitchBehavior": {
+        "desired_behavior": "$(fullname flatsim.navigation.planner.pose2_graph_planner)"
+      }
+    },
+    "flatmap_cost": {
+      "MultiplicationFlatmapCost": {
+        "maximum_weight": 100.0,
+        "minimum_weight": 0.001
+      },
+      "inside_round": {
+        "polyline": [
+          [36.0, 109.5], [36.0, 16.0], [34.5, 14.5], [16.0, 14.5], [14.5, 16.0],
+          [14.5, 109.5], [16.5, 111.0], [34.5, 111.0], [36.0, 109.5]
+        ],
+        "width": 0.8,
+        "penality_angle": 1.0,
+        "penality_distance": 2.0,
+        "outside_weight": 10.0
+      },
+      "outside_round": {
+        "polyline": [
+          [38.0, 110.0], [35.0, 113.0], [16.0, 113.0], [12.5, 110.0],
+          [12.5, 15.5], [15.5, 12.5], [35.0, 12.5], [38.0, 15.5], [38.0, 110.0]
+        ],
+        "width": 0.8,
+        "penality_angle": 1.0,
+        "penality_distance": 2.0,
+        "outside_weight": 10.0
+      }
+    },
+    "flatsim.navigation.sight_widgets": {
+      "Planner View": {
+        "type": "2d",
+        "channels": [
+          { "name": "flatsim.navigation.local_map.local_map/isaac.navigation.LocalMap/local_map" },
+          { "name": "flatmap_cost/outside_round/area" },
+          { "name": "flatmap_cost/outside_round/polyline" },
+          { "name": "flatmap_cost/restricted_area/area" },
+          { "name": "flatmap_cost/inside_round/polyline" },
+          { "name": "flatmap_cost/inside_round/area" },
+          { "name": "flatsim.navigation.go_to.goal_viewer/GoalViewer/goal" },
+          { "name": "flatsim.navigation.planner.pose2_graph_planner/Pose2GraphPlanner/path" },
+          { "name": "flatsim.navigation.localization.viewers/RobotViewer/robot_model" },
+          { "name": "flatsim.navigation.localization.viewers/PoseTrailViewer/pose_trail" },
+          { "name": "flatsim.navigation.control.lqr/isaac.planner.DifferentialBaseLqrPlanner/plan" }
+        ]
+      },
+      "Map View": {
+        "type": "2d",
+        "channels": [
+          { "name": "map/occupancy/map" },
+          { "name": "flatmap_cost/outside_round/area" },
+          { "name": "flatmap_cost/outside_round/polyline" },
+          { "name": "flatmap_cost/restricted_area/area" },
+          { "name": "flatmap_cost/inside_round/polyline" },
+          { "name": "flatmap_cost/inside_round/area" },
+          { "name": "map/waypoints/waypoints" },
+          { "name": "flatsim.navigation.localization.viewers/FlatscanViewer/beam_endpoints" },
+          { "name": "flatsim.navigation.localization.viewers/FlatscanViewer2/beam_endpoints" },
+          { "name": "flatsim.navigation.go_to.goal_viewer/GoalViewer/goal" },
+          { "name": "flatsim.navigation.localization.viewers/RobotViewer/robot_model" },
+          { "name": "flatsim.navigation.localization.viewers/RobotViewer/robot" },
+          { "name": "flatsim.navigation.planner.pose2_graph_planner/Pose2GraphPlanner/path" },
+          { "name": "flatsim.navigation.control.lqr/isaac.planner.DifferentialBaseLqrPlanner/plan" }
+        ]
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "port": 3000
+      }
+    }
+  }
+}

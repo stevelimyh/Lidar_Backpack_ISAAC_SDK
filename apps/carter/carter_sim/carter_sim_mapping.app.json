@@ -1,0 +1,153 @@
+{
+  "name": "carter_sim_mapping",
+  "modules": [
+    "lidar_slam:cartographer",
+    "planner",
+    "viewers"
+  ],
+  "config": {
+    "cartographer": {
+      "cartographer": {
+        "lua_configuration_directory": "apps/carter/carter_sim/,../com_github_googlecartographer_cartographer/configuration_files/,external/com_github_googlecartographer_cartographer/configuration_files/",
+        "lua_configuration_basename": "carter.lua",
+        "background_rows": 3000,
+        "background_cols": 3000,
+        "background_offset_x": -150,
+        "background_offset_y": -150,
+        "tick_period": "250ms"
+      },
+      "lidar_initializer": {
+        "lhs_frame": "robot",
+        "rhs_frame": "lidar",
+        "pose": [1.0, 0.0, 0.0, 0.0, -0.06, 0.0, 0.62]
+      }
+    },
+    "imu_odometry.odometry": {
+      "DifferentialBaseWheelImuOdometry": {
+        "use_imu": false
+      }
+    },
+    "local_map.local_map": {
+      "isaac.navigation.BinaryToDistanceMap": {
+        "obstacle_name": ""
+      }
+    },
+    "simulation.scan_flattener.scan_accumulator": {
+      "isaac.perception.ScanAccumulator": {
+        "min_slice_count": 900,
+        "clock_wise_rotation": false
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "port": 3000,
+        "ui_config": {
+          "windows": {
+            "carter_sim - Cartographer": {
+              "renderer": "2d",
+              "dims": {
+                "width": 3000,
+                "height": 3000
+              },
+              "channels": [
+                {
+                  "name": "carter_sim_mapping/cartographer/cartographer/map_background",
+                  "active": true
+                },
+                {
+                  "name": "carter_sim_mapping/cartographer/cartographer/submaps",
+                  "active": true
+                },
+                {
+                  "name": "carter_sim_mapping/cartographer/cartographer/trajectory_node_poses",
+                  "active": true
+                }
+              ]
+            },
+            "Carter Sim - Left Color": {
+              "renderer": "2d",
+              "dims": {
+                "width": 480,
+                "height": 270
+              },
+              "channels": [
+                {
+                  "name": "carter_sim_mapping/simulation.carter_sim.camera_viewer/left_color_viewer/Color",
+                  "active": true
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "graph": {
+    "nodes": [
+      {
+        "name": "cartographer",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "cartographer",
+            "type": "isaac::lidar_slam::Cartographer"
+          }
+        ]
+      },
+      {
+        "name": "shared_robot_model",
+        "components": [
+          {
+            "name": "DifferentialBaseModel",
+            "type": "isaac::planner::DifferentialBaseModel"
+          },
+          {
+            "name": "RangeScanModel",
+            "type": "isaac::navigation::RangeScanModelFlatloc"
+          },
+          {
+            "name": "SphericalRobotShapeComponent",
+            "type": "isaac::planner::SphericalRobotShapeComponent"
+          }
+        ]
+      },
+      {
+        "name": "simulation",
+        "subgraph": "apps/carter/unreal_sim/2d_carter_sim.subgraph.json"
+      },
+      {
+        "name": "imu_odometry",
+        "subgraph": "packages/navigation/apps/differential_base_imu_odometry.subgraph.json"
+      },
+      {
+        "name": "local_map",
+        "subgraph": "packages/navigation/apps/local_map.subgraph.json"
+      },
+      {
+        "name": "commander",
+        "subgraph": "packages/navigation/apps/differential_base_commander.subgraph.json"
+      }
+    ],
+    "edges": [
+      {
+        "source": "simulation.subgraph/interface/flatscan",
+        "target": "cartographer/cartographer/flatscan"
+      },
+      {
+        "source": "simulation.subgraph/interface/flatscan",
+        "target": "local_map.subgraph/interface/flatscan"
+      },
+      {
+        "source": "simulation.subgraph/interface/diff_base_state",
+        "target": "imu_odometry.subgraph/interface/state"
+      },
+      {
+        "source": "commander.subgraph/interface/command",
+        "target": "simulation.subgraph/interface/diff_base_command"
+      }
+    ]
+  }
+}

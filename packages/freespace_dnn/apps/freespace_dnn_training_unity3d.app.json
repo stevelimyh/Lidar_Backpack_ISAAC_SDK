@@ -1,0 +1,77 @@
+{
+  "name": "freespace_dnn_training_unity3d",
+  "config": {
+    "sample_accumulator": {
+      "SampleAccumulator": {
+        "sample_buffer_size": 500,
+        "channel_names": ["image", "segmentation"]
+      },
+      "random": {
+        "use_random_seed": true
+      }
+    },
+    "simulation.interface": {
+      "input": {
+        "port": 55001
+      },
+      "output": {
+        "port": 55000,
+        "host": "localhost"
+      }
+    }
+  },
+  "graph": {
+    "nodes": [
+      {
+        "name": "simulation",
+        "subgraph": "packages/navsim/apps/navsim_training.subgraph.json"
+      },
+      {
+        "name": "training",
+        "subgraph": "packages/freespace_dnn/apps/freespace_dnn_training.subgraph.json"
+      },
+      {
+        "name": "sample_accumulator",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "random",
+            "type": "isaac::alice::Random"
+          },
+          {
+            "name": "SampleAccumulator",
+            "type": "isaac::ml::SampleAccumulator"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "simulation.interface/output/color",
+        "target": "training.interface/subgraph/color"
+      },
+      {
+        "source": "simulation.interface/output/segmentation",
+        "target": "training.interface/subgraph/segmentation"
+      },
+      {
+        "source": "training.interface/subgraph/teleport_command",
+        "target": "simulation.interface/input/teleport_command"
+      },
+      {
+        "source": "training.interface/subgraph/training_sample_image",
+        "target": "sample_accumulator/SampleAccumulator/image"
+      },
+      {
+        "source": "training.interface/subgraph/training_sample_segmentation",
+        "target": "sample_accumulator/SampleAccumulator/segmentation"
+      }
+    ]
+  },
+  "config_files": [
+    "packages/freespace_dnn/apps/freespace_dnn_training_unity3d_medium_warehouse.config.json"
+  ]
+}

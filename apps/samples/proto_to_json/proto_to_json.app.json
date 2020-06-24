@@ -1,0 +1,173 @@
+{
+  "name": "proto_to_json",
+  "modules": [
+    "message_generators",
+    "json"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "for_color_camera_proto",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "CameraGenerator",
+            "type": "isaac::message_generators::CameraGenerator"
+          },
+          {
+            "name": "ProtoToJson",
+            "type": "isaac::alice::ProtoToJson"
+          },
+          {
+            "name": "JsonWriter",
+            "type": "isaac::json::JsonWriter"
+          }
+        ]
+      },
+      {
+        "name": "for_range_scan_proto",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "RangeScanGenerator",
+            "type": "isaac::message_generators::RangeScanGenerator"
+          },
+          {
+            "name": "ProtoToJson",
+            "type": "isaac::alice::ProtoToJson"
+          },
+          {
+            "name": "JsonWriter",
+            "type": "isaac::json::JsonWriter"
+          }
+        ]
+      },
+      {
+        "name": "for_differential_base_state_proto",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "DifferentialBaseStateGenerator",
+            "type": "isaac::message_generators::DifferentialBaseStateGenerator"
+          },
+          {
+            "name": "ProtoToJson",
+            "type": "isaac::alice::ProtoToJson"
+          },
+          {
+            "name": "JsonWriter",
+            "type": "isaac::json::JsonWriter"
+          }
+        ]
+      },
+      {
+        "name": "for_differential_base_control_proto",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "DifferentialBaseControlGenerator",
+            "type": "isaac::message_generators::DifferentialBaseControlGenerator"
+          },
+          {
+            "name": "ProtoToJson",
+            "type": "isaac::alice::ProtoToJson"
+          },
+          {
+            "name": "JsonWriter",
+            "type": "isaac::json::JsonWriter"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "for_color_camera_proto/CameraGenerator/color_left",
+        "target": "for_color_camera_proto/ProtoToJson/proto"
+      },
+      {
+        "source": "for_color_camera_proto/ProtoToJson/json",
+        "target": "for_color_camera_proto/JsonWriter/raw_json"
+      },
+      {
+        "source": "for_range_scan_proto/RangeScanGenerator/scan",
+        "target": "for_range_scan_proto/ProtoToJson/proto"
+      },
+      {
+        "source": "for_range_scan_proto/ProtoToJson/json",
+        "target": "for_range_scan_proto/JsonWriter/raw_json"
+      },
+      {
+        "source": "for_differential_base_state_proto/DifferentialBaseStateGenerator/state",
+        "target": "for_differential_base_state_proto/ProtoToJson/proto"
+      },
+      {
+        "source": "for_differential_base_state_proto/ProtoToJson/json",
+        "target": "for_differential_base_state_proto/JsonWriter/raw_json"
+      } ,
+      {
+        "source": "for_differential_base_control_proto/DifferentialBaseControlGenerator/command",
+        "target": "for_differential_base_control_proto/ProtoToJson/proto"
+      },
+      {
+        "source": "for_differential_base_control_proto/ProtoToJson/json",
+        "target": "for_differential_base_control_proto/JsonWriter/raw_json"
+      }
+    ]
+  },
+  "config": {
+    "for_color_camera_proto": {
+      "JsonWriter": {
+        "filename": "/tmp/color_camera_proto.json",
+        "indent": 2
+      },
+      "CameraGenerator": {
+        "tick_period": "1Hz"
+      }
+    },
+    "for_range_scan_proto": {
+      "JsonWriter": {
+        "filename": "/tmp/range_scan_proto.json",
+        "indent": 2
+      },
+      "RangeScanGenerator": {
+        "segments": [
+          [ [-100.0, 0.0], [100.0, 0.0] ],
+          [ [   0.0, 0.0], [ 20.0, 2.0] ]
+        ],
+        "tick_period": "1Hz"
+      }
+    },
+    "for_differential_base_state_proto": {
+      "JsonWriter": {
+        "filename": "/tmp/differential_base_state_proto.json",
+        "indent": 2
+      },
+      "DifferentialBaseStateGenerator": {
+        "tick_period": "1Hz"
+      }
+    },
+    "for_differential_base_control_proto": {
+      "JsonWriter": {
+        "filename": "/tmp/differential_base_control_proto.json",
+        "indent": 2
+      },
+      "DifferentialBaseControlGenerator": {
+        "linear_speed": 0.8,
+        "angular_speed": -0.1,
+        "tick_period": "1Hz"
+      }
+    }
+  }
+}

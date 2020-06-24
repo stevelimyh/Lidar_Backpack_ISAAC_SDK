@@ -1,0 +1,55 @@
+{
+  "name": "audio_capture",
+  "modules": ["audio"],
+  "graph": {
+    "nodes": [
+      {
+        "name": "audiocapture",
+        "components": [
+          {
+            "name": "ml",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.audio.AudioCapture",
+            "type": "isaac::audio::AudioCapture"
+          }
+        ]
+      },
+      {
+        "name": "audio_data_capture",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.audio.SaveAudioToFile",
+            "type": "isaac::audio::SaveAudioToFile"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "audiocapture/isaac.audio.AudioCapture/audio_capture",
+        "target": "audio_data_capture/isaac.audio.SaveAudioToFile/audio"
+      }
+    ]
+  },
+  "config": {
+    "audiocapture": {
+      "isaac.audio.AudioCapture": {
+        "sample_rate": 16000,
+        "num_channels": 6,
+        "audio_frame_in_milliseconds": 100,
+        "ticks_per_frame": 5
+      }
+    },
+    "audio_data_capture": {
+      "isaac.audio.SaveAudioToFile": {
+        "filepath": "/tmp/audio-out-f32-16k.pcm"
+      }
+    }
+  }
+}

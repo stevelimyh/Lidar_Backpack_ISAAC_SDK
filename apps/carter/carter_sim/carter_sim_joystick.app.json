@@ -1,0 +1,60 @@
+{
+  "name": "carter_sim_joystick",
+  "modules": [
+    "viewers"
+  ],
+  "config": {
+    "imu_odometry.odometry": {
+      "DifferentialBaseWheelImuOdometry": {
+        "use_imu": false
+      }
+    },
+    "shared_robot_model": {
+      "DifferentialBaseModel": {
+        "robot_radius": 0.5,
+        "base_length": 0.534,
+        "wheel_radius": 0.24
+      }
+    }
+  },
+  "graph": {
+    "nodes": [
+      {
+        "name": "imu_odometry",
+        "subgraph": "packages/navigation/apps/differential_base_imu_odometry.subgraph.json"
+      },
+      {
+        "name": "carter_sim",
+        "subgraph": "apps/carter/unreal_sim/carter_sim.subgraph.json"
+      },
+      {
+        "name": "commander",
+        "subgraph": "packages/navigation/apps/differential_base_commander.subgraph.json"
+      },
+      {
+        "name": "shared_robot_model",
+        "components": [
+          {
+            "name": "RangeScanModel",
+            "type": "isaac::navigation::RangeScanModelFlatloc"
+          },
+          {
+            "name": "DifferentialBaseModel",
+            "type": "isaac::planner::DifferentialBaseModel"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "carter_sim.subgraph/interface/diff_base_state",
+        "target": "imu_odometry.subgraph/interface/state"
+      },
+      {
+        "source": "commander.subgraph/interface/command",
+        "target": "carter_sim.subgraph/interface/diff_base_command"
+      }
+    ]
+  }
+}
+

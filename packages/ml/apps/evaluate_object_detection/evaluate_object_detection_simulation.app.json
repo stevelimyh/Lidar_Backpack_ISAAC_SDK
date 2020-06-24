@@ -1,0 +1,187 @@
+{
+  "name": "evaluate_object_detection",
+  "modules": [
+    "ml",
+    "ml:evaluation",
+    "viewers"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "simulation",
+        "subgraph": "packages/navsim/apps/navsim_training.subgraph.json"
+      },
+      {
+        "name": "detect_net_inference",
+        "subgraph": "packages/detect_net/apps/detect_net_inference.subgraph.json"
+      },
+      {
+        "name": "ground_truth_bbox_viewer",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "viewer",
+            "type": "isaac::viewers::DetectionsViewer"
+          }
+        ]
+      },
+      {
+        "name": "detection_comparer",
+        "components": [
+          {
+            "name": "ml",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.ml.DetectionComparer",
+            "type": "isaac::ml::DetectionComparer"
+          }
+        ]
+      },
+      {
+        "name": "metrics_aggregator",
+        "components": [
+          {
+            "name": "ml",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.ml.ConfusionMatrixAggregator",
+            "type": "isaac::ml::ConfusionMatrixAggregator"
+          }
+        ]
+      },
+      {
+        "name": "color_camera_viewer",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.viewers.ColorCameraViewer",
+            "type": "isaac::viewers::ColorCameraViewer"
+          }
+        ]
+      },
+      {
+        "name": "object_detection_metrics_verifier",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.alice.PyCodelet",
+            "type": "isaac::alice::PyCodelet"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "simulation.interface/output/bounding_boxes",
+        "target": "detection_comparer/isaac.ml.DetectionComparer/ground_truth_detection"
+      },
+      {
+        "source": "simulation.interface/output/bounding_boxes",
+        "target": "ground_truth_bbox_viewer/viewer/detections"
+      },
+      {
+        "source": "simulation.interface/output/color",
+        "target": "detect_net_inference.subgraph/interface/image"
+      },
+      {
+        "source": "simulation.interface/output/color",
+        "target": "color_camera_viewer/isaac.viewers.ColorCameraViewer/color_listener"
+      },
+      {
+        "source": "detect_net_inference.subgraph/interface/detections",
+        "target": "detection_comparer/isaac.ml.DetectionComparer/predicted_detection"
+      },
+      {
+        "source": "detection_comparer/isaac.ml.DetectionComparer/metrics",
+        "target": "metrics_aggregator/isaac.ml.ConfusionMatrixAggregator/sample_metrics"
+      },
+      {
+        "source": "metrics_aggregator/isaac.ml.ConfusionMatrixAggregator/accumulated_metrics",
+        "target": "object_detection_metrics_verifier/isaac.alice.PyCodelet/object_detection_metrics"
+      }
+    ]
+  },
+  "config": {
+    "simulation.bounding_boxes": {
+      "conversion": {
+        "min_bbox_size": 30
+      }
+    },
+    "detect_net_inference.detection_decoder": {
+      "isaac.detect_net.DetectNetDecoder": {
+        "labels": [
+          "Dolly"
+        ]
+      }
+    },
+    "detect_net_inference.detection_viewer": {
+      "isaac.viewers.DetectionsViewer": {
+        "enable_labels": false
+      }
+    },
+    "ground_truth_bbox_viewer": {
+      "viewer": {
+        "enable_labels": false,
+        "border_background_color": [0, 0, 0],
+        "border_foreground_color": [0, 0, 0]
+      }
+    },
+    "detection_comparer": {
+      "isaac.ml.DetectionComparer": {
+        "class_names": [
+          "Dolly"
+        ]
+      }
+    },
+    "metrics_aggregator": {
+      "isaac.ml.ConfusionMatrixAggregator": {
+        "slice_index": 6
+      }
+    },
+    "object_detection_metrics_verifier": {
+      "isaac.alice.PyCodelet": {
+        "class_names": [
+          "Dolly"
+        ]
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "port": 3000,
+        "ui_config": {
+          "windows": {
+            "Object Detection Test: Detections": {
+              "renderer": "2d",
+              "dims": {
+                "width": 500,
+                "height": 500
+              },
+              "channels": [
+                {
+                  "name": "evaluate_object_detection/color_camera_viewer/isaac.viewers.ColorCameraViewer/Color"
+                },
+                {
+                  "name": "evaluate_object_detection/detect_net_inference.detection_viewer/isaac.viewers.DetectionsViewer/detections"
+                },
+                {
+                  "name": "evaluate_object_detection/ground_truth_bbox_viewer/viewer/detections"
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

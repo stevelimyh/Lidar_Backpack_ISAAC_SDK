@@ -1,0 +1,85 @@
+{
+    "name": "record_dummy",
+    "modules": [
+        "message_generators"
+    ],
+    "graph": {
+        "nodes": [
+            {
+                "name": "lidar_generator",
+                "components": [
+                    {
+                        "name": "message_ledger",
+                        "type": "isaac::alice::MessageLedger"
+                    },
+                    {
+                        "name": "range_scan_generator",
+                        "type": "isaac::message_generators::RangeScanGenerator"
+                    }
+                ]
+            },
+            {
+                "name": "camera_generator",
+                "components": [
+                    {
+                        "name": "message_ledger",
+                        "type": "isaac::alice::MessageLedger"
+                    },
+                    {
+                        "name": "camera_generator",
+                        "type": "isaac::message_generators::CameraGenerator"
+                    }
+                ]
+            },
+            {
+                "name": "imu_generator",
+                "subgraph": "apps/record_dummy/imu_generator.subgraph.json"
+            },
+            {
+                "name": "record",
+                "subgraph": "packages/record_replay/apps/record.subgraph.json"
+            }
+
+        ],
+        "edges": [
+            {
+                "source": "lidar_generator/range_scan_generator/scan" ,
+                "target": "record.interface/input/scan"
+            },
+            {
+                "source": "camera_generator/camera_generator/color_left" ,
+                "target": "record.interface/input/color_left"
+            },
+            {
+                "source": "camera_generator/camera_generator/color_right" ,
+                "target": "record.interface/input/color_right"
+            },
+            {
+                "source": "camera_generator/camera_generator/depth" ,
+                "target": "record.interface/input/depth"
+            },
+            {
+                "source": "imu_generator.subgraph/interface/imu_raw" ,
+                "target": "record.interface/input/imu_raw"
+            }
+        ]
+    },
+    "config": {
+        "record.interface": {
+            "input": {
+              "start_recording_automatically": false
+            }
+          },
+          "lidar_generator": {
+              "range_scan_generator": {
+                  "num_slices_per_message": 4,
+                  "tick_period": "0.5s"
+              }
+          },
+          "camera_generator": {
+              "camera_generator": {
+                  "tick_period": "0.5s"
+              }
+          }
+    }
+}

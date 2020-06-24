@@ -1,0 +1,158 @@
+{
+  "name": "imu",
+  "modules": [
+    "imu"
+  ],
+  "config": {
+    "imu": {
+      "iio_bmi160": {
+        "i2c_device_id": 1,
+        "tick_period": "100Hz"
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "port": 3000,
+        "ui_config": {
+          "windows": {
+            "imu - CorrectedAngularVelocity": {
+              "renderer": "plot",
+              "dims": {
+                "width": 600,
+                "height": 600
+              },
+              "channels": [
+                {
+                  "name": "imu/imu/imu_corrector/CorrectedAngularVelocity.x"
+                },
+                {
+                  "name": "imu/imu/imu_corrector/CorrectedAngularVelocity.y"
+                },
+                {
+                  "name": "imu/imu/imu_corrector/CorrectedAngularVelocity.z"
+                }
+              ]
+            },
+            "imu - CorrectedLinearAcceleration": {
+              "renderer": "plot",
+              "dims": {
+                "width": 600,
+                "height": 600
+              },
+              "channels": [
+                {
+                  "name": "imu/imu/imu_corrector/CorrectedLinearAcceleration.x"
+                },
+                {
+                  "name": "imu/imu/imu_corrector/CorrectedLinearAcceleration.y"
+                },
+                {
+                  "name": "imu/imu/imu_corrector/CorrectedLinearAcceleration.z"
+                }
+              ]
+            },
+            "imu - RawAngularVelocity": {
+              "renderer": "plot",
+              "dims": {
+                "width": 600,
+                "height": 600
+              },
+              "channels": [
+                {
+                  "name": "imu/imu/imu_corrector/RawAngularVelocity.x"
+                },
+                {
+                  "name": "imu/imu/imu_corrector/RawAngularVelocity.y"
+                },
+                {
+                  "name": "imu/imu/imu_corrector/RawAngularVelocity.z"
+                }
+              ]
+            },
+            "imu - RawLinearAcceleration": {
+              "renderer": "plot",
+              "dims": {
+                "width": 600,
+                "height": 600
+              },
+              "channels": [
+                {
+                  "name": "imu/imu/imu_corrector/RawLinearAcceleration.x"
+                },
+                {
+                  "name": "imu/imu/imu_corrector/RawLinearAcceleration.y"
+                },
+                {
+                  "name": "imu/imu/imu_corrector/RawLinearAcceleration.z"
+                }
+              ]
+            },
+            "imu - BiasLinearAcceleration": {
+              "renderer": "plot",
+              "dims": {
+                "width": 600,
+                "height": 600
+              },
+              "channels": [
+                {
+                  "name": "imu/imu/imu_corrector/BiasLinearAcceleration.x"
+                },
+                {
+                  "name": "imu/imu/imu_corrector/BiasLinearAcceleration.y"
+                },
+                {
+                  "name": "imu/imu/imu_corrector/BiasLinearAcceleration.z"
+                }
+              ]
+            },
+            "imu - BiasAngularVelocity": {
+              "renderer": "plot",
+              "dims": {
+                "width": 600,
+                "height": 600
+              },
+              "channels": [
+                {
+                  "name": "imu/imu/imu_corrector/BiasAngularVelocity.x"
+                },
+                {
+                  "name": "imu/imu/imu_corrector/BiasAngularVelocity.y"
+                },
+                {
+                  "name": "imu/imu/imu_corrector/BiasAngularVelocity.z"
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "graph": {
+    "nodes": [
+      {
+        "name": "imu",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "iio_bmi160",
+            "type": "isaac::imu::IioBmi160"
+          },
+          {
+            "name": "imu_corrector",
+            "type": "isaac::imu::ImuCorrector"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "imu/iio_bmi160/imu_raw",
+        "target": "imu/imu_corrector/raw"
+      }
+    ]
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "scene": "warehouse",
+  "description": "Small warehouse scene with TurtleBot 3 Waffle Pi robot",
+  "robots": [
+    {
+      "prefab": "Turtlebot3WafflePi",
+      "name": "robot",
+      "node": "navsim",
+      "pose": [1.0, 0, 0, 0.0, -8.36, -4.89, 0.0]
+    }
+  ]
+}

@@ -1,0 +1,95 @@
+{
+  "modules": [
+    "map",
+    "planner"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "subgraph",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "interface",
+            "type": "isaac::alice::Subgraph"
+          }
+        ]
+      },
+      {
+        "start_order": -100,
+        "name": "kinematic_tree",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "KinematicTree",
+            "type": "isaac::map::KinematicTree"
+          }
+        ]
+      },
+      {
+        "name": "local_plan",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "MultiJointLqrPlanner",
+            "type": "isaac::planner::MultiJointLqrPlanner"
+          }
+        ]
+      },
+      {
+        "name": "controller",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "MultiJointController",
+            "type": "isaac::planner::MultiJointController"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "subgraph/interface/joint_state",
+        "target": "local_plan/MultiJointLqrPlanner/starting_state"
+      },
+      {
+        "source": "subgraph/interface/joint_target",
+        "target": "local_plan/MultiJointLqrPlanner/target_state"
+      },
+      {
+        "source": "local_plan/MultiJointLqrPlanner/plan",
+        "target": "controller/MultiJointController/plan"
+      },
+      {
+        "source": "controller/MultiJointController/command",
+        "target": "subgraph/interface/joint_command"
+      }
+    ]
+  },
+  "config": {
+    "local_plan": {
+      "MultiJointLqrPlanner": {
+        "tick_period": "10Hz",
+        "kinematic_tree": "$(fullname kinematic_tree)"
+      }
+    },
+    "controller": {
+      "MultiJointController": {
+        "tick_period": "100Hz",
+        "kinematic_tree": "$(fullname kinematic_tree)"
+      }
+    }
+  }
+}

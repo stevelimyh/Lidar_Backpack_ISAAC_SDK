@@ -1,0 +1,127 @@
+{
+  "modules": [
+    "ml",
+    "navsim"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "interface",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "Subgraph",
+            "type": "isaac::alice::Subgraph"
+          },
+          {
+            "name": "TcpSubscriber",
+            "type": "isaac::alice::TcpSubscriber"
+          },
+          {
+            "name": "TcpPublisher",
+            "type": "isaac::alice::TcpPublisher"
+          },
+          {
+            "name": "TimeSynchronizer",
+            "type": "isaac::alice::TimeSynchronizer"
+          }
+        ]
+      },
+      {
+        "name": "scenario_manager",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "ScenarioManager",
+            "type": "isaac::navsim::ScenarioManager"
+          }
+        ]
+      },
+      {
+        "name": "encoder_bounding_boxes",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "LabelToBoundingBox",
+            "type": "isaac::ml::LabelToBoundingBox"
+          }
+        ]
+      },
+      {
+        "name": "decoder_bounding_boxes",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "LabelToBoundingBox",
+            "type": "isaac::ml::LabelToBoundingBox"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "interface/TcpSubscriber/encoder_segmentation",
+        "target": "encoder_bounding_boxes/LabelToBoundingBox/segmentation"
+      },
+      {
+        "source": "encoder_bounding_boxes/LabelToBoundingBox/detections",
+        "target": "interface/Subgraph/encoder_bounding_boxes"
+      },
+      {
+        "source": "interface/TcpSubscriber/decoder_segmentation",
+        "target": "decoder_bounding_boxes/LabelToBoundingBox/segmentation"
+      },
+      {
+        "source": "decoder_bounding_boxes/LabelToBoundingBox/detections",
+        "target": "interface/Subgraph/decoder_bounding_boxes"
+      },
+      {
+        "source": "scenario_manager/ScenarioManager/scenario_control",
+        "target": "interface/TcpPublisher/scenario_control"
+      },
+      {
+        "source": "scenario_manager/ScenarioManager/robot",
+        "target": "interface/TcpPublisher/scenario_actors"
+      },
+      {
+        "source": "interface/TcpSubscriber/scenario_reply",
+        "target": "scenario_manager/ScenarioManager/scenario_reply"
+      }
+    ]
+  },
+  "config": {
+    "interface": {
+      "TcpSubscriber": {
+        "port": 55000,
+        "host": "localhost"
+      },
+      "TcpPublisher": {
+        "port": 55001
+      }
+    },
+    "encoder_bounding_boxes": {
+      "LabelToBoundingBox": {
+        "resolution": 2,
+        "min_bbox_size": 20
+      }
+    },
+    "decoder_bounding_boxes": {
+      "LabelToBoundingBox": {
+        "resolution": 2,
+        "min_bbox_size": 20
+      }
+    }
+  }
+}

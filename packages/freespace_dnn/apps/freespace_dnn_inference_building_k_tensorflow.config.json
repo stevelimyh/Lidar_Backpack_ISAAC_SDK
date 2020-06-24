@@ -1,0 +1,52 @@
+{
+  "inference_behavior": {
+    "SelectorBehavior": {
+      "desired_behavior": "tensorflow"
+    }
+  },
+  "color_camera_encoder": {
+    "ColorCameraEncoderCpu": {
+      "rows": 256,
+      "cols": 512
+    }
+  },
+  "tensor_reshape_after_image_encoder": {
+    "TensorReshape": {
+      "output_tensor_dimensions": [1, 256, 512, 3]
+    }
+  },
+  "tensorflow_inference": {
+    "TensorflowInference": {
+      "model_file_path": "<path_to_model.pb>",
+      "config_file_path": "external/path_segmentation_pretrained_models/allow_growth.cfg",
+      "input_tensor_info": [
+        {
+          "ops_name": "input",
+          "index": 0,
+          "dims": [1, 256, 512, 3]
+        }
+      ],
+      "output_tensor_info": [
+        {
+          "ops_name": "prediction/truediv",
+          "channel": "output",
+          "index": 0,
+          "dims": [1, 256, 512, 7]
+        }
+      ]
+    }
+  },
+  "viewer": {
+    "RawSegmentationViewer": {
+      "tile_columns": 3
+    },
+    "DiscreteSegmentationViewer": {
+      "range": [-1.0, 5.0]
+    }
+  },
+  "tensor_reshape_before_segmentation_decoder": {
+    "TensorReshape": {
+      "output_tensor_dimensions": [256, 512, 7]
+    }
+  }
+}

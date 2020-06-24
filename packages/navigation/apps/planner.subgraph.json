@@ -1,0 +1,209 @@
+{
+  "modules": [
+    "behavior_tree",
+    "navigation",
+    "planner"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "planner_behavior",
+        "components": [
+          {
+            "name": "NodeGroup",
+            "type": "isaac::behavior_tree::NodeGroup"
+          },
+          {
+            "name": "ParallelBehavior",
+            "type": "isaac::behavior_tree::ParallelBehavior"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "planner_switch_behavior",
+        "components": [
+          {
+            "name": "NodeGroup",
+            "type": "isaac::behavior_tree::NodeGroup"
+          },
+          {
+            "name": "SwitchBehavior",
+            "type": "isaac::behavior_tree::SwitchBehavior"
+          }
+        ]
+      },
+      {
+        "name": "subgraph",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "interface",
+            "type": "isaac::alice::Subgraph"
+          }
+        ]
+      },
+      {
+        "name": "pose2_graph_planner",
+        "components": [
+          {
+            "name": "Pose2GraphPlanner",
+            "type": "isaac::planner::Pose2GraphPlanner"
+          },
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "global_plan",
+        "components": [
+          {
+            "name": "isaac.planner.GlobalPlanner",
+            "type": "isaac::planner::GlobalPlanner"
+          },
+          {
+            "name": "random",
+            "type": "isaac::alice::Random"
+          },
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "global_plan_map",
+        "components": [
+          {
+            "name": "isaac.navigation.OccupancyToBinaryMap",
+            "type": "isaac::navigation::OccupancyToBinaryMap"
+          },
+          {
+            "name": "isaac.navigation.BinaryToDistanceMap",
+            "type": "isaac::navigation::BinaryToDistanceMap"
+          },
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "global_plan_smoother",
+        "components": [
+          {
+            "name": "smoother",
+            "type": "isaac::planner::GlobalPlanSmoother"
+          },
+          {
+            "name": "random",
+            "type": "isaac::alice::Random"
+          },
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          }
+        ],
+        "disable_automatic_start": true
+      }
+    ],
+    "edges": [
+      {
+        "source": "subgraph/interface/goal",
+        "target": "global_plan/isaac.planner.GlobalPlanner/goal"
+      },
+      {
+        "source": "subgraph/interface/goal",
+        "target": "pose2_graph_planner/Pose2GraphPlanner/goal"
+      },
+      {
+        "source": "pose2_graph_planner/Pose2GraphPlanner/plan",
+        "target": "subgraph/interface/plan"
+      },
+      {
+        "source": "global_plan_map/isaac.navigation.OccupancyToBinaryMap/binary_map",
+        "target": "global_plan_map/isaac.navigation.BinaryToDistanceMap/binary_map"
+      },
+      {
+        "source": "subgraph/interface/local_map_lattice",
+        "target": "global_plan_map/isaac.navigation.BinaryToDistanceMap/binary_map_lattice"
+      },
+      {
+        "source": "subgraph/interface/local_map",
+        "target": "global_plan_map/isaac.navigation.OccupancyToBinaryMap/occupancy_map"
+      },
+      {
+        "source": "subgraph/interface/local_map_lattice",
+        "target": "global_plan_map/isaac.navigation.OccupancyToBinaryMap/occupancy_map_lattice"
+      },
+      {
+        "source": "global_plan/isaac.planner.GlobalPlanner/plan",
+        "target": "global_plan_smoother/smoother/rough_plan"
+      },
+      {
+        "source": "global_plan_smoother/smoother/smooth_plan",
+        "target": "subgraph/interface/plan"
+      },
+      {
+        "source": "global_plan_smoother/smoother/smooth_plan",
+        "target": "global_plan/isaac.planner.GlobalPlanner/previous_path"
+      }
+    ]
+  },
+  "config": {
+    "planner_behavior": {
+      "NodeGroup": {
+        "node_names": [
+          "$(fullname global_plan_smoother)",
+          "$(fullname global_plan_map)",
+          "$(fullname global_plan)"
+        ]
+      }
+    },
+    "planner_switch_behavior": {
+      "SwitchBehavior": {
+        "desired_behavior": "$(fullname planner_behavior)"
+      },
+      "NodeGroup": {
+        "node_names": [
+          "$(fullname planner_behavior)",
+          "$(fullname pose2_graph_planner)"
+        ]
+      }
+    },
+    "global_plan_map": {
+      "isaac.navigation.OccupancyToBinaryMap": {
+        "is_optimistic": true,
+        "mean_threshold": 196,
+        "standard_deviation_threshold": 96
+      },
+      "isaac.navigation.BinaryToDistanceMap": {
+        "obstacle_name": "global_plan_local_map",
+        "compute_distance_inside": false,
+        "blur_factor": 0,
+        "max_distance": 2.0
+      }
+    },
+    "global_plan": {
+      "isaac.planner.GlobalPlanner": {
+        "robot_model": "navigation.shared_robot_model",
+        "dynamic_obstacle_names": ["global_plan_local_map"],
+        "tick_period": "1Hz"
+      }
+    },
+    "pose2_graph_planner": {
+      "Pose2GraphPlanner": {
+        "robot_model": "navigation.shared_robot_model",
+        "tick_period": "1Hz"
+      }
+    }
+  }
+}

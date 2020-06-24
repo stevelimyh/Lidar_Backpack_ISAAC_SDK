@@ -1,0 +1,519 @@
+{
+  "graph": {
+    "nodes": [
+      {
+        "name": "map",
+        "start_order": -100,
+        "components": [
+          {
+            "name": "isaac.map.Map",
+            "type": "isaac::map::Map"
+          },
+          {
+            "name": "map",
+            "type": "isaac::navigation::NavigationMap"
+          },
+          {
+            "name": "occupancy",
+            "type": "isaac::map::OccupancyGridMapLayer"
+          },
+          {
+            "name": "waypoints",
+            "type": "isaac::map::WaypointMapLayer"
+          },
+          {
+            "name": "restricted_area",
+            "type": "isaac::map::PolygonMapLayer"
+          },
+          {
+            "name": "unity_initializer",
+            "type": "isaac::alice::PoseInitializer"
+          }
+        ]
+      }
+    ],
+    "edges": []
+  },
+  "config": {
+    "simulation.scenario_manager" : {
+      "scenario_manager": {
+        "scene": "Factory01"
+      }
+    },
+    "map": {
+      "occupancy": {
+        "filename": "apps/assets/maps/virtual_factory_1.png",
+        "cell_size": 0.05
+      },
+      "waypoints": {
+        "execution_queue_limit": 1,
+        "waypoints": {
+          "robot_home": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [7.0, 5.0, 0.0],
+              "rotation": {"yaw_radians": -3.142}
+            },
+            "radius": 0.3
+          },
+          "pickup_1": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [42.142, 109.205, 0.000],
+              "rotation": {"yaw_radians": 0.000}
+            },
+            "radius": 0.3
+          },
+          "pickup_face_dolly_1": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [39.142, 109.205, 0.000],
+              "rotation": {"yaw_radians": 0.000}
+            },
+            "radius": 0.3
+          },
+          "pickup_2": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [42.142, 92.205, 0.000],
+              "rotation": {"yaw_radians": 0.000}
+            },
+            "radius": 0.3
+          },
+          "pickup_face_dolly_2": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [39.142, 92.205, 0.000],
+              "rotation": {"yaw_radians": 0.000}
+            },
+            "radius": 0.3
+          },
+          "pickup_3": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [42.142, 31.800, 0.000],
+              "rotation": {"yaw_radians": 0.000}
+            },
+            "radius": 0.3
+          },
+          "pickup_face_dolly_3": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [39.142, 31.800, 0.000],
+              "rotation": {"yaw_radians": 0.000}
+            },
+            "radius": 0.3
+          },
+          "pickup_4": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [42.142, 28.205, 0.000],
+              "rotation": {"yaw_radians": 0.000}
+            },
+            "radius": 0.3
+          },
+          "pickup_face_dolly_4": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [39.142, 28.205, 0.000],
+              "rotation": {"yaw_radians": 0.000}
+            },
+            "radius": 0.3
+          },
+          "pickup_5": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [42.142, 20.500, 0.000],
+              "rotation": {"yaw_radians": 0.000}
+            },
+            "radius": 0.3
+          },
+          "pickup_face_dolly_5": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [39.142, 20.500, 0.000],
+              "rotation": {"yaw_radians": 0.000}
+            },
+            "radius": 0.3
+          },
+          "pickup_6": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [42.142, 17.205, 0.000],
+              "rotation": {"yaw_radians": 0.000}
+            },
+            "radius": 0.3
+          },
+          "pickup_face_dolly_6": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [39.142, 17.205, 0.000],
+              "rotation": {"yaw_radians": 0.000}
+            },
+            "radius": 0.3
+          },
+          "pickup_7": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [8.000, 16.000, 0.000],
+              "rotation": {"yaw_radians": 3.142}
+            },
+            "radius": 0.3
+          },
+          "pickup_face_dolly_7": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [11.000, 16.000, 0.000],
+              "rotation": {"yaw_radians": 3.142}
+            },
+            "radius": 0.3
+          },
+          "pickup_8": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [8.000, 18.000, 0.000],
+              "rotation": {"yaw_radians": 3.142}
+            },
+            "radius": 0.3
+          },
+          "pickup_face_dolly_8": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [11.000, 18.000, 0.000],
+              "rotation": {"yaw_radians": 3.142}
+            },
+            "radius": 0.3
+          },
+          "pickup_9": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [8.000, 21.800, 0.000],
+              "rotation": {"yaw_radians": 3.142}
+            },
+            "radius": 0.3
+          },
+          "pickup_face_dolly_9": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [11.000, 21.800, 0.000],
+              "rotation": {"yaw_radians": 3.142}
+            },
+            "radius": 0.3
+          },
+          "pickup_10": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [8.000, 26.800, 0.000],
+              "rotation": {"yaw_radians": 3.142}
+            },
+            "radius": 0.3
+          },
+          "pickup_face_dolly_10": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [11.000, 26.800, 0.000],
+              "rotation": {"yaw_radians": 3.142}
+            },
+            "radius": 0.3
+          },
+          "pickup_11": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [8.000, 45.600, 0.000],
+              "rotation": {"yaw_radians": 3.142}
+            },
+            "radius": 0.3
+          },
+          "pickup_face_dolly_11": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [11.000, 45.600, 0.000],
+              "rotation": {"yaw_radians": 3.142}
+            },
+            "radius": 0.3
+          },
+          "pickup_12": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [8.000, 49.300, 0.000],
+              "rotation": {"yaw_radians": 3.142}
+            },
+            "radius": 0.3
+          },
+          "pickup_face_dolly_12": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [11.000, 49.300, 0.000],
+              "rotation": {"yaw_radians": 3.142}
+            },
+            "radius": 0.3
+          },
+          "dropoff_1": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [33.786, 96.970, 0.000],
+              "rotation": {"yaw_radians": 3.142}
+            },
+            "radius": 0.3
+          },
+          "dropoff_face_dolly_1": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [36.786, 96.970, 0.000],
+              "rotation": {"yaw_radians": 3.142}
+            },
+            "radius": 0.3
+          },
+          "dropoff_2": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [33.786, 94.920, 0.000],
+              "rotation": {"yaw_radians": 3.142}
+            },
+            "radius": 0.3
+          },
+          "dropoff_face_dolly_2": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [36.786, 94.920, 0.000],
+              "rotation": {"yaw_radians": 3.142}
+            },
+            "radius": 0.3
+          },
+          "dropoff_3": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [33.786, 92.980, 0.000],
+              "rotation": {"yaw_radians": 3.142}
+            },
+            "radius": 0.3
+          },
+          "dropoff_face_dolly_3": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [36.786, 92.980, 0.000],
+              "rotation": {"yaw_radians": 3.142}
+            },
+            "radius": 0.3
+          },
+          "dropoff_4": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [33.786, 90.910, 0.000],
+              "rotation": {"yaw_radians": 3.142}
+            },
+            "radius": 0.3
+          },
+          "dropoff_face_dolly_4": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [36.786, 90.910, 0.000],
+              "rotation": {"yaw_radians": 3.142}
+            },
+            "radius": 0.3
+          },
+          "dropoff_5": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [33.786, 78.892, 0.000],
+              "rotation": {"yaw_radians": 3.142}
+            },
+            "radius": 0.3
+          },
+          "dropoff_face_dolly_5": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [36.786, 78.892, 0.000],
+              "rotation": {"yaw_radians": 3.142}
+            },
+            "radius": 0.3
+          },
+          "dropoff_6": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [33.786, 75.796, 0.000],
+              "rotation": {"yaw_radians": 3.142}
+            },
+            "radius": 0.3
+          },
+          "dropoff_face_dolly_6": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [36.786, 75.796, 0.000],
+              "rotation": {"yaw_radians": 3.142}
+            },
+            "radius": 0.3
+          },
+          "dropoff_7": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [16.350, 26.600, 0.000],
+              "rotation": {"yaw_radians": 0.000}
+            },
+            "radius": 0.3
+          },
+          "dropoff_face_dolly_7": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [13.350, 26.600, 0.000],
+              "rotation": {"yaw_radians": 0.000}
+            },
+            "radius": 0.3
+          },
+          "dropoff_8": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [16.350, 28.380, 0.000],
+              "rotation": {"yaw_radians": 0.000}
+            },
+            "radius": 0.3
+          },
+          "dropoff_face_dolly_8": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [13.350, 28.380, 0.000],
+              "rotation": {"yaw_radians": 0.000}
+            },
+            "radius": 0.3
+          },
+          "dropoff_9": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [16.350, 30.256, 0.000],
+              "rotation": {"yaw_radians": 0.000}
+            },
+            "radius": 0.3
+          },
+          "dropoff_face_dolly_9": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [13.350, 30.256, 0.000],
+              "rotation": {"yaw_radians": 0.000}
+            },
+            "radius": 0.3
+          },
+          "dropoff_10": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [16.350, 32.256, 0.000],
+              "rotation": {"yaw_radians": 0.000}
+            },
+            "radius": 0.3
+          },
+          "dropoff_face_dolly_10": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [13.350, 32.256, 0.000],
+              "rotation": {"yaw_radians": 0.000}
+            },
+            "radius": 0.3
+          },
+          "dropoff_11": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [16.350, 34.456, 0.000],
+              "rotation": {"yaw_radians": 0.000}
+            },
+            "radius": 0.3
+          },
+          "dropoff_face_dolly_11": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [13.350, 34.456, 0.000],
+              "rotation": {"yaw_radians": 0.000}
+            },
+            "radius": 0.3
+          },
+          "dropoff_12": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [16.350, 44.256, 0.000],
+              "rotation": {"yaw_radians": 0.000}
+            },
+            "radius": 0.3
+          },
+          "dropoff_face_dolly_12": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [13.350, 44.256, 0.000],
+              "rotation": {"yaw_radians": 0.000}
+            },
+            "radius": 0.3
+          },
+          "dropoff_13": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [16.350, 67.586, 0.000],
+              "rotation": {"yaw_radians": 0.000}
+            },
+            "radius": 0.3
+          },
+          "dropoff_face_dolly_13": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [13.350, 67.586, 0.000],
+              "rotation": {"yaw_radians": 0.000}
+            },
+            "radius": 0.3
+          },
+          "dropoff_14": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [16.350, 75.856, 0.000],
+              "rotation": {"yaw_radians": 0.000}
+            },
+            "radius": 0.3
+          },
+          "dropoff_face_dolly_14": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [13.350, 75.856, 0.000],
+              "rotation": {"yaw_radians": 0.000}
+            },
+            "radius": 0.3
+          },
+          "dropoff_15": {
+            "color": [255.0, 0.0, 0.0],
+            "pose": {
+              "translation": [16.350, 78.856, 0.000],
+              "rotation": {"yaw_radians": 0.000}
+            },
+            "radius": 0.3
+          }
+        },
+        "dropoff_face_dolly_15": {
+          "color": [255.0, 0.0, 0.0],
+          "pose": {
+            "translation": [13.350, 78.856, 0.000],
+            "rotation": {"yaw_radians": 0.000}
+          },
+          "radius": 0.3
+        },
+        "tick_period": "1.0"
+      },
+      "restricted_area": {
+        "tick_period": "1.0",
+          "polygons": {
+            "assembly_line": {
+              "points": [
+                [19.0, 20.0], [19.0, 105.5], [31.0, 105.5], [31.0, 20.0]
+              ]
+            }
+          }
+      },
+      "unity_initializer": {
+        "lhs_frame": "world",
+        "rhs_frame": "unity",
+        "pose": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,150 @@
+{
+  "modules": [
+    "behavior_tree",
+    "message_generators",
+    "navigation",
+    "planner"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "subgraph",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "interface",
+            "type": "isaac::alice::Subgraph"
+          }
+        ]
+      },
+      {
+        "name": "lqr",
+        "components": [
+          {
+            "name": "isaac.planner.DifferentialBaseLqrPlanner",
+            "type": "isaac::planner::DifferentialBaseLqrPlanner"
+          },
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          }
+        ]
+      },
+      {
+        "name": "control",
+        "components": [
+          {
+            "name": "isaac.planner.DifferentialBaseControl",
+            "type": "isaac::planner::DifferentialBaseControl"
+          },
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          }
+        ]
+      },
+      {
+        "name": "stop",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "DifferentialBaseControlGenerator",
+            "type": "isaac::message_generators::DifferentialBaseControlGenerator"
+          }
+        ]
+      },
+      {
+        "name": "navigation_mode",
+        "components": [
+          {
+            "name": "isaac.navigation.GroupSelectorBehavior",
+            "type": "isaac::behavior_tree::deprecated::GroupSelectorBehavior"
+          },
+          {
+            "name": "isaac.alice.Behavior",
+            "type": "isaac::behavior_tree::deprecated::Behavior"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "lqr/isaac.planner.DifferentialBaseLqrPlanner/plan",
+        "target": "control/isaac.planner.DifferentialBaseControl/plan"
+      },
+      {
+        "source": "control/isaac.planner.DifferentialBaseControl/cmd",
+        "target": "subgraph/interface/command"
+      },
+      {
+        "source": "stop/DifferentialBaseControlGenerator/command",
+        "target": "subgraph/interface/command"
+      },
+      {
+        "source": "subgraph/interface/odometry",
+        "target": "lqr/isaac.planner.DifferentialBaseLqrPlanner/odometry"
+      },
+      {
+        "source": "subgraph/interface/plan",
+        "target": "lqr/isaac.planner.DifferentialBaseLqrPlanner/global_plan"
+      }
+    ]
+  },
+  "config": {
+    "navigation_mode": {
+      "isaac.alice.Behavior": {
+        "aliases": [
+          "lqr",
+          "control",
+          "stop"
+        ],
+        "nodes": [
+          "$(fullname lqr)",
+          "$(fullname control)",
+          "$(fullname stop)"
+        ]
+      },
+      "isaac.navigation.GroupSelectorBehavior": {
+        "behavior_map": {
+          "navigate": [
+            "lqr",
+            "control"
+          ],
+          "stop": [
+            "stop"
+          ]
+        },
+        "desired_behavior": "navigate",
+        "tick_period": "50ms"
+      }
+    },
+    "lqr": {
+      "isaac.planner.DifferentialBaseLqrPlanner": {
+        "robot_model": "shared_robot_model/SphericalRobotShapeComponent",
+        "max_speed": 0.65,
+        "num_controls": 50,
+        "obstacle_names": ["local_map", "map/restricted_area"],
+        "tick_period": "10Hz"
+      }
+    },
+    "control": {
+      "isaac.planner.DifferentialBaseControl": {
+        "tick_period": "100Hz",
+        "use_tick_time": true
+      }
+    },
+    "stop": {
+      "DifferentialBaseControlGenerator": {
+        "linear_speed": 0.0,
+        "angular_speed": 0.0,
+        "tick_period": "100Hz"
+      }
+    }
+  }
+}

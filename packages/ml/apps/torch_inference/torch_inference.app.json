@@ -1,0 +1,67 @@
+{
+  "name": "torch_inference",
+  "modules": [
+    "//packages/ml/apps/torch_inference:torch_inference_test_send_input",
+    "//packages/ml/apps/torch_inference:torch_inference_test_display_output",
+    "ml:torch"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "torch_inference_test",
+        "components": [
+          {
+            "name": "ml",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.TorchInferenceTestSendInput",
+            "type": "isaac::TorchInferenceTestSendInput"
+          },
+          {
+            "name": "isaac.TorchInferenceTestDisplayOutput",
+            "type": "isaac::TorchInferenceTestDisplayOutput"
+          }
+        ]
+      },
+      {
+        "name": "torch_model",
+        "components": [
+          {
+            "name": "ml",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.ml.TorchInference",
+            "type": "isaac::ml::TorchInference"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "torch_inference_test/isaac.TorchInferenceTestSendInput/test_input",
+        "target": "torch_model/isaac.ml.TorchInference/input"
+      },
+      {
+        "source": "torch_model/isaac.ml.TorchInference/output",
+        "target": "torch_inference_test/isaac.TorchInferenceTestDisplayOutput/test_output"
+      }
+    ]
+  },
+  "config": {
+    "torch_inference_test": {
+      "isaac.TorchInferenceTestSendInput": {
+        "input_value": 8.7,
+        "tick_period": "4s"
+      }
+    },
+    "torch_model": {
+      "isaac.ml.TorchInference": {
+        "model_file_path" : "external/torch_inference_test_assets/double-value-model.pt",
+        "message_time_to_live": 8.0
+      }
+    }
+  }
+}
+

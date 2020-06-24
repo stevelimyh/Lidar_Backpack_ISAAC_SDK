@@ -1,0 +1,51 @@
+{
+  "graph": {
+    "nodes": [
+      {
+        "name": "subgraph",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "interface",
+            "type": "isaac::alice::Subgraph"
+          }
+        ]
+      },
+      {
+        "name": "carter_sim",
+        "subgraph": "apps/carter/unreal_sim/carter_sim.subgraph.json"
+      },
+      {
+        "name": "scan_flattener",
+        "subgraph": "packages/navigation/apps/scan_flattener.subgraph.json"
+      }
+    ],
+    "edges": [
+      {
+        "source": "subgraph/interface/diff_base_command",
+        "target": "carter_sim.subgraph/interface/diff_base_command"
+      },
+      {
+        "source": "carter_sim.subgraph/interface/diff_base_state",
+        "target": "subgraph/interface/diff_base_state"
+      },
+      {
+        "source": "scan_flattener.subgraph/interface/flatscan",
+        "target": "subgraph/interface/flatscan"
+      },
+      {
+        "source": "carter_sim.subgraph/interface/scan",
+        "target": "scan_flattener.subgraph/interface/scan"
+      },
+      {
+        "source": "carter_sim.subgraph/interface/imu_raw",
+        "target": "subgraph/interface/imu_raw"
+      }
+    ]
+  },
+  "config": {
+  }
+}

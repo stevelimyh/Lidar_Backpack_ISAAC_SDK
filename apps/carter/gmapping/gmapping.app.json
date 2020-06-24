@@ -1,0 +1,44 @@
+{
+  "name": "gmapping",
+  "graph": {
+    "nodes": [
+      {
+        "name": "2d_carter",
+        "subgraph": "apps/carter/2d_carter.subgraph.json"
+      },
+      {
+        "name": "gmapping",
+        "subgraph": "packages/lidar_slam/apps/differential_base_gmapping.subgraph.json"
+      }
+    ],
+    "edges": [
+      {
+        "source": "2d_carter.subgraph/interface/flatscan",
+        "target": "gmapping.gmapping/GMapping/flatscan"
+      },
+      {
+        "source": "2d_carter.scan_flattener.scan_accumulator/isaac.perception.ScanAccumulator/fullscan",
+        "target": "gmapping.record.interface/input/fullscan"
+      },
+      {
+        "source": "2d_carter.subgraph/interface/diff_base_state",
+        "target": "gmapping.interface/Subgraph/base_state"
+      },
+      {
+        "source": "2d_carter.subgraph/interface/imu_raw",
+        "target": "gmapping.interface/Subgraph/imu_raw"
+      },
+      {
+        "source": "gmapping.interface/Subgraph/base_command",
+        "target": "2d_carter.subgraph/interface/diff_base_command"
+      }
+    ]
+  },
+  "config": {
+    "2d_carter.scan_flattener.range_scan_flattening": {
+      "isaac.perception.RangeScanFlattening": {
+        "pitch_fudge": 0.005
+      }
+    }
+  }
+}

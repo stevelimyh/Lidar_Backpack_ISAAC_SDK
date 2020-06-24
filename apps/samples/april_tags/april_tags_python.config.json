@@ -1,0 +1,21 @@
+{
+    "config": {
+      "websight": {
+        "WebsightServer": {
+          "port": 3000,
+          "ui_config": {
+            "windows": {
+              "Tags": {
+                "renderer": "2d",
+                "channels": [
+                  { "name": "april_tags_python/image_viewers/ColorCameraViewer/Color" , "active": true},
+                  { "name": "april_tags_python/april_tags_detection/FiducialsViewer/fiducials", "active": true }
+                ]
+              }
+
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,36 @@
+{
+    "name": "navsim_replay_gmap",
+    "graph": {
+      "nodes": [
+        {
+          "name": "gmapping",
+          "subgraph": "packages/lidar_slam/apps/differential_base_gmapping.subgraph.json"
+        },
+        {
+            "name": "replay",
+            "subgraph": "packages/record_replay/apps/replay.subgraph.json"
+        }
+      ],
+      "edges": [
+        {
+          "source": "replay.interface/output/flatscan",
+          "target": "gmapping.interface/Subgraph/flatscan"
+        },
+        {
+          "source": "replay.interface/output/base_state",
+          "target": "gmapping.interface/Subgraph/base_state"
+        },
+        {
+          "source": "replay.interface/output/imu_raw",
+          "target": "gmapping.interface/Subgraph/imu_raw"
+        }
+      ]
+    },
+    "config": {
+      "gmapping.odometry.odometry": {
+        "DifferentialBaseWheelImuOdometry": {
+          "use_imu": true
+        }
+      }
+    }
+  }

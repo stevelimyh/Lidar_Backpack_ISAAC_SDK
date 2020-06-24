@@ -1,0 +1,71 @@
+/*
+Copyright (c) 2018, NVIDIA CORPORATION. All rights reserved.
+
+NVIDIA CORPORATION and its licensors retain all intellectual property
+and proprietary rights in and to this software, related documentation
+and any modifications thereto. Any use, reproduction, disclosure or
+distribution of this software and related documentation without an express
+license agreement from NVIDIA CORPORATION is strictly prohibited.
+*/
+
+#__win-replay-window-time-slider .slider-track {
+  height: 0.1cm;
+  margin: auto;
+  border-radius: 0;
+}
+
+#__win-replay-window-time-slider .slider-selection {
+  background: #76b900;
+}
+
+#__win-replay-window-time-slider .slider-handle {
+  background: #76b900;
+}
+
+#__win-replay-window-time-slider .slider-track-high {
+  background: #999999;
+}
+
+.btn.btn-outline-isaac {
+  border-width: 0.2em;
+  border-color: #76b900;
+  border-radius: 8px;
+  background: transparent;
+}
+
+.btn.btn-sharp-isaac {
+  border-radius: 0;
+}
+
+.btn.btn-round-isaac {
+  border-radius: 100%;
+  border-width: 5px;
+}
+
+.btn.btn-static-isaac {
+  cursor: default;
+}
+
+.btn-success.btn-success-isaac {
+  background: #76b900;
+  border-color: #76b900;
+}
+
+.btn-danger.btn-danger-isaac {
+  background: #f44336;
+  border-color: #f44336;
+}
+
+.alert {
+  border: 0;
+}
+
+.alert-danger {
+  background: none;
+  color: #f44336
+}
+
+.alert-info {
+  background: none;
+  color: #999999;
+}

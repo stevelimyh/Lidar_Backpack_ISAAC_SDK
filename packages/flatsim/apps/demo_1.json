@@ -1,0 +1,100 @@
+{
+  "modules": [
+    "map",
+    "navigation"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "map",
+        "start_order": -100,
+        "components": [
+          {
+            "name": "isaac.map.Map",
+            "type": "isaac::map::Map"
+          },
+          {
+            "name": "map",
+            "type": "isaac::navigation::NavigationMap"
+          },
+          {
+            "name": "occupancy",
+            "type": "isaac::map::OccupancyGridMapLayer"
+          },
+          {
+            "name": "waypoints",
+            "type": "isaac::map::WaypointMapLayer"
+          },
+          {
+            "name": "restricted_area",
+            "type": "isaac::map::PolygonMapLayer"
+          }
+        ]
+      }
+    ]
+  },
+  "config": {
+    "map": {
+      "occupancy": {
+        "cell_size": 0.1,
+        "filename": "apps/assets/maps/nvidia_R_180306.png"
+      },
+      "waypoints": {
+        "vis_cell_size": 0.1,
+        "waypoints": {
+          "kitchen": {
+            "pose": [1,0,0,0,45.0,20.3,0],
+            "color": [255,128,0]
+          },
+          "atrium": {
+            "pose": [1,0,0,0,36.2,29.4,0],
+            "color": [32,220,64]
+          },
+          "david_desk": {
+            "pose": [1,0,0,0,39.3,15.9,0],
+            "color": [220,16,16],
+            "radius": 0.5
+          },
+          "column hallway": {
+            "pose": [1,0,0,0,16.9,19.5,0],
+            "color": [230,16,230],
+            "radius": 1.5
+          }
+        },
+        "tick_period": "1.0"
+      },
+      "restricted_area": {
+        "polygons": {
+          "atrium": {
+            "points": [
+              [30.4, 33.0],
+              [42.5, 31.0],
+              [43.3, 36.9],
+              [42.8, 36.9],
+              [42.0, 31.5],
+              [30.4, 33.5]
+            ]
+          }
+        },
+        "tick_period": "1.0"
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "port": 3000,
+        "assetroot": "external/isaac_assets",
+        "ui_config": {
+          "assets": {
+            "carter": {
+              "obj": "apps/assets/carter.obj",
+              "diffuse_map": "apps/assets/carter_albido.png",
+              "normal_map": "apps/assets/carter_normal.png",
+              "rotation": [-0.5, -0.5, 0.5, 0.5],
+              "scale": 0.01
+            }
+          }
+        }
+      }
+    }
+  }
+}

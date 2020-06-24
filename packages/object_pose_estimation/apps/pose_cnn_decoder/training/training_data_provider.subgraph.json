@@ -1,0 +1,211 @@
+{
+  "modules": [
+    "ml",
+    "object_pose_estimation",
+    "utils"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "interface",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "subgraph",
+            "type": "isaac::alice::Subgraph"
+          }
+        ]
+      },
+      {
+        "name": "simulation",
+        "subgraph": "packages/object_pose_estimation/apps/pose_cnn_decoder/training/pose_estimation_sim.subgraph.json"
+      },
+      {
+        "name": "encoder_color_camera_splitter",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "ColorCameraSplitter",
+            "type": "isaac::utils::ColorCameraProtoSplitter"
+          }
+        ]
+      },
+      {
+        "name": "encoder_crop_downsample",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "CropAndDownsample",
+            "type": "isaac::ml::ImageDetectionExtraction"
+          }
+        ]
+      },
+      {
+        "name": "rigid_bodies_convertor",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "RigidbodyToDetections3",
+            "type": "isaac::ml::RigidbodyToDetections3"
+          }
+        ]
+      },
+      {
+        "name": "detection3_convertor",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "PoseEncoder",
+            "type": "isaac::object_pose_estimation::PoseEncoder"
+          }
+        ]
+      },
+      {
+        "name": "detection_convertor",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "DetectionEncoder",
+            "type": "isaac::object_pose_estimation::BoundingBoxEncoder"
+          }
+        ]
+      },
+      {
+        "name": "decoder_segmentation_camera_splitter",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "SegmentationCameraSplitter",
+            "type": "isaac::utils::SegmentationCameraProtoSplitter"
+          }
+        ]
+      },
+      {
+        "name": "decoder_crop_downsample",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "CropAndDownsample",
+            "type": "isaac::ml::ImageDetectionExtraction"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "simulation.interface/output/encoder_color",
+        "target": "encoder_color_camera_splitter/ColorCameraSplitter/color_camera"
+      },
+      {
+        "source": "encoder_color_camera_splitter/ColorCameraSplitter/image",
+        "target": "encoder_crop_downsample/CropAndDownsample/image"
+      },
+      {
+        "source": "simulation.interface/subgraph/encoder_bounding_boxes",
+        "target": "encoder_crop_downsample/CropAndDownsample/detections"
+      },
+      {
+        "source": "encoder_crop_downsample/CropAndDownsample/tensor",
+        "target": "interface/subgraph/sample_encoder_image"
+      },
+      {
+        "source": "simulation.interface/output/bodies",
+        "target": "rigid_bodies_convertor/RigidbodyToDetections3/rigid_bodies"
+      },
+      {
+        "source": "rigid_bodies_convertor/RigidbodyToDetections3/detections",
+        "target": "detection3_convertor/PoseEncoder/detection3"
+      },
+      {
+        "source": "encoder_color_camera_splitter/ColorCameraSplitter/pinhole",
+        "target": "detection3_convertor/PoseEncoder/pinhole"
+      },
+      {
+        "source": "detection3_convertor/PoseEncoder/center_and_depth",
+        "target": "interface/subgraph/sample_center_and_depth"
+      },
+      {
+        "source": "detection3_convertor/PoseEncoder/rotation",
+        "target": "interface/subgraph/sample_rotation"
+      },
+      {
+        "source": "simulation.interface/subgraph/encoder_bounding_boxes",
+        "target": "detection_convertor/DetectionEncoder/detection"
+      },
+      {
+        "source": "detection_convertor/DetectionEncoder/tensor",
+        "target": "interface/subgraph/sample_detection"
+      },
+      {
+        "source": "simulation.interface/output/decoder_segmentation",
+        "target": "decoder_segmentation_camera_splitter/SegmentationCameraSplitter/segmentation_camera"
+      },
+      {
+        "source": "decoder_segmentation_camera_splitter/SegmentationCameraSplitter/class_labels",
+        "target": "decoder_crop_downsample/CropAndDownsample/image"
+      },
+      {
+        "source": "simulation.interface/subgraph/encoder_bounding_boxes",
+        "target": "decoder_crop_downsample/CropAndDownsample/detections"
+      },
+      {
+        "source": "decoder_crop_downsample/CropAndDownsample/tensor",
+        "target": "interface/subgraph/sample_decoder_image"
+      }
+    ]
+  },
+  "config": {
+    "encoder_crop_downsample": {
+      "CropAndDownsample": {
+        "downsample_size": [128, 128],
+        "pixel_normalization_mode": "Unit",
+        "tensor_index_order": "201"
+      }
+    },
+    "decoder_crop_downsample": {
+      "CropAndDownsample": {
+        "downsample_size": [128, 128],
+        "pixel_normalization_mode": "None"
+      }
+    },
+    "rigid_bodies_convertor": {
+      "RigidbodyToDetections3": {
+        "ref_frame_id": 0
+      }
+    },
+    "detection3_convertor": {
+      "Detection3Encoder": {
+        "class_names": ["Dolly"]
+      }
+    },
+    "detection_convertor": {
+      "DetectionEncoder": {
+        "center_out_of_frame_tolerance": 10
+      }
+    }
+  }
+}

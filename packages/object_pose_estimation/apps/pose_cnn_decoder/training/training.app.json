@@ -1,0 +1,232 @@
+{
+  "name": "pose_estimation_cnn_training",
+  "modules": [
+    "ml",
+    "viewers"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "data",
+        "subgraph": "packages/object_pose_estimation/apps/pose_cnn_decoder/training/training_data_provider.subgraph.json"
+      },
+      {
+        "name":"encoder_color_viewer",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "encoder_color",
+            "type": "isaac::viewers::ColorCameraViewer"
+          },
+          {
+            "name": "encoder_detection",
+            "type": "isaac::viewers::DetectionsViewer"
+          }
+        ]
+      },
+      {
+        "name":"encoder_segmentation_viewer",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "encoder_segmentation",
+            "type": "isaac::viewers::SegmentationCameraViewer"
+          }
+        ]
+      },
+      {
+        "name":"decoder_segmentation_viewer",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "decoder_segmentation",
+            "type": "isaac::viewers::SegmentationCameraViewer"
+          },
+          {
+            "name": "decoder_detection",
+            "type": "isaac::viewers::DetectionsViewer"
+          }
+        ]
+      },
+      {
+        "name": "pose_estimation_training_samples",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "random",
+            "type": "isaac::alice::Random"
+          },
+          {
+            "name": "SampleAccumulator",
+            "type": "isaac::ml::SampleAccumulator"
+          },
+          {
+            "name": "ChannelMonitor",
+            "type": "isaac::alice::ChannelMonitor"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "data.interface/subgraph/sample_encoder_image",
+        "target": "pose_estimation_training_samples/SampleAccumulator/encoder_image"
+      },
+      {
+        "source": "data.interface/subgraph/sample_decoder_image",
+        "target": "pose_estimation_training_samples/SampleAccumulator/decoder_image"
+      },
+      {
+        "source": "data.interface/subgraph/sample_center_and_depth",
+        "target": "pose_estimation_training_samples/SampleAccumulator/object_center_and_depth"
+      },
+      {
+        "source": "data.interface/subgraph/sample_rotation",
+        "target": "pose_estimation_training_samples/SampleAccumulator/object_rotation"
+      },
+      {
+        "source": "data.interface/subgraph/sample_detection",
+        "target": "pose_estimation_training_samples/SampleAccumulator/object_detection"
+      },
+      {
+        "source": "data.simulation.interface/output/encoder_color",
+        "target": "encoder_color_viewer/encoder_color/color_listener"
+      },
+      {
+        "source": "data.simulation.interface/subgraph/encoder_bounding_boxes",
+        "target": "encoder_color_viewer/encoder_detection/detections"
+      },
+      {
+        "source": "data.simulation.interface/output/encoder_segmentation",
+        "target": "encoder_segmentation_viewer/encoder_segmentation/segmentation_listener"
+      },
+      {
+        "source": "data.simulation.interface/output/decoder_segmentation",
+        "target": "decoder_segmentation_viewer/decoder_segmentation/segmentation_listener"
+      },
+      {
+        "source": "data.simulation.interface/subgraph/encoder_bounding_boxes",
+        "target": "decoder_segmentation_viewer/decoder_detection/detections"
+      }
+    ]
+  },
+  "config": {
+    "pose_estimation_training_samples": {
+      "SampleAccumulator": {
+        "sample_buffer_size":500,
+        "channel_names": ["encoder_image", "decoder_image", "object_center_and_depth",  "object_rotation", "object_detection"]
+      },
+      "ChannelMonitor": {
+        "tick_period": "10hz",
+        "channel": "samples"
+      }
+    },
+    "data.simulation.interface": {
+      "output": {
+        "port": 55000,
+        "host": "localhost"
+      },
+      "input": {
+        "port": 55001
+      }
+    },
+    "data.simulation.scenario_manager": {
+      "scenario_manager": {
+        "scene": "Factory01",
+        "robot_prefab": "Dolly"
+      }
+    },
+    "data.detection3_convertor": {
+      "Detection3Encoder": {
+        "class_names": ["IndustrialDolly", "PickupBox"]
+      }
+    },
+    "data.detection_convertor": {
+      "DetectionEncoder": {
+        "class_names": ["IndustrialDolly", "Dolly", "Box"]
+      }
+    },
+    "encoder_color_viewer": {
+      "encoder_color": {
+        "camera_name": "color_camera_viewer"
+      }
+    },
+    "encoder_segmentation_viewer": {
+      "encoder_segmentation": {
+        "target_fps": 10,
+        "camera_name": "segmentation_camera"
+      }
+    },
+    "decoder_segmentation_viewer": {
+      "decoder_segmentation": {
+        "target_fps": 10,
+        "camera_name": "segmentation_camera"
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "webroot": "packages/sight/webroot",
+        "assetroot": "../isaac_assets",
+        "port": 3000,
+        "ui_config": {
+          "windows": {
+            "Object Detection - Pose Estimation - Sample Rate": {
+              "renderer": "plot",
+              "channels": [
+                {
+                  "name": "pose_estimation_cnn_training/pose_estimation_training_samples/ChannelMonitor/rx_rate"
+                }
+              ]
+            },
+            "Object Detection - Pose Estimation - Color": {
+              "renderer": "2d",
+              "channels": [
+                {
+                  "name": "pose_estimation_cnn_training/encoder_color_viewer/encoder_color/Color"
+                },
+                {
+                  "name": "pose_estimation_cnn_training/encoder_color_viewer/encoder_detection/detections"
+                }
+              ]
+            },
+            "Object Detection - Pose Estimation - Classes": {
+              "renderer": "2d",
+              "channels": [
+                {
+                  "name": "pose_estimation_cnn_training/encoder_segmentation_viewer/encoder_segmentation/Classes"
+                },
+                {
+                  "name": "pose_estimation_cnn_training/encoder_color_viewer/encoder_detection/detections"
+                }
+              ]
+            },
+            "Decoder Object Detection - Pose Estimation - Color": {
+              "renderer": "2d",
+              "channels": [
+                {
+                  "name": "pose_estimation_cnn_training/decoder_segmentation_viewer/decoder_segmentation/Classes"
+                },
+                {
+                  "name": "pose_estimation_cnn_training/decoder_segmentation_viewer/decoder_detection/detections"
+                }
+              ]
+            }
+          },
+          "assets": {}
+        }
+      }
+    }
+  }
+}

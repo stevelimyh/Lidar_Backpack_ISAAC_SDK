@@ -1,0 +1,145 @@
+{
+  "modules": [
+    "lidar_slam:cartographer",
+    "navigation",
+    "sight"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "interface",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "Subgraph",
+            "type": "isaac::alice::Subgraph"
+          }
+        ]
+      },
+      {
+        "name": "odometry",
+        "subgraph": "packages/navigation/apps/differential_base_imu_odometry.subgraph.json"
+      },
+      {
+        "name": "commander",
+        "subgraph": "packages/navigation/apps/differential_base_commander.subgraph.json"
+      },
+      {
+        "name": "record",
+        "subgraph": "packages/record_replay/apps/record.subgraph.json"
+      },
+      {
+        "name": "cartographer",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "Cartographer",
+            "type": "isaac::lidar_slam::Cartographer"
+          }
+        ]
+      },
+      {
+        "name": "range_scan_to_observation_map",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "RangeScanToObservationMap",
+            "type": "isaac::navigation::RangeScanToObservationMap"
+          }
+        ]
+      },
+      {
+        "name": "sight_widgets",
+        "components": [
+          {
+            "name": "Map",
+            "type": "isaac::sight::SightWidget"
+          },
+          {
+            "name": "Current Scan Data",
+            "type": "isaac::sight::SightWidget"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "interface/Subgraph/flatscan",
+        "target": "cartographer/Cartographer/flatscan"
+      },
+      {
+        "source": "interface/Subgraph/flatscan",
+        "target": "range_scan_to_observation_map/RangeScanToObservationMap/flatscan"
+      },
+      {
+        "source": "interface/Subgraph/base_state",
+        "target": "odometry.subgraph/interface/state"
+      },
+      {
+        "source": "interface/Subgraph/imu_raw",
+        "target": "odometry.subgraph/interface/imu_raw"
+      },
+      {
+        "source": "commander.subgraph/interface/command",
+        "target": "interface/Subgraph/base_command"
+      },
+      {
+        "source": "interface/Subgraph/flatscan",
+        "target": "record.interface/input/flatscan"
+      },
+      {
+        "source": "interface/Subgraph/base_state",
+        "target": "record.interface/input/base_state"
+      },
+      {
+        "source": "interface/Subgraph/imu_raw",
+        "target": "record.interface/input/imu_raw"
+      }
+    ]
+  },
+  "config": {
+    "commander.robot_remote": {
+      "isaac.navigation.RobotRemoteControl": {
+        "angular_speed_max": 0.4,
+        "linear_speed_max": 0.3
+      }
+    },
+    "record.interface": {
+      "input": {
+        "start_recording_automatically": false
+      }
+    },
+    "cartographer": {
+      "Cartographer": {
+        "lua_configuration_directory": "../com_github_googlecartographer_cartographer/configuration_files/,external/com_github_googlecartographer_cartographer/configuration_files/",
+        "num_visible_submaps": 100,
+        "tick_period": "250ms"
+      }
+    },
+    "sight_widgets": {
+      "Map": {
+        "type": "2d",
+        "channels": [
+          { "name": "$(fullname cartographer/Cartographer/map_background)" },
+          { "name": "$(fullname cartographer/Cartographer/submaps)" },
+          { "name": "$(fullname cartographer/Cartographer/trajectory_node)" }
+        ]
+      },
+      "Current Scan Data": {
+        "type": "2d",
+        "channels": [
+          { "name": "$(fullname range_scan_to_observation_map/RangeScanToObservationMap/observation)" }
+        ]
+      }
+    }
+  }
+}

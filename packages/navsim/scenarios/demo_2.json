@@ -1,0 +1,25 @@
+{
+  "scene": "warehouse",
+  "description": "Drive from garage door to back of warehouse, encounter an unexpected obstacle",
+  "robots": [
+    {
+      "prefab": "Carter_Wheeled",
+      "name": "robot",
+      "node": "navsim",
+      "pose": [0.931374, 0, 0, 0.364064, 4.91, 0.85, 0.05]
+    }
+  ],
+  "frames": [
+    {
+      "name": "goal_from_sim",
+      "pose": [0.707107, 0, 0, 0.707107, -8.12, -6, 0]
+    }
+  ],
+  "obstacles": [
+    {
+      "prefab": "Cylinder",
+      "name": "obstacle in hallway",
+      "pose": [1, 0, 0, 0, 0.13, -4.67, 1]
+    }
+  ]
+}

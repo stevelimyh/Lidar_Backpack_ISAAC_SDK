@@ -1,0 +1,286 @@
+{
+  "modules": [
+    "ml",
+    "ml:tensorflow",
+    "planner",
+    "//packages/rl/components:rl",
+    "//packages/rl/apps/dolly_navigation/components:dolly_navigation_task"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "subgraph",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "interface",
+            "type": "isaac::alice::Subgraph"
+          }
+        ]
+      },
+      {
+        "name": "tensorflow_inference",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "TensorflowInference",
+            "type": "isaac::ml::TensorflowInference"
+          }
+        ]
+      },
+      {
+        "name": "temporal_batching",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "TemporalBatching",
+            "type": "isaac::rl::TemporalBatching"
+          }
+        ]
+      },
+      {
+        "name": "tensor_aggregator",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "TensorAggregator",
+            "type": "isaac::rl::TensorAggregator"
+          }
+        ]
+      },
+      {
+        "name": "tensor_deaggregator",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "TensorDeaggregator",
+            "type": "isaac::rl::TensorDeaggregator"
+          }
+        ]
+      },
+      {
+        "name": "pid",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "DifferentialBaseControl",
+            "type": "isaac::planner::DifferentialBaseControl"
+          }
+        ]
+      },
+      {
+        "name": "state_decoder",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "DollyDockingStateDecoder",
+            "type": "isaac::rl::DollyDockingStateDecoder"
+          }
+        ]
+      },
+      {
+        "name": "range_scan_to_observation_map",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "RangeScanToObservationMap",
+            "type": "isaac::navigation::RangeScanToObservationMap"
+          }
+        ]
+      },
+      {
+        "name": "tensor_to_composite_velocity_profile",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "TensorToCompositeVelocityProfile",
+            "type": "isaac::rl::TensorToCompositeVelocityProfile"
+          }
+        ]
+      },
+      {
+        "name": "velocity_integrator",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "DifferentialBaseVelocityIntegrator",
+            "type": "isaac::planner::DifferentialBaseVelocityIntegrator"
+          }
+        ]
+      },
+      {
+        "name": "composite_to_diff_trajectory",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "CompositeToDifferentialTrajectoryConverter",
+            "type": "isaac::utils::CompositeToDifferentialTrajectoryConverter"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "subgraph/interface/base_state",
+        "target": "state_decoder/DollyDockingStateDecoder/base_state"
+      },
+      {
+        "source": "subgraph/interface/flatscan",
+        "target": "range_scan_to_observation_map/RangeScanToObservationMap/flatscan"
+      },
+      {
+        "source": "range_scan_to_observation_map/RangeScanToObservationMap/observation_map",
+        "target": "state_decoder/DollyDockingStateDecoder/local_map"
+      },
+      {
+        "source": "state_decoder/DollyDockingStateDecoder/agent_state",
+        "target": "tensor_aggregator/TensorAggregator/agent1"
+      },
+      {
+        "source": "tensor_aggregator/TensorAggregator/aggregate_tensor",
+        "target": "temporal_batching/TemporalBatching/step"
+      },
+      {
+        "source": "temporal_batching/TemporalBatching/temporal_tensor",
+        "target": "tensorflow_inference/TensorflowInference/observations_before"
+      },
+      {
+        "source": "tensorflow_inference/TensorflowInference/output",
+        "target": "tensor_deaggregator/TensorDeaggregator/aggregate_tensor"
+      },
+      {
+        "source": "tensor_deaggregator/TensorDeaggregator/tensor",
+        "target": "tensor_to_composite_velocity_profile/TensorToCompositeVelocityProfile/policy"
+      },
+      {
+        "source": "tensor_to_composite_velocity_profile/TensorToCompositeVelocityProfile/velocity_profile",
+        "target": "velocity_integrator/DifferentialBaseVelocityIntegrator/target_velocities"
+      },
+      {
+        "source": "velocity_integrator/DifferentialBaseVelocityIntegrator/plan",
+        "target": "composite_to_diff_trajectory/CompositeToDifferentialTrajectoryConverter/input_plan"
+      },
+      {
+        "source": "composite_to_diff_trajectory/CompositeToDifferentialTrajectoryConverter/output_plan",
+        "target": "pid/DifferentialBaseControl/plan"
+      },
+      {
+        "source": "pid/DifferentialBaseControl/cmd",
+        "target": "subgraph/interface/base_command"
+      }
+    ]
+  },
+  "config": {
+    "pid": {
+      "DifferentialBaseControl": {
+        "tick_period": "100Hz",
+        "static_frame": "odom",
+        "robot_frame": "robot"
+      }
+    },
+    "tensorflow_inference": {
+      "TensorflowInference": {
+        "model_file_path": "external/dolly_docking_reinforcement_learning_policy/agent.ckpt-frozen.pb",
+        "config_file_path": "external/dolly_docking_reinforcement_learning_policy/allow_growth.cfg",
+        "input_tensor_info": [
+          {
+            "ops_name": "observations_before",
+            "index": 0,
+            "dims": [1,  49173]
+          }
+        ],
+        "output_tensor_info": [
+          {
+            "ops_name": "main/mul",
+            "channel": "output",
+            "index": 0,
+            "dims": [1, 6]
+          }
+        ]
+      }
+    },
+    "state_decoder": {
+      "DollyDockingStateDecoder": {
+        "use_pose_tree": true,
+        "robot_frame":"robot",
+        "target_frame":"dolly",
+        "tick_period": "100Hz"
+      }
+    },
+    "tensor_to_composite_velocity_profile": {
+      "TensorToCompositeVelocityProfile": {
+        "input_linear_velocity_range":[-0.5, 0.5],
+        "input_angular_velocity_range":[-0.5, 0.5],
+        "output_linear_velocity_range":[0.0, 0.65],
+        "output_angular_velocity_range":[-0.3, 0.3],
+        "timestamp_profile":[0.0, 0.6, 1.2]
+      }
+    },
+    "velocity_integrator": {
+      "DifferentialBaseVelocityIntegrator": {
+        "delta_time":0.001
+      }
+    },
+    "range_scan_to_observation_map": {
+      "RangeScanToObservationMap": {
+        "cell_size":0.05,
+        "dimensions":[128,128],
+        "map_offset_relative":[0.25,0.5],
+        "wall_thickness":0.2
+      }
+    },
+    "temporal_batching": {
+      "TemporalBatching": {
+        "num_agents":1,
+        "look_back":3,
+        "is_connected_to_gym": false,
+        "reset_interval":-1,
+        "dead_flag_location":-1,
+        "end_of_episode_flag":-1
+      }
+    },
+    "tensor_aggregator": {
+      "TensorAggregator": {
+        "tick_period": "100Hz"
+      }
+    },
+    "composite_to_diff_trajectory": {
+      "CompositeToDifferentialTrajectoryConverter": {
+        "frame": "robot"
+      }
+    }
+  }
+}

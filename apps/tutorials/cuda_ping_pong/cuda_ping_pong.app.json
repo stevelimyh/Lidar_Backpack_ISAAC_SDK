@@ -1,0 +1,49 @@
+{
+  "name": "cuda_ping_pong",
+  "modules": [
+    "//apps/tutorials/cuda_ping_pong:cuda_ping_components"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "cuda_ping",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "cuda_ping",
+            "type": "isaac::CudaImagePing"
+          }
+        ]
+      },
+      {
+        "name": "cuda_pong",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "cuda_pong",
+            "type": "isaac::CudaImagePong"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "cuda_ping/cuda_ping/ping",
+        "target": "cuda_pong/cuda_pong/pong"
+      }
+    ]
+  },
+  "config": {
+    "cuda_ping" : {
+      "cuda_ping" : {
+        "tick_period" : "2Hz"
+      }
+    }
+  }
+}

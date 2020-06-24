@@ -1,0 +1,40 @@
+{
+  "name": "gmapping",
+  "graph": {
+    "nodes": [
+      {
+        "name": "simulation",
+        "subgraph": "packages/navsim/apps/navsim_navigation.subgraph.json"
+      },
+      {
+        "name": "gmapping",
+        "subgraph": "packages/lidar_slam/apps/differential_base_gmapping.subgraph.json"
+      }
+    ],
+    "edges": [
+      {
+        "source": "simulation.interface/noisy/flatscan",
+        "target": "gmapping.interface/Subgraph/flatscan"
+      },
+      {
+        "source": "simulation.interface/output/base_state",
+        "target": "gmapping.interface/Subgraph/base_state"
+      },
+      {
+        "source": "simulation.interface/output/imu_raw",
+        "target": "gmapping.interface/Subgraph/imu_raw"
+      },
+      {
+        "source": "gmapping.interface/Subgraph/base_command",
+        "target": "simulation.interface/input/base_command"
+      }
+    ]
+  },
+  "config": {
+    "gmapping.odometry.odometry": {
+      "DifferentialBaseWheelImuOdometry": {
+        "use_imu": false
+      }
+    }
+  }
+}

@@ -1,0 +1,85 @@
+/*
+Copyright (c) 2019, NVIDIA CORPORATION. All rights reserved.
+
+NVIDIA CORPORATION and its licensors retain all intellectual property
+and proprietary rights in and to this software, related documentation
+and any modifications thereto. Any use, reproduction, disclosure or
+distribution of this software and related documentation without an express
+license agreement from NVIDIA CORPORATION is strictly prohibited.
+*/
+
+div.record-widget {
+  /* Prevent content wrapping on window resizing */
+  overflow: auto;
+  margin: 0px auto;
+  text-align: left;
+}
+
+textarea.input-text {
+  resize: none;
+  vertical-align: middle;
+  background-color: #f7f7f7;
+  font-size: 14px;
+  float: right;
+}
+
+div.input-text-container {
+  clear: both;
+  padding: 10px;
+}
+
+div.chronometer-label {
+  display: inline;
+  font-size: 25px;
+  vertical-align: middle;
+  margin: auto;
+  padding: 10px;
+  margin: 5px 50px 5px 5px;
+}
+
+#__win-record-window-prev-record-btn {
+  background-color: transparent;
+  color: #76b900;
+  font-size: 16px;
+  float: right;
+  text-align: center;
+  vertical-align: middle;
+  width: 45px;
+  height: 45px;
+}
+
+#__win-record-window-container {
+  clear: both;
+  padding: 10px;
+}
+
+#__win-record-window-info-text {
+  clear: both;
+  padding: 10px;
+}
+
+#__win-record-window-prev-record {
+  display: none;
+}
+
+#__win-record-window-prev-record-path {
+  clear: both;
+}
+
+#__win-record-window-prev-record-path-text {
+  resize: none;
+  vertical-align: middle;
+  padding: 0px;
+  font-size: 10px;
+  float: right;
+}
+
+#__win-record-window-prev-record-path-label {
+  padding: 0px;
+  margin: 0px;
+  float: left;
+}
+
+#__win-record-window-prev-record-length {
+  clear: both;
+}

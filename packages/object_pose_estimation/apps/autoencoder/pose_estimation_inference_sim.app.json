@@ -1,0 +1,178 @@
+{
+  "name": "pose_estimation_inference_sim",
+  "modules": [
+    "ml",
+    "viewers",
+    "sight"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "simulation",
+        "subgraph": "packages/object_pose_estimation/apps/autoencoder/pose_estimation_sim.subgraph.json"
+      },
+      {
+        "name": "6Dpose_bodies",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "RigidbodyToDetections3",
+            "type": "isaac::ml::RigidbodyToDetections3"
+          }
+        ]
+      },
+      {
+        "name": "viewers",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "DetectionsViewer",
+            "type": "isaac::viewers::DetectionsViewer"
+          },
+          {
+            "name": "ObjectDetectionViewer",
+            "type": "isaac::viewers::Detections3Viewer"
+          },
+          {
+            "name": "ColorCameraViewer",
+            "type": "isaac::viewers::ColorCameraViewer"
+          }
+        ]
+      },
+      {
+        "name": "object_pose_estimation",
+        "subgraph": "packages/object_pose_estimation/apps/autoencoder/pose_estimation.subgraph.json"
+      },
+      {
+        "name": "pose_error",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "Detections3Comparer",
+            "type": "isaac::ml::Detections3Comparer"
+          }
+        ]
+      },
+      {
+        "name": "sight_widgets",
+        "components": [
+          {
+            "type": "isaac::sight::SightWidget",
+            "name": "Object Pose"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "simulation.interface/output/encoder_color",
+        "target": "viewers/ColorCameraViewer/color_listener"
+      },
+      {
+        "source": "simulation.interface/output/encoder_color",
+        "target": "object_pose_estimation.subgraph/interface/input_image"
+      },
+      {
+        "source": "simulation.interface/subgraph/encoder_bounding_boxes",
+        "target": "viewers/DetectionsViewer/detections"
+      },
+      {
+        "source": "simulation.interface/subgraph/encoder_bounding_boxes",
+        "target": "object_pose_estimation.subgraph/interface/input_detections"
+      },
+      {
+        "source": "simulation.interface/output/bodies",
+        "target": "6Dpose_bodies/RigidbodyToDetections3/rigid_bodies"
+      },
+      {
+        "source": "6Dpose_bodies/RigidbodyToDetections3/detections",
+        "target": "pose_error/Detections3Comparer/reference_poses"
+      },
+      {
+        "source": "object_pose_estimation.subgraph/interface/output_poses",
+        "target": "viewers/ObjectDetectionViewer/detections"
+      },
+      {
+        "source": "object_pose_estimation.subgraph/interface/output_poses",
+        "target": "pose_error/Detections3Comparer/predicted_poses"
+      }
+    ]
+  },
+  "config": {
+    "simulation.scenario_manager": {
+      "scenario_manager": {
+        "scene": "pose_estimation_training",
+        "robot_prefab": "Dolly"
+      }
+    },
+    "viewers": {
+      "ColorCameraViewer": {
+        "camera_name": "camera"
+      },
+      "ObjectDetectionViewer": {
+        "frame": "camera",
+        "object_T_box_center": [1.0, 0, 0, 0, 0, 0, 0.5],
+        "box_dimensions": [0.75, 1.5, 1.0],
+        "alpha_channel": 128,
+        "mesh_name": "dolly"
+      }
+    },
+    "object_pose_estimation.detection_filter": {
+      "FilterDetectionsByLabel": {
+        "whitelist_labels": ["Dolly", "dolly"]
+      }
+    },
+    "object_pose_estimation.pose_encoder": {
+      "TensorRTInference": {
+        "model_file_path": "external/dolly_pose_estimation_model/dolly_ae_model.uff"
+      }
+    },
+    "object_pose_estimation.codebook_lookup": {
+      "CodebookLookup": {
+        "codebook_path": "external/dolly_pose_estimation_model/dolly_codebook.jsonl"
+      }
+    },
+    "pose_error": {
+      "Detections3Comparer": {
+        "log_file": "/tmp/error.csv"
+      }
+    },
+    "sight_widgets": {
+      "Object Pose": {
+        "type": "2d",
+        "channels": [
+          { "name": "viewers/ColorCameraViewer/Color" },
+          { "name": "viewers/DetectionsViewer/detections" },
+          { "name": "viewers/ObjectDetectionViewer/bounding_box" },
+          { "name": "viewers/ObjectDetectionViewer/mesh"}
+        ]
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "webroot": "packages/sight/webroot",
+        "assetroot": "external/dolly_pose_estimation_model/dolly_assets",
+        "port": 3000,
+        "ui_config": {
+          "assets": {
+            "dolly": {
+              "obj": "/apps/assets/dolly.obj",
+              "rotation": [0.70710678118, 0.70710678118, 0, 0],
+              "translation": [0, 0, 0.0],
+              "scale": 1.0
+            }
+          }
+        }
+      }
+    }
+  }
+}

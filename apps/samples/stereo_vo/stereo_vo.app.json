@@ -1,0 +1,256 @@
+{
+  "name": "stereo_vo",
+  "modules": [
+    "perception:stereo_visual_odometry",
+    "utils",
+    "viewers",
+    "zed"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "zed",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "ZedCamera",
+            "type": "isaac::ZedCamera"
+          },
+          {
+            "name": "ZedImuReader",
+            "type": "isaac::zed::ZedImuReader"
+          }
+        ]
+      },
+      {
+        "name": "camera_splitter_left",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "ColorCameraProtoSplitter",
+            "type": "isaac::utils::ColorCameraProtoSplitter"
+          }
+        ]
+      },
+      {
+        "name": "camera_splitter_right",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "ColorCameraProtoSplitter",
+            "type": "isaac::utils::ColorCameraProtoSplitter"
+          }
+        ]
+      },
+      {
+        "name": "tracker",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "StereoVisualOdometry",
+            "type": "isaac::StereoVisualOdometry"
+          }
+        ]
+      },
+      {
+        "name": "image_keypoint_viewer",
+        "components": [
+          {
+            "name": "isaac.alice.MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.viewers.ImageKeypointViewer",
+            "type": "isaac::viewers::ImageKeypointViewer"
+          }
+        ]
+      },
+      {
+        "name": "color_camera_viewer",
+        "components": [
+          {
+            "name": "isaac.alice.MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.viewers.ColorCameraViewer",
+            "type": "isaac::viewers::ColorCameraViewer"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "zed/ZedCamera/left_camera_gray",
+        "target": "camera_splitter_left/ColorCameraProtoSplitter/color_camera"
+      },
+      {
+        "source": "camera_splitter_left/ColorCameraProtoSplitter/image",
+        "target": "tracker/StereoVisualOdometry/left_image"
+      },
+      {
+        "source": "camera_splitter_left/ColorCameraProtoSplitter/intrinsics",
+        "target": "tracker/StereoVisualOdometry/left_intrinsics"
+      },
+      {
+        "source": "zed/ZedCamera/right_camera_gray",
+        "target": "camera_splitter_right/ColorCameraProtoSplitter/color_camera"
+      },
+      {
+        "source": "camera_splitter_right/ColorCameraProtoSplitter/image",
+        "target": "tracker/StereoVisualOdometry/right_image"
+      },
+      {
+        "source": "camera_splitter_right/ColorCameraProtoSplitter/intrinsics",
+        "target": "tracker/StereoVisualOdometry/right_intrinsics"
+      },
+      {
+        "source": "zed/ZedImuReader/imu_raw",
+        "target": "tracker/StereoVisualOdometry/imu"
+      },
+      {
+        "source": "tracker/StereoVisualOdometry/coordinates",
+        "target": "image_keypoint_viewer/isaac.viewers.ImageKeypointViewer/coordinates"
+      },
+      {
+        "source": "tracker/StereoVisualOdometry/features",
+        "target": "image_keypoint_viewer/isaac.viewers.ImageKeypointViewer/features"
+      },
+      {
+        "source": "zed/ZedCamera/left_camera_gray",
+        "target": "color_camera_viewer/isaac.viewers.ColorCameraViewer/color_listener"
+      }
+    ]
+  },
+  "config": {
+    "zed": {
+      "ZedCamera": {
+        "resolution": "672x376",
+        "gray_scale": true,
+        "rgb": false,
+        "enable_factory_rectification": true,
+        "enable_imu": true,
+        "tick_period": "60Hz"
+      },
+      "ZedImuReader": {
+        "tick_period": "300Hz"
+      }
+    },
+    "camera_splitter_left": {
+      "ColorCameraProtoSplitter": {
+        "only_pinhole": false
+      }
+    },
+    "camera_splitter_right": {
+      "ColorCameraProtoSplitter": {
+        "only_pinhole": false
+      }
+    },
+    "tracker": {
+      "StereoVisualOdometry": {
+        "horizontal_stereo_camera": true,
+        "process_imu_readings": true,
+        "lhs_camera_frame": "zed_left_camera",
+        "rhs_camera_frame": "zed_right_camera",
+        "imu_frame": "zed_imu"
+      }
+    },
+    "color_camera_viewer": {
+      "isaac.viewers.ColorCameraViewer": {
+        "target_fps": 100
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "port": 3000,
+        "ui_config": {
+          "windows": {
+            "left camera": {
+              "renderer": "2d",
+              "channels": [
+                {
+                  "name": "stereo_vo/zed/ZedCamera/left_gray_thumbnail",
+                  "active": true
+                }
+              ]
+            },
+            "right camera": {
+              "renderer": "2d",
+              "channels": [
+                {
+                  "name": "stereo_vo/zed/ZedCamera/right_gray_thumbnail",
+                  "active": true
+                }
+              ]
+            },
+            "Camera Pose": {
+              "renderer": "3d",
+              "dims": {
+                "width": 1100,
+                "height": 450
+              },
+              "channels": [
+                {
+                  "name": "stereo_vo/tracker/StereoVisualOdometry/current_pose",
+                  "active": true
+                },
+                {
+                  "name": "stereo_vo/tracker/StereoVisualOdometry/pose_trail",
+                  "active": true
+                }
+              ]
+            },
+            "xy": {
+              "renderer": "plot",
+              "channels": [
+                {
+                  "name": "stereo_vo/tracker/StereoVisualOdometry/vo.pos_x"
+                },
+                {
+                  "name": "stereo_vo/tracker/StereoVisualOdometry/vo.pos_y"
+                }
+              ]
+            },
+            "up": {
+              "renderer": "plot",
+              "channels": [
+                {
+                  "name": "stereo_vo/tracker/StereoVisualOdometry/vo.pos_z"
+                }
+              ]
+            },
+            "2d Features": {
+              "renderer": "2d",
+              "dims": {
+                "width": 512,
+                "height": 512
+              },
+              "channels": [
+                {
+                  "name": "stereo_vo/color_camera_viewer/isaac.viewers.ColorCameraViewer/Color",
+                  "active": true
+                },
+                {
+                  "name": "stereo_vo/image_keypoint_viewer/isaac.viewers.ImageKeypointViewer/keypoints",
+                  "active": true
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "name": "navigation_rosbridge",
+  "modules": [
+    "//apps/samples/navigation_rosbridge:navigation_ros_bridge"
+  ],
+  "config": {
+    "ros_bridge": {
+      "isaac.rosbridge.NavigationRosBridge": {
+        "tick_period": "1000Hz"
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "port": 3000,
+        "ui_config": {
+          "windows": {}
+        }
+      }
+    }
+  },
+  "graph": {
+    "nodes": [
+      {
+        "name": "ros_bridge",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.rosbridge.NavigationRosBridge",
+            "type": "isaac::rosbridge::NavigationRosBridge"
+          }
+        ]
+      }
+    ],
+    "edges": []
+  }
+}

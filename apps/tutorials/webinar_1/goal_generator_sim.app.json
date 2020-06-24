@@ -1,0 +1,94 @@
+{
+  "name": "goal_generator_sim",
+  "modules": [
+    "//apps/tutorials/webinar_1:goal_generator",
+    "map"
+  ],
+  "config_files": [
+    "apps/assets/maps/carter_warehouse_p.config.json"
+  ],
+  "graph_files": [
+    "apps/assets/maps/carter_warehouse_p.graph.json"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "simulation",
+        "subgraph": "apps/carter/unreal_sim/2d_carter_sim.subgraph.json"
+      },
+      {
+        "name": "navigation",
+        "subgraph": "packages/navigation/apps/differential_base_navigation.subgraph.json"
+      },
+      {
+        "name": "goal_generator",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "GoalGenerator",
+            "type": "isaac::tutorials::GoalGenerator"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "goal_generator/GoalGenerator/goal",
+        "target": "navigation.subgraph/interface/goal"
+      },
+      {
+        "source": "navigation.subgraph/interface/feedback",
+        "target": "goal_generator/GoalGenerator/feedback"
+      },
+      {
+        "source": "simulation.subgraph/interface/flatscan",
+        "target": "navigation.subgraph/interface/flatscan_for_localization"
+      },
+      {
+        "source": "simulation.subgraph/interface/flatscan",
+        "target": "navigation.subgraph/interface/flatscan_for_obstacles"
+      },
+      {
+        "source": "simulation.subgraph/interface/diff_base_state",
+        "target": "navigation.subgraph/interface/state"
+      },
+      {
+        "source": "navigation.subgraph/interface/command",
+        "target": "simulation.subgraph/interface/diff_base_command"
+      }
+    ]
+  },
+  "config": {
+    "goal_generator" : {
+      "GoalGenerator" : {
+        "tick_period" : "10Hz"
+      }
+    },
+    "simulation.scan_flattener.scan_accumulator": {
+      "isaac.perception.ScanAccumulator": {
+        "min_slice_count": 900,
+        "clock_wise_rotation": false
+      }
+    },
+    "simulation.scan_flattener.range_scan_flattening": {
+      "isaac.perception.RangeScanFlattening": {
+        "height_min": -0.47,
+        "height_max": 1.0,
+        "pitch_fudge": 0.005
+      }
+    },
+    "simulation.carter_sim.base_simulation": {
+      "isaac.flatsim.DifferentialBaseSimulator": {
+        "robot_model": "navigation.shared_robot_model"
+      }
+    },
+    "navigation.imu_odometry.odometry": {
+      "DifferentialBaseWheelImuOdometry": {
+        "use_imu": false
+      }
+    }
+  }
+}

@@ -1,0 +1,117 @@
+{
+  "name": "proportional_control_cpp",
+  "modules": [
+    "//apps/tutorials/proportional_control_cpp:proportional_control_cpp_codelet",
+    "navigation",
+    "segway"
+  ],
+  "config": {
+    "cpp_controller": {
+      "isaac.ProportionalControlCpp": {
+        "tick_period": "10ms"
+      }
+    },
+    "segway_rmp": {
+      "isaac.SegwayRmpDriver": {
+        "ip": "192.168.0.40",
+        "tick_period": "20ms",
+        "speed_limit_angular": 1.0,
+        "speed_limit_linear": 1.0,
+        "flip_orientation": true
+      },
+      "isaac.alice.Failsafe": {
+        "name": "robot_failsafe"
+      }
+    },
+    "odometry": {
+      "isaac.navigation.DifferentialBaseOdometry": {
+        "tick_period": "100Hz"
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "port": 3000,
+        "ui_config": {
+          "windows": {
+            "Proportional Control C++": {
+              "renderer": "plot",
+              "channels": [
+                { "name": "proportional_control_cpp/cpp_controller/isaac.ProportionalControlCpp/reference (m)" },
+                { "name": "proportional_control_cpp/cpp_controller/isaac.ProportionalControlCpp/position (m)" }
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "graph": {
+    "nodes": [
+      {
+        "name": "cpp_controller",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.ProportionalControlCpp",
+            "type": "isaac::ProportionalControlCpp"
+          }
+        ]
+      },
+      {
+        "name": "segway_rmp",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.SegwayRmpDriver",
+            "type": "isaac::SegwayRmpDriver"
+          },
+          {
+            "name": "isaac.alice.Failsafe",
+            "type": "isaac::alice::Failsafe"
+          }
+        ]
+      },
+      {
+        "name": "odometry",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.navigation.DifferentialBaseOdometry",
+            "type": "isaac::navigation::DifferentialBaseOdometry"
+          }
+        ]
+      },
+      {
+        "name": "commander",
+        "subgraph": "packages/navigation/apps/differential_base_commander.subgraph.json"
+      }
+    ],
+    "edges": [
+      {
+        "source": "segway_rmp/isaac.SegwayRmpDriver/segway_state",
+        "target": "odometry/isaac.navigation.DifferentialBaseOdometry/state"
+      },
+      {
+        "source": "odometry/isaac.navigation.DifferentialBaseOdometry/odometry",
+        "target": "cpp_controller/isaac.ProportionalControlCpp/odometry"
+      },
+      {
+        "source": "cpp_controller/isaac.ProportionalControlCpp/cmd",
+        "target": "commander.subgraph/interface/control"
+      },
+      {
+        "source": "commander.subgraph/interface/command",
+        "target": "segway_rmp/isaac.SegwayRmpDriver/segway_cmd"
+      }
+    ]
+  }
+}

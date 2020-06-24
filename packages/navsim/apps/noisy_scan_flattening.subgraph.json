@@ -1,0 +1,74 @@
+{
+  "modules": [
+    "perception",
+    "flatsim"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "interface",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          }
+        ]
+      },
+      {
+        "name": "scan_flattener",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "RangeScanFlattening",
+            "type": "isaac::perception::RangeScanFlattening"
+          }
+        ]
+      },
+      {
+        "name": "flatscan_noiser",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "Random",
+            "type": "isaac::alice::Random"
+          },
+          {
+            "name": "FlatscanNoiser",
+            "type": "isaac::flatsim::FlatscanNoiser"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "interface/MessageLedger/rangescan",
+        "target": "scan_flattener/RangeScanFlattening/scan"
+      },
+      {
+        "source": "scan_flattener/RangeScanFlattening/flatscan",
+        "target": "flatscan_noiser/FlatscanNoiser/flatscan"
+      },
+      {
+        "source": "flatscan_noiser/FlatscanNoiser/noisy_flatscan",
+        "target": "interface/MessageLedger/flatscan"
+      }
+    ]
+  },
+  "config": {
+    "flatscan_noiser": {
+      "FlatscanNoiser": {
+        "beam_invalid_probability": 0.1,
+        "beam_random_probability": 0.0,
+        "beam_short_probability": 0.0,
+        "range_sigma_abs": 0.05,
+        "range_sigma_rel": 0.005
+      }
+    }
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "name": "argus_camera",
+  "modules": [
+    "sensors:argus_camera",
+    "viewers"
+  ],
+  "config": {
+    "websight": {
+      "WebsightServer": {
+        "port": 3000,
+        "ui_config": {
+          "windows": {
+            "Argus Image": {
+              "renderer": "2d",
+              "dims": {
+                "width": 1280,
+                "height": 720
+              },
+              "channels": [
+                {
+                  "name": "argus_camera/color_camera_viewer/viewer/Color"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "argus": {
+      "camera": {
+        "mode": 4,
+        "camera_id": 0,
+        "framerate": 60,
+        "focal_length": [
+          700.0,
+          700.0
+        ],
+        "optical_center": [
+          360.0,
+          640.0
+        ]
+      }
+    }
+  },
+  "graph": {
+    "nodes": [
+      {
+        "name": "argus",
+        "components": [
+          {
+            "name": "isaac.alice.MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "camera",
+            "type": "isaac::ArgusCsiCamera"
+          }
+        ]
+      },
+      {
+        "name": "color_camera_viewer",
+        "components": [
+          {
+            "name": "isaac.alice.MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "viewer",
+            "type": "isaac::viewers::ColorCameraViewer"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "argus/camera/image",
+        "target": "color_camera_viewer/viewer/color_listener"
+      }
+    ]
+  }
+}

@@ -1,0 +1,161 @@
+{
+  "modules": [
+    "lidar_slam:g_mapping",
+    "navigation",
+    "sight"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "interface",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "Subgraph",
+            "type": "isaac::alice::Subgraph"
+          }
+        ]
+      },
+      {
+        "name": "odometry",
+        "subgraph": "packages/navigation/apps/differential_base_imu_odometry.subgraph.json"
+      },
+      {
+        "name": "commander",
+        "subgraph": "packages/navigation/apps/differential_base_commander.subgraph.json"
+      },
+      {
+        "name": "record",
+        "subgraph": "packages/record_replay/apps/record.subgraph.json"
+      },
+      {
+        "name": "gmapping",
+        "start_order": 100,
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "GMapping",
+            "type": "isaac::lidar_slam::GMapping"
+          }
+        ]
+      },
+      {
+        "name": "range_scan_to_observation_map",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "RangeScanToObservationMap",
+            "type": "isaac::navigation::RangeScanToObservationMap"
+          }
+        ]
+      },
+      {
+        "name": "sight_widgets",
+        "components": [
+          {
+            "name": "Map",
+            "type": "isaac::sight::SightWidget"
+          },
+          {
+            "name": "Current Scan Data",
+            "type": "isaac::sight::SightWidget"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "interface/Subgraph/flatscan",
+        "target": "gmapping/GMapping/flatscan"
+      },
+      {
+        "source": "interface/Subgraph/flatscan",
+        "target": "range_scan_to_observation_map/RangeScanToObservationMap/flatscan"
+      },
+      {
+        "source": "interface/Subgraph/base_state",
+        "target": "odometry.subgraph/interface/state"
+      },
+      {
+        "source": "interface/Subgraph/imu_raw",
+        "target": "odometry.subgraph/interface/imu_raw"
+      },
+      {
+        "source": "commander.subgraph/interface/command",
+        "target": "interface/Subgraph/base_command"
+      },
+      {
+        "source": "odometry.subgraph/interface/odometry",
+        "target": "gmapping/GMapping/odometry"
+      },
+      {
+        "source": "interface/Subgraph/flatscan",
+        "target": "record.interface/input/flatscan"
+      },
+      {
+        "source": "interface/Subgraph/base_state",
+        "target": "record.interface/input/base_state"
+      },
+      {
+        "source": "interface/Subgraph/imu_raw",
+        "target": "record.interface/input/imu_raw"
+      }
+    ]
+  },
+  "config": {
+    "commander.robot_remote": {
+      "isaac.navigation.RobotRemoteControl": {
+        "angular_speed_max": 0.4,
+        "linear_speed_max": 0.3
+      }
+    },
+    "record.interface": {
+      "input": {
+        "start_recording_automatically": false
+      }
+    },
+    "gmapping": {
+      "GMapping": {
+        "file_path": "/tmp",
+        "build_map_period": 1.0,
+        "laser_matcher_resolution": 0.005,
+        "map_x_max": 10.0,
+        "map_x_min": -10.0,
+        "map_y_max": 10.0,
+        "map_y_min": -10.0,
+        "map_resolution": 0.05,
+        "max_range": 34,
+        "map_update_range": 10.0,
+        "number_particles": 150,
+        "linear_distance": 0.2,
+        "angular_distance": 0.08,
+        "use_pose_tree": false
+      }
+    },
+    "sight_widgets": {
+      "Map": {
+        "type": "2d",
+        "channels": [
+          { "name": "$(fullname gmapping/GMapping/global_map)" },
+          { "name": "$(fullname gmapping/GMapping/fov_cone)" },
+          { "name": "$(fullname gmapping/GMapping/robot_pos)" }
+        ]
+      },
+      "Current Scan Data": {
+        "type": "2d",
+        "channels": [
+          { "name": "$(fullname range_scan_to_observation_map/RangeScanToObservationMap/observation)" }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,190 @@
+{
+  "modules": [
+    "sight",
+    "utils",
+    "viewers"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "interface",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "Subgraph",
+            "type": "isaac::alice::Subgraph"
+          }
+        ]
+      },
+      {
+        "name": "object_detection",
+        "subgraph": "packages/detect_net/apps/detect_net_inference.subgraph.json"
+      },
+      {
+        "name": "object_pose_estimation",
+        "subgraph": "packages/object_pose_estimation/apps/pose_cnn_decoder/pose_estimation_cnn.subgraph.json"
+      },
+      {
+        "name": "detections_filter",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "Detections3Filter",
+            "type": "isaac::utils::Detections3Filter"
+          }
+        ]
+      },
+      {
+        "name": "viewers",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "Detections3Viewer",
+            "type": "isaac::viewers::Detections3Viewer"
+          },
+          {
+            "name": "TensorViewer",
+            "type": "isaac::viewers::TensorViewer"
+          }
+        ]
+      },
+      {
+        "name": "decoder_viewer",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "TensorViewer",
+            "type": "isaac::viewers::TensorViewer"
+          }
+        ]
+      },
+      {
+        "name": "sight_widgets",
+        "components": [
+          {
+            "type": "isaac::sight::SightWidget",
+            "name": "Pose Estimation"
+          },
+          {
+            "type": "isaac::sight::SightWidget",
+            "name": "Pose Estimation - Segmentation Decoder"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "interface/Subgraph/color",
+        "target": "object_pose_estimation.interface/Subgraph/input_image"
+      },
+      {
+        "source": "interface/Subgraph/color",
+        "target": "object_detection.subgraph/interface/image"
+      },
+      {
+        "source": "object_detection.subgraph/interface/detections",
+        "target": "object_pose_estimation.interface/Subgraph/input_detections"
+      },
+      {
+        "source": "object_pose_estimation.interface/Subgraph/output_poses",
+        "target": "detections_filter/Detections3Filter/detections_in"
+      },
+      {
+        "source": "detections_filter/Detections3Filter/detections_out",
+        "target": "viewers/Detections3Viewer/detections"
+      },
+      {
+        "source": "detections_filter/Detections3Filter/detections_out",
+        "target": "interface/Subgraph/output_poses"
+      },
+      {
+        "source": "object_pose_estimation.interface/Subgraph/output_decoder",
+        "target": "interface/Subgraph/output_tensors"
+      },
+      {
+        "source": "object_pose_estimation.interface/Subgraph/output_decoder",
+        "target": "viewers/TensorViewer/tensor"
+      }
+    ]
+  },
+  "config": {
+    "object_detection.sight_widgets": {
+      "Detections": {
+        "enabled": false
+      }
+    },
+    "detections_filter": {
+      "Detections3Filter": {
+        "detection_frame": "camera",
+        "threshold_translation": [7, 7, 7],
+        "threshold_rotation": [6.3, 6.3, 6.3]
+      }
+    },
+    "sight_widgets": {
+      "Pose Estimation": {
+        "type": "2d",
+        "channels": [
+          {
+            "name": "$(fullname object_detection.color_camera_visualizer/isaac.viewers.ColorCameraViewer/Color)"
+          },
+          {
+            "name": "$(fullname object_detection.detection_viewer/isaac.viewers.DetectionsViewer/detections)",
+            "active": false
+          },
+          {
+            "name": "$(fullname viewers/Detections3Viewer/bounding_box)"
+          },
+          {
+            "name": "$(fullname viewers/Detections3Viewer/mesh)"
+          }
+        ]
+      },
+      "Pose Estimation - Segmentation Decoder": {
+        "type": "2d",
+        "channels": [
+          {
+            "name": "$(fullname viewers/TensorViewer/tensor)"
+          }
+        ]
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "webroot": "packages/sight/webroot",
+        "assetroot": "external/industrial_dolly_pose_estimation_cnn_model",
+        "port": 3000,
+        "ui_config": {
+          "assets": {
+            "dolly": {
+              "obj": "/apps/assets/industrial_dolly_frame.obj",
+              "rotation": [
+                0.70710678118,
+                0.70710678118,
+                0,
+                0
+              ],
+              "translation": [
+                0,
+                0,
+                0.4
+              ],
+              "scale": 1.0
+            }
+          }
+        }
+      }
+    }
+  }
+}

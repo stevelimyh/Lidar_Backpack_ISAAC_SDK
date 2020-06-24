@@ -1,0 +1,185 @@
+{
+  "modules": [
+    "navigation"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "subgraph",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "interface",
+            "type": "isaac::alice::Subgraph"
+          }
+        ]
+      },
+      {
+        "name": "range_scan_to_observation_map",
+        "components": [
+          {
+            "name": "isaac.navigation.RangeScanToObservationMap",
+            "type": "isaac::navigation::RangeScanToObservationMap"
+          },
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          }
+        ]
+      },
+      {
+        "name": "range_scan_2_to_observation_map",
+        "components": [
+          {
+            "name": "isaac.navigation.RangeScanToObservationMap",
+            "type": "isaac::navigation::RangeScanToObservationMap"
+          },
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          }
+        ]
+      },
+      {
+        "name": "local_map",
+        "components": [
+          {
+            "name": "isaac.navigation.LocalMap",
+            "type": "isaac::navigation::LocalMap"
+          },
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          }
+        ]
+      },
+      {
+        "name": "local_map_postprocessing",
+        "components": [
+          {
+            "name": "cleanup",
+            "type": "isaac::navigation::OccupancyMapCleanup"
+          },
+          {
+            "name": "isaac.navigation.OccupancyToBinaryMap",
+            "type": "isaac::navigation::OccupancyToBinaryMap"
+          },
+          {
+            "name": "isaac.navigation.BinaryToDistanceMap",
+            "type": "isaac::navigation::BinaryToDistanceMap"
+          },
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          }
+        ]
+      },
+      {
+        "name": "binary_map_viewer",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "BinaryMapViewer",
+            "type": "isaac::viewers::BinaryMapViewer"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "subgraph/interface/flatscan",
+        "target": "range_scan_to_observation_map/isaac.navigation.RangeScanToObservationMap/flatscan"
+      },
+      {
+        "source": "subgraph/interface/flatscan_2",
+        "target": "range_scan_2_to_observation_map/isaac.navigation.RangeScanToObservationMap/flatscan"
+      },
+      {
+        "source": "local_map/isaac.navigation.LocalMap/local_map",
+        "target": "local_map_postprocessing/cleanup/rough_map"
+      },
+      {
+        "source": "local_map/isaac.navigation.LocalMap/local_map_lattice",
+        "target": "local_map_postprocessing/cleanup/rough_map_lattice"
+      },
+      {
+        "source": "local_map_postprocessing/cleanup/clean_map",
+        "target": "local_map_postprocessing/isaac.navigation.OccupancyToBinaryMap/occupancy_map"
+      },
+      {
+        "source": "local_map/isaac.navigation.LocalMap/local_map_lattice",
+        "target": "local_map_postprocessing/isaac.navigation.OccupancyToBinaryMap/occupancy_map_lattice"
+      },
+      {
+        "source": "local_map_postprocessing/isaac.navigation.OccupancyToBinaryMap/binary_map",
+        "target": "local_map_postprocessing/isaac.navigation.BinaryToDistanceMap/binary_map"
+      },
+      {
+        "source": "local_map/isaac.navigation.LocalMap/local_map_lattice",
+        "target": "local_map_postprocessing/isaac.navigation.BinaryToDistanceMap/binary_map_lattice"
+      },
+      {
+        "source": "range_scan_to_observation_map/isaac.navigation.RangeScanToObservationMap/observation_map",
+        "target": "local_map/isaac.navigation.LocalMap/observation_map"
+      },
+      {
+        "source": "range_scan_2_to_observation_map/isaac.navigation.RangeScanToObservationMap/observation_map",
+        "target": "local_map/isaac.navigation.LocalMap/observation_map"
+      },
+      {
+        "source": "range_scan_to_observation_map/isaac.navigation.RangeScanToObservationMap/observation_map_lattice",
+        "target": "local_map/isaac.navigation.LocalMap/observation_map_lattice"
+      },
+      {
+        "source": "range_scan_2_to_observation_map/isaac.navigation.RangeScanToObservationMap/observation_map_lattice",
+        "target": "local_map/isaac.navigation.LocalMap/observation_map_lattice"
+      },
+      {
+        "source": "local_map_postprocessing/cleanup/clean_map",
+        "target": "subgraph/interface/local_map"
+      },
+      {
+        "source": "local_map/isaac.navigation.LocalMap/local_map_lattice",
+        "target": "subgraph/interface/local_map_lattice"
+      },
+      {
+        "source": "local_map_postprocessing/isaac.navigation.OccupancyToBinaryMap/binary_map",
+        "target": "binary_map_viewer/BinaryMapViewer/binary_map"
+      },
+      {
+        "source": "local_map/isaac.navigation.LocalMap/local_map_lattice",
+        "target": "binary_map_viewer/BinaryMapViewer/binary_map_lattice"
+      }
+    ]
+  },
+  "config": {
+    "local_map_postprocessing": {
+      "cleanup": {
+        "clear_region": [[-0.25, 0.25],[-0.25, 0.25]],
+        "clear_region_frame": "robot"
+      },
+      "isaac.navigation.OccupancyToBinaryMap": {
+        "mean_threshold": 32,
+        "standard_deviation_threshold": 96
+      },
+      "isaac.navigation.BinaryToDistanceMap": {
+        "obstacle_name": "local_map",
+        "compute_distance_inside": true,
+        "blur_factor": 3,
+        "max_distance": 2.0
+      }
+    },
+    "range_scan_2_to_observation_map": {
+      "isaac.navigation.RangeScanToObservationMap": {
+        "sensor_frame": "lidar_2",
+        "sensor_lattice_frame": "lidar_2_lattice"
+      }
+    }
+  }
+}

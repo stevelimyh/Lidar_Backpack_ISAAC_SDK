@@ -1,0 +1,124 @@
+{
+  "name": "pose_refinement_imagefeed",
+  "modules": [
+    "message_generators",
+    "object_pose_refinement",
+    "sight",
+    "viewers"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "camera",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "image_loader",
+            "type": "isaac::message_generators::ImageLoader"
+          }
+        ]
+      },
+      {
+        "name": "detection_pose_estimation",
+        "subgraph": "packages/object_pose_estimation/apps/pose_cnn_decoder/detection_pose_estimation_cnn_inference.subgraph.json"
+      },
+      {
+        "name": "superpixels",
+        "subgraph": "packages/superpixels/apps/superpixels.subgraph.json"
+      },
+      {
+        "name": "object_pose_refinement",
+        "subgraph": "packages/object_pose_refinement/apps/pose_refinement.subgraph.json"
+      },
+      {
+        "name": "viewers",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "ObjectRefinementViewer",
+            "type": "isaac::viewers::Detections3Viewer"
+          }
+        ]
+      },
+      {
+        "name": "sight_widgets",
+        "components": [
+          {
+            "type": "isaac::sight::SightWidget",
+            "name": "SightWidget"
+          },
+          {
+            "name": "ObjectRefinement3DViewer",
+            "type": "isaac::sight::SightWidget"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "camera/image_loader/color",
+        "target": "detection_pose_estimation.interface/Subgraph/color"
+      },
+      {
+        "source": "camera/image_loader/color",
+        "target": "superpixels.subgraph/interface/color"
+      },
+      {
+        "source": "camera/image_loader/depth",
+        "target": "superpixels.subgraph/interface/depth"
+      },
+      {
+        "source": "superpixels.subgraph/interface/surflets",
+        "target": "object_pose_refinement.subgraph/interface/measurement_surflets"
+      },
+      {
+        "source": "detection_pose_estimation.object_detection.subgraph/interface/detections",
+        "target": "object_pose_refinement.subgraph/interface/input_detections"
+      },
+      {
+        "source": "detection_pose_estimation.interface/Subgraph/output_tensors",
+        "target": "object_pose_refinement.subgraph/interface/input_tensors"
+      },
+      {
+        "source": "detection_pose_estimation.interface/Subgraph/output_poses",
+        "target": "object_pose_refinement.subgraph/interface/input_poses"
+      },
+      {
+        "source": "object_pose_refinement.subgraph/interface/output_poses",
+        "target": "viewers/ObjectRefinementViewer/detections"
+      }
+    ]
+  },
+  "config": {
+    "camera": {
+      "image_loader": {
+        "color_filename": "packages/object_pose_refinement/apps/assets/sample_2_color.png",
+        "depth_filename": "packages/object_pose_refinement/apps/assets/sample_2_depth.png",
+        "tick_period": "1Hz",
+        "focal_length": [614.573, 614.573],
+        "optical_center": [240, 424]
+      }
+    },
+    "detection_pose_estimation.object_detection.detection_decoder": {
+      "isaac.detect_net.DetectNetDecoder": {
+        "output_scale": [480, 848]
+      }
+    },
+    "detection_pose_estimation.object_pose_estimation.detection_convertor": {
+      "BoundingBoxEncoder": {
+        "image_dimensions": [480, 848]
+      }
+    },
+    "object_pose_refinement.surflet_assignment": {
+      "surflet_assignment": {
+        "scale": 0.05
+      }
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "map": {
+    "occupancy": {
+      "cell_size": 0.075,
+      "filename": "apps/assets/maps/elevator_office_2.png"
+    },
+    "waypoints": {
+        "tick_period": "1.0"
+    },
+    "restricted_area": {
+      "tick_period": "1.0"
+    }
+  }
+}

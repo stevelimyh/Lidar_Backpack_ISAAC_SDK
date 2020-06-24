@@ -1,0 +1,91 @@
+{
+  "name": "navigate",
+  "modules": [],
+  "graph": {
+    "nodes": [
+      {
+        "name": "simulation",
+        "subgraph": "packages/navsim/apps/navsim_navigation.subgraph.json"
+      },
+      {
+        "name": "navigation",
+        "subgraph": "packages/navigation/apps/differential_base_navigation.subgraph.json"
+      },
+      {
+        "name": "goals",
+        "subgraph": "packages/navigation/apps/goal_generators.subgraph.json"
+      }
+    ],
+    "edges": [
+      {
+        "source": "navigation.subgraph/interface/feedback",
+        "target": "goals.subgraph/interface/feedback"
+      },
+      {
+        "source": "goals.subgraph/interface/goal",
+        "target": "navigation.subgraph/interface/goal"
+      },
+      {
+        "source": "simulation.interface/noisy/flatscan",
+        "target": "navigation.subgraph/interface/flatscan_for_localization"
+      },
+      {
+        "source": "simulation.interface/noisy/flatscan",
+        "target": "navigation.subgraph/interface/flatscan_for_obstacles"
+      },
+      {
+        "source": "simulation.interface/output/base_state",
+        "target": "navigation.subgraph/interface/state"
+      },
+      {
+        "source": "simulation.interface/output/imu_raw",
+        "target": "navigation.subgraph/interface/imu_raw"
+      },
+      {
+        "source": "navigation.subgraph/interface/command",
+        "target": "simulation.interface/input/base_command"
+      },
+      {
+        "source": "navigation.planner.global_plan_smoother/smoother/smooth_plan",
+        "target": "simulation.interface/sight/global_plan"
+      },
+      {
+        "source": "navigation.control.lqr/isaac.planner.DifferentialBaseLqrPlanner/plan",
+        "target": "simulation.interface/sight/local_plan"
+      }
+    ]
+  },
+  "config": {
+    "simulation.scenario_manager": {
+      "disable_automatic_start": true
+    },
+    "goals.goal_behavior": {
+      "isaac.navigation.SelectorBehavior": {
+        "desired_behavior": "patrol"
+      }
+    },
+    "goals.patrol": {
+      "FollowPath": {
+        "stationary_wait_time": 30.0,
+        "wait_time": 0.0
+      }
+    },
+    "navigation.imu_odometry.odometry": {
+      "DifferentialBaseWheelImuOdometry": {
+        "use_imu": false
+      }
+    },
+    "navigation.control.lqr": {
+      "isaac.planner.DifferentialBaseLqrPlanner": {
+        "speed_gradient_target_distance": 3.0,
+        "target_distance": 0.25
+      }
+    },
+    "navigation.control.lqr": {
+      "isaac.planner.DifferentialBaseLqrPlanner": {
+        "max_speed": 0.45,
+        "max_angular_speed": 0.6
+      }
+    }
+  }
+}

@@ -1,0 +1,97 @@
+{
+  "name": "gstreamer_pipeline_multi",
+  "modules": [
+    "deepstream",
+    "sight",
+    "viewers"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "deepstream",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "pipeline",
+            "type": "isaac::deepstream::Pipeline"
+          },
+          {
+            "name": "viewer1",
+            "type": "isaac::viewers::ColorCameraViewer"
+          },
+          {
+            "name": "viewer2",
+            "type": "isaac::viewers::ColorCameraViewer"
+          },
+          {
+            "name": "viewer3",
+            "type": "isaac::viewers::ColorCameraViewer"
+          },
+          {
+            "name": "viewer1_widget",
+            "type": "isaac::sight::SightWidget"
+          },
+          {
+            "name": "viewer2_widget",
+            "type": "isaac::sight::SightWidget"
+          },
+          {
+            "name": "viewer3_widget",
+            "type": "isaac::sight::SightWidget"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "deepstream/pipeline/image1",
+        "target": "deepstream/viewer1/color_listener"
+      },
+      {
+        "source": "deepstream/pipeline/image2",
+        "target": "deepstream/viewer2/color_listener"
+      },
+      {
+        "source": "deepstream/pipeline/image3",
+        "target": "deepstream/viewer3/color_listener"
+      }
+    ]
+  },
+  "config": {
+    "deepstream": {
+      "pipeline": {
+        "pipeline": "videotestsrc ! video/x-raw,format=RGB ! videoconvert ! appsink name=image1 videotestsrc pattern=ball ! video/x-raw,format=RGB ! videoconvert ! appsink name=image2 videotestsrc pattern=pinwheel ! video/x-raw,format=RGB ! videoconvert ! appsink name=image3"
+      },
+      "viewer1_widget": {
+        "title": "Viewer: Test Source 1",
+        "type": "2d",
+        "channels": [
+          {
+            "name": "deepstream/viewer1/Color"
+          }
+        ]
+      },
+      "viewer2_widget": {
+        "title": "Viewer: Test Source 2",
+        "type": "2d",
+        "channels": [
+          {
+            "name": "deepstream/viewer2/Color"
+          }
+        ]
+      },
+      "viewer3_widget": {
+        "title": "Viewer: Test Source 3",
+        "type": "2d",
+        "channels": [
+          {
+            "name": "deepstream/viewer3/Color"
+          }
+        ]
+      }
+    }
+  }
+}

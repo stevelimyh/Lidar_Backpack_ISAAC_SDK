@@ -1,0 +1,19 @@
+{
+    "config": {
+      "detect_net_inference.tensor_r_t_inference": {
+        "isaac.ml.TensorRTInference": {
+          "model_file_path": "external/industrial_dolly_pose_estimation_cnn_model/resnet18_detector_industrial_dolly_fof.etlt",
+          "etlt_password": "test_pilot_2020",
+          "force_engine_update": false
+        }
+      },
+      "detect_net_inference.detection_decoder": {
+        "isaac.detect_net.DetectNetDecoder": {
+          "labels": ["dolly"],
+          "non_maximum_suppression_threshold": 0.4,
+          "confidence_threshold": 0.55,
+          "output_scale": [720, 1280]
+        }
+      }
+    }
+  }

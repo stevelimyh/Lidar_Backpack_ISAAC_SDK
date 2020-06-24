@@ -1,0 +1,117 @@
+{
+  "modules": [
+    "navigation",
+    "sensors:joystick"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "subgraph",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "interface",
+            "type": "isaac::alice::Subgraph"
+          }
+        ]
+      },
+      {
+        "name": "joystick",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.Joystick",
+            "type": "isaac::Joystick"
+          }
+        ]
+      },
+      {
+        "name": "virtual_gamepad_bridge",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "VirtualGamepadBridge",
+            "type": "isaac::navigation::VirtualGamepadBridge"
+          }
+        ]
+      },
+      {
+        "name": "robot_remote",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.navigation.RobotRemoteControl",
+            "type": "isaac::navigation::RobotRemoteControl"
+          },
+          {
+            "name": "isaac.alice.FailsafeHeartbeat",
+            "type": "isaac::alice::FailsafeHeartbeat"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "joystick/isaac.Joystick/js_state",
+        "target": "robot_remote/isaac.navigation.RobotRemoteControl/js_state"
+      },
+      {
+        "source": "virtual_gamepad_bridge/VirtualGamepadBridge/joystick",
+        "target": "robot_remote/isaac.navigation.RobotRemoteControl/js_state"
+      },
+      {
+        "source": "/websight/WebsightServer/virtual_gamepad",
+        "target": "virtual_gamepad_bridge/VirtualGamepadBridge/request"
+      },
+      {
+        "source": "virtual_gamepad_bridge/VirtualGamepadBridge/reply",
+        "target": "/websight/WebsightServer/virtual_gamepad_reply"
+      },
+      {
+        "source": "robot_remote/isaac.navigation.RobotRemoteControl/segway_cmd",
+        "target": "subgraph/interface/command"
+      },
+      {
+        "source": "subgraph/interface/control",
+        "target": "robot_remote/isaac.navigation.RobotRemoteControl/ctrl"
+      },
+      {
+        "source": "joystick/isaac.Joystick/js_state",
+        "target": "subgraph/interface/joystick"
+      },
+      {
+        "source": "virtual_gamepad_bridge/VirtualGamepadBridge/joystick",
+        "target": "subgraph/interface/joystick"
+      }
+    ]
+  },
+  "config": {
+    "virtual_gamepad_bridge": {
+      "VirtualGamepadBridge": {
+        "tick_period": "100ms"
+      }
+    },
+    "robot_remote": {
+      "isaac.alice.FailsafeHeartbeat": {
+        "interval": 0.25,
+        "failsafe_name": "robot_failsafe",
+        "heartbeat_name": "deadman_switch"
+      },
+      "isaac.navigation.RobotRemoteControl": {
+        "tick_period": "10ms"
+      }
+    }
+  }
+}

@@ -1,0 +1,178 @@
+{
+  "modules": [
+    "flatsim"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "subgraph",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "interface",
+            "type": "isaac::alice::Subgraph"
+          }
+        ]
+      },
+      {
+        "name": "base_simulation",
+        "components": [
+          {
+            "name": "DifferentialBasePhysics",
+            "type": "isaac::flatsim::DifferentialBasePhysics"
+          },
+          {
+            "name": "DifferentialBaseSimulator",
+            "type": "isaac::flatsim::DifferentialBaseSimulator"
+          },
+          {
+            "name": "Random",
+            "type": "isaac::alice::Random"
+          },
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          }
+        ]
+      },
+      {
+        "name": "robot_spawn_pose",
+        "components": [
+          {
+            "name": "PoseInitializer",
+            "type": "isaac::alice::PoseInitializer"
+          }
+        ],
+        "start_order": -200
+      },
+      {
+        "name": "sim_range_scan",
+        "components": [
+          {
+            "name": "SimRangeScan",
+            "type": "isaac::flatsim::SimRangeScan"
+          },
+          {
+            "name": "robot_gt_T_lidar_gt",
+            "type": "isaac::alice::PoseInitializer"
+          },
+          {
+            "name": "robot_T_lidar",
+            "type": "isaac::alice::PoseInitializer"
+          },
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          }
+        ]
+      },
+      {
+        "name": "flatscan_noiser",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "Random",
+            "type": "isaac::alice::Random"
+          },
+          {
+            "name": "FlatscanNoiser",
+            "type": "isaac::flatsim::FlatscanNoiser"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "base_simulation/DifferentialBaseSimulator/diff_base_state",
+        "target": "subgraph/interface/diff_base_state"
+      },
+      {
+        "source": "subgraph/interface/diff_base_command",
+        "target": "base_simulation/DifferentialBaseSimulator/diff_base_command"
+      },
+      {
+        "source": "base_simulation/DifferentialBaseSimulator/physics_actuation",
+        "target": "base_simulation/DifferentialBasePhysics/command"
+      },
+      {
+        "source": "base_simulation/DifferentialBasePhysics/bodies",
+        "target": "base_simulation/DifferentialBaseSimulator/physics_bodies"
+      },
+      {
+        "source": "sim_range_scan/SimRangeScan/flatscan",
+        "target": "flatscan_noiser/FlatscanNoiser/flatscan"
+      },
+      {
+        "source": "flatscan_noiser/FlatscanNoiser/noisy_flatscan",
+        "target": "subgraph/interface/flatscan"
+      }
+    ]
+  },
+  "config": {
+    "base_simulation": {
+      "DifferentialBasePhysics": {
+        "tick_period": "100Hz"
+      },
+      "DifferentialBaseSimulator": {
+        "tick_period": "100Hz"
+      }
+    },
+    "robot_spawn_pose": {
+      "PoseInitializer": {
+        "lhs_frame": "world",
+        "rhs_frame": "robot_init_gt",
+        "pose": {
+          "rotation": { "yaw_degrees": 180.0 },
+          "translation": [25.0, 20.0, 0.0]
+        }
+      }
+    },
+    "sim_range_scan": {
+      "SimRangeScan": {
+        "num_beams": 900,
+        "tick_period": "50ms"
+      },
+      "robot_gt_T_lidar_gt": {
+        "lhs_frame": "robot_gt",
+        "pose": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          -0.04,
+          0.0,
+          0.0
+        ],
+        "rhs_frame": "lidar_gt"
+      },
+      "robot_T_lidar": {
+        "lhs_frame": "robot",
+        "pose": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          -0.04,
+          0.0,
+          0.0
+        ],
+        "rhs_frame": "lidar"
+      }
+    },
+    "flatscan_noiser": {
+      "FlatscanNoiser": {
+        "beam_invalid_probability": 0.1,
+        "beam_random_probability": 0.0,
+        "beam_short_probability": 0.05,
+        "range_sigma_abs": 0.05,
+        "range_sigma_rel": 0.005
+      }
+    }
+  }
+}

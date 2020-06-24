@@ -1,0 +1,51 @@
+{
+  "name": "dynamixel_test",
+  "modules": [
+    "dynamixel",
+    "sight"
+  ],
+  "config": {
+    "dynamixel": {
+      "driver": {
+        "tick_period": "50Hz",
+        "port": "/dev/ttyUSB0",
+        "debug_mode": true,
+        "debug_speed": 1.0,
+        "servo_ids": [1, 2, 3],
+        "servo_model": "MX12W"
+      },
+      "Dynamixel Motors": {
+        "type": "plot",
+        "channels": [
+          { "name": "dynamixel/driver/motor_1.command" },
+          { "name": "dynamixel/driver/motor_2.command" },
+          { "name": "dynamixel/driver/motor_3.command" },
+          { "name": "dynamixel/driver/motor_1.state" },
+          { "name": "dynamixel/driver/motor_2.state" },
+          { "name": "dynamixel/driver/motor_3.state" }
+        ]
+      }
+    }
+  },
+  "graph": {
+    "nodes": [
+      {
+        "name": "dynamixel",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "driver",
+            "type": "isaac::dynamixel::DynamixelDriver"
+          },
+          {
+            "name": "Dynamixel Motors",
+            "type": "isaac::sight::SightWidget"
+          }
+        ]
+      }
+    ]
+  }
+}

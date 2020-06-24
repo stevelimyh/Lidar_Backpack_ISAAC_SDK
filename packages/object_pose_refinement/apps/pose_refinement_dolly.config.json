@@ -1,0 +1,104 @@
+{
+  "detection_pose_estimation.viewers": {
+    "Detections3Viewer": {
+      "detections_color": [204, 0, 102, 0]
+    }
+  },
+  "detection_pose_estimation.detections_filter": {
+    "Detections3Filter": {
+      "detection_frame": "camera",
+      "threshold_translation": [100.0, 100.0, 7.0],
+      "threshold_rotation": [6.3, 6.3, 6.3]
+    }
+  },
+  "detection_pose_estimation.sight_widgets": {
+    "Pose Estimation": {
+      "enabled": false
+    },
+    "Pose Estimation - Segmentation Decoder": {
+      "enabled": false
+    }
+  },
+  "detection_pose_estimation.object_detection.sight_widgets": {
+    "Detections": {
+      "enabled": false
+    }
+  },
+  "superpixels.rgbd":{
+    "edges": {
+      "max_depth": 4.0
+    }
+  },
+  "viewers": {
+    "ObjectRefinementViewer": {
+      "frame": "camera",
+      "object_T_box_center": [1.0, 0, 0, 0, 0, 0, 0.025],
+      "box_dimensions": [0.9, 1.32, 0.25],
+      "alpha_channel": 128,
+      "mesh_name": "dolly",
+      "detections_color": [118, 185, 0, 0]
+    }
+  },
+  "sight_widgets": {
+    "SightWidget": {
+      "type": "2d",
+      "channels": [
+        {
+          "name": "$(fullname detection_pose_estimation.object_detection.color_camera_visualizer/isaac.viewers.ColorCameraViewer/Color)"
+        },
+        {
+          "name": "$(fullname detection_pose_estimation.object_detection.detection_viewer/isaac.viewers.DetectionsViewer/detections)",
+          "active": false
+        },
+        {
+          "name": "$(fullname detection_pose_estimation.viewers/Detections3Viewer/bounding_box)",
+          "active": false,
+          "size": 2.5
+        },
+        {
+          "name": "$(fullname viewers/ObjectRefinementViewer/bounding_box)",
+          "size": 3
+        }
+      ]
+    },
+    "ObjectRefinement3DViewer": {
+      "type": "3d",
+      "channels": [
+        {
+          "name": "$(fullname object_pose_refinement.object_pose_refinement/PoseRefinement/measured)"
+        },
+        {
+          "name": "$(fullname object_pose_refinement.object_pose_refinement/PoseRefinement/initial)"
+        },
+        {
+          "name": "$(fullname object_pose_refinement.object_pose_refinement/PoseRefinement/refined)"
+        },
+        {
+          "name": "$(fullname object_pose_refinement.object_pose_refinement/PoseRefinement/assignment)",
+          "active": false
+        },
+        {
+          "name": "$(fullname object_pose_refinement.object_pose_refinement/PoseRefinement/filtered)",
+          "active": false
+        }
+      ]
+    }
+  },
+  "websight": {
+    "WebsightServer": {
+      "webroot": "packages/sight/webroot",
+      "assetroot": "external/industrial_dolly_pose_estimation_cnn_model",
+      "port": 3000,
+      "ui_config": {
+        "assets": {
+          "dolly": {
+            "obj": "/apps/assets/industrial_dolly_frame.obj",
+            "rotation": [0.70710678118, 0.70710678118, 0,  0],
+            "translation": [0, 0, 0.025],
+            "scale": 1.0
+          }
+        }
+      }
+    }
+  }
+}

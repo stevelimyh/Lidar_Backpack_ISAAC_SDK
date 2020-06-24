@@ -1,0 +1,39 @@
+{
+  "name": "subprocess",
+  "modules": [
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "subprocess",
+        "components": [
+          {
+            "name": "task0",
+            "type": "isaac::alice::Subprocess"
+          }
+        ]
+      }
+    ],
+    "edges": [
+    ]
+  },
+  "config": {
+    "subprocess": {
+      "task0": {
+        "start_command": "echo task0_start",
+        "stop_command": "echo task0_stop"
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "port": 2999,
+        "ui_config": {
+          "windows": {
+          },
+          "assets": {
+          }
+        }
+      }
+    }
+  }
+}

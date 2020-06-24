@@ -1,0 +1,4 @@
+{
+  "graphs": ["sim.graph.json"],
+  "configs": ["sim.config.json"]
+}

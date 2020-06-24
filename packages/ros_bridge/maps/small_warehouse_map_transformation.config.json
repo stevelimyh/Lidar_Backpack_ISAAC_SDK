@@ -1,0 +1,12 @@
+{
+  "pose_initializers": {
+    "map_transformation": {
+      "lhs_frame": "ros_map",
+      "rhs_frame": "map",
+      "pose": {
+        "rotation": { "yaw_degrees": 180 },
+        "translation": [19.3, 24.3, 0.0]
+      }
+    }
+  }
+}

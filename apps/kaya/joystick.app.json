@@ -1,0 +1,38 @@
+{
+  "name": "joystick",
+  "modules": [
+  ],
+  "config": {
+    "odometry.odometry": {
+      "HolonomicBaseWheelImuOdometry": {
+        "use_imu": false
+      }
+    }
+  },
+  "graph": {
+    "nodes": [
+      {
+        "name": "odometry",
+        "subgraph": "packages/navigation/apps/holonomic_base_imu_odometry.subgraph.json"
+      },
+      {
+        "name": "2d_kaya",
+        "subgraph": "apps/kaya/2d_kaya.subgraph.json"
+      },
+      {
+        "name": "commander",
+        "subgraph": "packages/navigation/apps/holonomic_base_commander.subgraph.json"
+      }
+    ],
+    "edges": [
+      {
+        "source": "2d_kaya.subgraph/interface/base_state",
+        "target": "odometry.subgraph/interface/state"
+      },
+      {
+        "source": "commander.subgraph/interface/command",
+        "target": "2d_kaya.subgraph/interface/base_command"
+      }
+    ]
+  }
+}

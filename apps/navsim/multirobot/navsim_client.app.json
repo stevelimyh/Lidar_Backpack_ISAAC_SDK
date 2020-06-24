@@ -1,0 +1,101 @@
+{
+  "name": "navsim_client",
+  "modules": [],
+  "graph": {
+    "nodes": [
+      {
+        "name": "navsim",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "output",
+            "type": "isaac::alice::TcpPublisher"
+          },
+          {
+            "name": "input",
+            "type": "isaac::alice::TcpSubscriber"
+          },
+          {
+            "name": "time_sync",
+            "type": "isaac::alice::TimeSynchronizer"
+          }
+        ]
+      },
+      {
+        "name": "robot",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "input",
+            "type": "isaac::alice::TcpPublisher"
+          },
+          {
+            "name": "output",
+            "type": "isaac::alice::TcpSubscriber"
+          },
+          {
+            "name": "time_sync",
+            "type": "isaac::alice::TimeSynchronizer"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "robot/output/bodies",
+        "target": "navsim/output/bodies"
+      },
+      {
+        "source": "robot/output/base_state",
+        "target": "navsim/output/base_state"
+      },
+      {
+        "source": "navsim/input/base_command",
+        "target": "robot/input/base_command"
+      },
+      {
+        "source": "robot/output/players",
+        "target": "navsim/input/teleport"
+      },
+      {
+        "source": "navsim/input/unity_global_plan",
+        "target": "robot/input/unity_global_plan"
+      },
+      {
+        "source": "navsim/input/unity_local_plan",
+        "target": "robot/input/unity_local_plan"
+      }
+    ]
+  },
+  "config": {
+    "websight": {
+      "WebsightServer": {
+        "port": 3100
+      }
+    },
+    "navsim": {
+      "output": {
+        "port": 55000
+      },
+      "input": {
+        "port": 55001,
+        "host": "localhost"
+      }
+    },
+    "robot": {
+      "input": {
+        "port": 45001
+      },
+      "output": {
+        "port": 45000,
+        "host": "localhost"
+      }
+    }
+  }
+}

@@ -1,0 +1,67 @@
+{
+    "modules": [
+        "imu",
+        "message_generators"
+    ],
+    "graph": {
+        "nodes": [
+            {
+                "name": "subgraph",
+                "components": [
+                    {
+                        "name": "message_ledger",
+                        "type": "isaac::alice::MessageLedger"
+                    },
+                    {
+                        "name": "interface",
+                        "type": "isaac::alice::Subgraph"
+                    }
+                ]
+            },
+            {
+                "name": "body_generator",
+                "components": [
+                    {
+                        "name": "message_ledger",
+                        "type": "isaac::alice::MessageLedger"
+                    },
+                    {
+                        "name": "body_generator",
+                        "type": "isaac::message_generators::RigidBody3GroupGenerator"
+                    }
+                ]
+            },
+            {
+                "name": "imu_sim",
+                "components": [
+                    {
+                        "name": "message_ledger",
+                        "type": "isaac::alice::MessageLedger"
+                    },
+                    {
+                        "name": "imu_sim",
+                        "type":"isaac::imu::ImuSim"
+                    }
+                ]
+            }
+        ],
+        "edges": [
+            {
+                "source": "body_generator/body_generator/bodies" ,
+                "target": "imu_sim/imu_sim/bodies"
+            },
+            {
+                "source": "imu_sim/imu_sim/imu_raw" ,
+                "target": "subgraph/interface/imu_raw"
+            }
+        ]
+    },
+    "config": {
+        "body_generator": {
+            "body_generator": {
+                "body_name": "imu",
+                "tick_period": "0.1s"
+            }
+        }
+    }
+}

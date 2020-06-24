@@ -1,0 +1,92 @@
+{
+  "name": "opencv_edge_detection",
+  "modules": [
+      "//apps/tutorials/opencv_edge_detection:edge_detector",
+      "sensors:v4l2_camera",
+      "viewers"
+  ],
+  "graph": {
+       "nodes": [
+         {
+           "name": "camera",
+           "components": [
+             {
+               "name": "MessageLedger",
+               "type": "isaac::alice::MessageLedger"
+             },
+             {
+               "name": "V4L2Camera",
+               "type": "isaac::V4L2Camera"
+             }
+           ]
+         },
+         {
+           "name": "edge_detector",
+           "components": [
+             {
+               "name": "MessageLedger",
+               "type": "isaac::alice::MessageLedger"
+             },
+             {
+               "name": "EdgeDetector",
+               "type": "isaac::opencv::EdgeDetector"
+             }
+           ]
+         },
+         {
+           "name": "viewer",
+           "components": [
+             {
+               "name": "MessageLedger",
+               "type": "isaac::alice::MessageLedger"
+             },
+             {
+               "name": "ColorCameraViewer",
+               "type": "isaac::viewers::ColorCameraViewer"
+             }
+           ]
+         }
+       ],
+       "edges": [
+         {
+           "source": "camera/V4L2Camera/frame",
+           "target": "edge_detector/EdgeDetector/input_image"
+         },
+         {
+           "source": "edge_detector/EdgeDetector/output_image",
+           "target": "viewer/ColorCameraViewer/color_listener"
+         }
+       ]
+  },
+  "config": {
+    "camera": {
+      "V4L2Camera": {
+        "device_id": 0,
+        "rows": 480,
+        "cols": 640,
+        "rate_hz": 30
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "port": 3000,
+        "ui_config": {
+          "windows": {
+            "Edge Detection": {
+              "renderer": "2d",
+              "dims": {
+                "width": 640,
+                "height": 480
+              },
+              "channels": [
+                {
+                  "name": "opencv_edge_detection/viewer/ColorCameraViewer/Color"
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

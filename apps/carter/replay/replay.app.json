@@ -1,0 +1,190 @@
+{
+  "name": "replay",
+  "modules": [
+    "navigation",
+    "perception",
+    "planner",
+    "viewers"
+  ],
+  "config": {
+    "robot_pose_initializer": {
+      "initial_pose": {
+        "lhs_frame": "world",
+        "rhs_frame": "robot_init",
+        "pose": [0.965926, 0.0, 0.0, -0.258819, 34.0, 9.0, 0.0],
+        "attach_interactive_marker": true
+      }
+    },
+    "lidar_pose": {
+      "initial_pose": {
+        "lhs_frame": "robot",
+        "rhs_frame": "lidar",
+        "pose": [1.0, 0.0, 0.0, 0.0, -0.04, 0.0, 0.59]
+      }
+    },
+    "range_scan_flattening": {
+      "isaac.perception.RangeScanFlattening": {
+        "height_min": -0.60,
+        "height_max": 0.60,
+        "pitch_fudge": 0.0174533
+      }
+    },
+    "segway_odometry": {
+      "isaac.navigation.DifferentialBaseOdometry": {
+        "tick_period": "100Hz"
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "port": 3000,
+        "ui_config": {
+          "windows": {
+            "Carter Replay - Local View": {
+              "renderer": "2d",
+              "dims": {
+                "width": 256,
+                "height": 256
+              },
+              "channels": [
+                { "name": "replay/local_map/isaac.navigation.LocalMap/local_map" }
+              ]
+            },
+            "Carter Replay - Right Camera": {
+              "renderer": "2d",
+              "dims": {
+                "width": 256,
+                "height": 256
+              },
+              "channels": [
+                { "name": "replay/camera_viewer_right/isaac.viewers.ColorCameraViewer/Color" }
+              ]
+            },
+            "Carter Replay - Odometry": {
+              "renderer": "plot",
+              "dims": {
+                "width":640,
+                "height":480
+              },
+              "channels": [
+                {"name": "replay/segway_odometry/isaac.navigation.DifferentialBaseOdometry/state.heading"},
+                {"name": "replay/segway_odometry/isaac.navigation.DifferentialBaseOdometry/state.pos_x"},
+                {"name": "replay/segway_odometry/isaac.navigation.DifferentialBaseOdometry/state.pos_y"}
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "graph" : {
+    "nodes": [
+      {
+        "name": "replay",
+        "subgraph": "packages/record_replay/apps/replay.subgraph.json"
+      },
+      {
+        "name": "range_scan_flattening",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.perception.RangeScanFlattening",
+            "type": "isaac::perception::RangeScanFlattening"
+          }
+        ]
+      },
+      {
+        "name": "camera_viewer_right",
+        "components": [
+          {
+            "name": "isaac.alice.MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.viewers.ColorCameraViewer",
+            "type": "isaac::viewers::ColorCameraViewer"
+          }
+        ]
+      },
+      {
+        "name": "segway_odometry",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.navigation.DifferentialBaseOdometry",
+            "type": "isaac::navigation::DifferentialBaseOdometry"
+          }
+        ]
+      },
+      {
+        "name": "local_map",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.navigation.LocalMap",
+            "type": "isaac::navigation::LocalMap"
+          }
+        ]
+      },
+      {
+        "name": "robot_pose_initializer",
+        "start_order": -200,
+        "components": [
+          {
+            "name": "initial_pose",
+            "type": "isaac::alice::PoseInitializer"
+          }
+        ]
+      },
+      {
+        "name": "lidar_pose",
+        "start_order": -200,
+        "components": [
+          {
+            "name": "initial_pose",
+            "type": "isaac::alice::PoseInitializer"
+          }
+        ]
+      },
+      {
+        "name": "shared_robot_model",
+        "components": [
+          {
+            "name": "RangeScanModel",
+            "type": "isaac::navigation::RangeScanModelFlatloc"
+          },
+          {
+            "name": "DifferentialBaseModel",
+            "type": "isaac::planner::DifferentialBaseModel"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "replay.interface/output/segway_state",
+        "target": "segway_odometry/isaac.navigation.DifferentialBaseOdometry/state"
+      },
+      {
+        "source": "replay.interface/output/fullscan",
+        "target": "range_scan_flattening/isaac.perception.RangeScanFlattening/scan"
+      },
+      {
+        "source": "range_scan_flattening/isaac.perception.RangeScanFlattening/flatscan",
+        "target": "local_map/isaac.navigation.LocalMap/flatscan"
+      },
+      {
+        "source": "replay.interface/output/right_camera_rgb",
+        "target": "camera_viewer_right/isaac.viewers.ColorCameraViewer/color_listener"
+      }
+    ]
+  }
+}

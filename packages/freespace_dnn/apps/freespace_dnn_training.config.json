@@ -1,0 +1,21 @@
+{
+  "app_filename": "packages/freespace_dnn/apps/freespace_dnn_training_unity3d.app.json",
+  "batch_size": 4,
+  "class_weight": 10,
+  "cols": 512,
+  "data_points": 40000,
+  "gpu_memory_usage": 0.6,
+  "initial_sample_count": 20,
+  "learning_rate": 1e-5,
+  "load_from_checkpoint": false,
+  "num_classes": 6,
+  "num_gpus": 1,
+  "rows": 256,
+  "save_every": 50,
+  "sleep_duration": 1,
+  "steps_per_eval": 1,
+  "summary_every": 10,
+  "timeout_duration": 3,
+  "train_logdir": "/tmp/path_segmentation/",
+  "use_mirrored_strategy": false
+}

@@ -1,0 +1,78 @@
+{
+  "nodes": [
+    {
+      "name": "A_CarterGroup",
+      "components": [
+        {
+          "name": "MessageLedger",
+          "type": "isaac::alice::MessageLedger"
+        },
+        {
+          "name": "ActorGroup",
+          "type": "isaac::sim_bridge::ActorGroup"
+        }
+      ]
+    },
+    {
+      "name": "A_DRGroup",
+      "components": [
+        {
+          "name": "MessageLedger",
+          "type": "isaac::alice::MessageLedger"
+        },
+        {
+          "name": "ActorGroup",
+          "type": "isaac::sim_bridge::ActorGroup"
+        }
+      ]
+    },
+    {
+      "name": "CarterLeftCamera",
+      "components": [
+        {
+          "name": "isaac.alice.MessageLedger",
+          "type": "isaac::alice::MessageLedger"
+        },
+        {
+          "name": "CameraComponent",
+          "type": "isaac::sim_bridge::Camera"
+        }
+      ]
+    },
+    {
+      "name": "TimeSyncedTcpConnections",
+      "components": [
+        {
+          "name": "TimeSynchronizer",
+          "type": "isaac::alice::TimeSynchronizer"
+        },
+        {
+          "name": "isaac.alice.MessageLedger",
+          "type": "isaac::alice::MessageLedger"
+        },
+        {
+          "name": "LeftCameraPublisher",
+          "type": "isaac::alice::TcpPublisher"
+        },
+        {
+          "name": "ActorGroupRigidCommandSubscriber",
+          "type": "isaac::alice::TcpSubscriber"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "CarterLeftCamera/CameraComponent/color_image",
+      "target": "TimeSyncedTcpConnections/LeftCameraPublisher/ColorSensor"
+    },
+    {
+      "source": "CarterLeftCamera/CameraComponent/bounding_box",
+      "target": "TimeSyncedTcpConnections/LeftCameraPublisher/DetectionSensor"
+    },
+    {
+      "source": "TimeSyncedTcpConnections/ActorGroupRigidCommandSubscriber/rigid_command",
+      "target": "A_CarterGroup/ActorGroup/rigid_command"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "camera_teleportation": {
+    "Teleportation": {
+      "name": "CameraGroup",
+      "min": [-21.0, -13.0, 0.4],
+      "max": [21.0, 13.0, 1.0],
+      "enable_yaw": true,
+      "roll_pitch_yaw_standard_deviation": [0.1, 0.15, 0.0],
+       "offset_pose": {
+        "rotation": {
+          "roll_degrees": -180.0,
+          "pitch_degrees": 68.5,
+          "yaw_degrees": 90.0
+        }
+      },
+      "tick_period": "3s"
+    }
+  }
+}

@@ -1,0 +1,157 @@
+{
+  "name": "perception",
+  "graph": {
+    "nodes": [
+      {
+        "name": "simulation",
+        "subgraph": "packages/navsim/apps/navsim_navigation.subgraph.json"
+      },
+      {
+        "name": "commander",
+        "subgraph": "packages/navigation/apps/differential_base_commander.subgraph.json"
+      },
+      {
+        "name": "detection_pose_estimation",
+        "subgraph": "packages/object_pose_estimation/apps/pose_cnn_decoder/detection_pose_estimation_cnn_inference.subgraph.json"
+      },
+      {
+        "name": "detections_to_pose_tree",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "DetectionsToPoseTree",
+            "type": "isaac::utils::DetectionsToPoseTree"
+          }
+        ]
+      },
+      {
+        "name": "range_scan_to_observation_map",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "RangeScanToObservationMap",
+            "type": "isaac::navigation::RangeScanToObservationMap"
+          }
+        ]
+      },
+      {
+        "name": "range_scan_2_to_observation_map",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "RangeScanToObservationMap",
+            "type": "isaac::navigation::RangeScanToObservationMap"
+          }
+        ]
+      },
+      {
+        "name": "local_map",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "LocalMap",
+            "type": "isaac::navigation::LocalMap"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "commander.subgraph/interface/command",
+        "target": "simulation.interface/input/base_command"
+      },
+      {
+        "source": "simulation.interface/output/color",
+        "target": "detection_pose_estimation.interface/Subgraph/color"
+      },
+      {
+        "source": "detection_pose_estimation.interface/Subgraph/output_poses",
+        "target": "detections_to_pose_tree/DetectionsToPoseTree/detections"
+      },
+      {
+        "source": "simulation.interface/noisy/flatscan",
+        "target": "range_scan_to_observation_map/RangeScanToObservationMap/flatscan"
+      },
+      {
+        "source": "simulation.interface/noisy/flatscan_2",
+        "target": "range_scan_2_to_observation_map/RangeScanToObservationMap/flatscan"
+      },
+      {
+        "source": "range_scan_to_observation_map/RangeScanToObservationMap/observation_map",
+        "target": "local_map/LocalMap/observation_map"
+      },
+      {
+        "source": "range_scan_2_to_observation_map/RangeScanToObservationMap/observation_map",
+        "target": "local_map/LocalMap/observation_map"
+      },
+      {
+        "source": "range_scan_to_observation_map/RangeScanToObservationMap/observation_map_lattice",
+        "target": "local_map/LocalMap/observation_map_lattice"
+      },
+      {
+        "source": "range_scan_2_to_observation_map/RangeScanToObservationMap/observation_map_lattice",
+        "target": "local_map/LocalMap/observation_map_lattice"
+      }
+    ]
+  },
+  "config": {
+    "detections_to_pose_tree": {
+      "DetectionsToPoseTree": {
+        "detection_frame": "camera"
+      }
+    },
+    "range_scan_2_to_observation_map": {
+      "RangeScanToObservationMap": {
+        "sensor_frame": "lidar_2",
+        "sensor_lattice_frame": "lidar_2_lattice"
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "webroot": "packages/sight/webroot",
+        "assetroot": "external/industrial_dolly_pose_estimation_cnn_model",
+        "port": 3000,
+        "ui_config": {
+          "windows": {
+            "perception - Local Map": {
+              "renderer": "2d",
+              "channels": [
+                { "name": "perception/local_map/LocalMap/local_map" },
+                { "name": "perception/detection_pose_estimation.viewers/Detections3Viewer/bounding_box" }
+              ]
+            }
+          },
+          "assets": {
+            "dolly": {
+              "obj": "/apps/assets/industrial_dolly_frame.obj",
+              "rotation": [
+                0.70710678118,
+                0.70710678118,
+                0,
+                0
+              ],
+              "translation": [
+                0,
+                0,
+                0.4
+              ],
+              "scale": 1.0
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,191 @@
+{
+  "modules": [
+    "navigation",
+    "planner",
+    "viewers"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "subgraph",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "interface",
+            "type": "isaac::alice::Subgraph"
+          }
+        ]
+      },
+      {
+        "name": "ros_bridge",
+        "subgraph": "packages/ros_bridge/apps/ros_to_navigation_bridge.subgraph.json"
+      },
+      {
+        "name": "shared_robot_model",
+        "components": [
+          {
+            "name": "DifferentialBaseModel",
+            "type": "isaac::planner::DifferentialBaseModel"
+          },
+          {
+            "name": "SphericalRobotShapeComponent",
+            "type": "isaac::planner::SphericalRobotShapeComponent"
+          }
+        ]
+      },
+      {
+        "name": "robot_viewers",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "estimation",
+            "type": "isaac::navigation::RobotViewer"
+          },
+          {
+            "name": "ground_truth",
+            "type": "isaac::navigation::RobotViewer"
+          }
+        ]
+      },
+      {
+        "name": "flatscan_viewer",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "FlatscanViewer",
+            "type": "isaac::viewers::FlatscanViewer"
+          }
+        ]
+      },
+      {
+        "name": "goal_viewer",
+        "start_order": -150,
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "GoalViewer",
+            "type": "isaac::viewers::GoalViewer"
+          }
+        ]
+      },
+      {
+        "name": "odometry",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "DifferentialBaseOdometry",
+            "type": "isaac::navigation::DifferentialBaseOdometry"
+          }
+        ]
+      },
+      {
+        "name": "pose_initializers",
+        "components": [
+          {
+            "name": "map_transformation",
+            "type": "isaac::alice::PoseInitializer"
+          }
+        ]
+      },
+      {
+        "name": "initial_robot_pose",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "PoseToMessage",
+            "type": "isaac::alice::PoseToMessage"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "subgraph/interface/flatscan",
+        "target": "ros_bridge.subgraph/interface/flatscan"
+      },
+      {
+        "source": "subgraph/interface/flatscan",
+        "target": "flatscan_viewer/FlatscanViewer/flatscan"
+      },
+      {
+        "source": "subgraph/interface/base_state",
+        "target": "odometry/DifferentialBaseOdometry/state"
+      },
+      {
+        "source": "odometry/DifferentialBaseOdometry/odometry",
+        "target": "ros_bridge.subgraph/interface/odometry"
+      },
+      {
+        "source": "ros_bridge.subgraph/interface/command",
+        "target": "subgraph/interface/command"
+      },
+      {
+        "source": "ros_bridge.subgraph/interface/feedback",
+        "target": "subgraph/interface/goal_feedback"
+      },
+      {
+        "source": "ros_bridge.subgraph/interface/pose_estimate",
+        "target": "robot_viewers/estimation/pose_estimate"
+      },
+      {
+        "source": "subgraph/interface/goal",
+        "target": "ros_bridge.subgraph/interface/goal"
+      },
+      {
+        "source": "subgraph/interface/goal",
+        "target": "goal_viewer/GoalViewer/goal"
+      },
+      {
+        "source": "initial_robot_pose/PoseToMessage/pose",
+        "target": "ros_bridge.subgraph/interface/initial_pose"
+      }
+    ]
+  },
+  "config": {
+    "robot_viewers": {
+      "ground_truth": {
+        "robot_pose_name": "robot_gt",
+        "robot_model": "$(fullname shared_robot_model/SphericalRobotShapeComponent)",
+        "robot_color": [100, 150, 0, 255]
+      },
+      "estimation": {
+        "robot_model": "$(fullname shared_robot_model/SphericalRobotShapeComponent)"
+      }
+    },
+    "goal_viewer": {
+      "GoalViewer": {
+        "robot_model": "$(fullname shared_robot_model)"
+      }
+    },
+    "odometry": {
+      "DifferentialBaseOdometry": {
+        "tick_period": "100Hz"
+      }
+    },
+    "initial_robot_pose": {
+      "PoseToMessage":{
+        "tick_period": "100Hz",
+        "lhs_frame": "ros_map",
+        "rhs_frame": "robot_gt"
+      }
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "name": "c_api_sample",
+  "modules": [],
+  "config": {},
+  "graph": {
+    "nodes": [
+      {
+        "name": "echo",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "echo/message_ledger/in",
+        "target": "echo/message_ledger/out"
+      }
+    ]
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "config": {
+    "websight": {
+      "WebsightServer": {
+        "port": 3001
+      }
+    },
+    "simulation.interface": {
+      "input": {
+        "port": 55011
+      },
+      "output": {
+        "port": 55010,
+        "host": "localhost"
+      }
+    },
+    "goals.patrol": {
+      "MapWaypointsAsPlan": {
+        "waypoints": [
+          "pickup0",
+          "delivery0"
+        ]
+      }
+    }
+  }
+}

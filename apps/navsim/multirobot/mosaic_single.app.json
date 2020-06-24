@@ -1,0 +1,137 @@
+{
+  "name": "mosaic",
+  "modules": [
+    "ml",
+    "viewers"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "server",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "output",
+            "type": "isaac::alice::TcpSubscriber"
+          },
+          {
+            "name": "time_sync",
+            "type": "isaac::alice::TimeSynchronizer"
+          }
+        ]
+      },
+      {
+        "name": "client",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "output",
+            "type": "isaac::alice::TcpSubscriber"
+          },
+          {
+            "name": "encoder",
+            "type": "isaac::ml::ColorCameraEncoderCpu"
+          }
+        ]
+      },
+      {
+        "name": "viewer",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "birdeye",
+            "type": "isaac::viewers::ColorCameraViewer"
+          },
+          {
+            "name": "mosaic",
+            "type": "isaac::viewers::MosaicViewer"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "client/output/color",
+        "target": "client/encoder/rgb_image"
+      },
+      {
+        "source": "client/encoder/tensor",
+        "target": "viewer/mosaic/sample"
+      },
+      {
+        "source": "server/output/color",
+        "target": "viewer/birdeye/color_listener"
+      }
+    ]
+  },
+  "config": {
+    "client": {
+      "output": {
+        "port": 55000,
+        "host": "localhost"
+      },
+      "encoder": {
+        "pixel_normalization_mode": "Unit"
+      }
+    },
+    "server": {
+      "output": {
+        "port": 46000,
+        "host": "localhost"
+      }
+    },
+    "viewer": {
+      "mosaic": {
+        "tick_period": "30hz",
+        "colormap": [[118, 185, 0], [185, 0, 108], [0, 156, 185]]
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "webroot": "packages/sight/webroot",
+        "assetroot": "../isaac_assets",
+        "port": 2998,
+        "ui_config": {
+          "windows": {
+            "NavSim Mosaic - BirdEye Viewer": {
+              "renderer": "2d",
+              "dims": {
+                "width": 1280,
+                "height": 720
+              },
+              "channels": [
+                {
+                  "name": "mosaic/viewer/birdeye/Color",
+                  "active": true
+                }
+              ]
+            },
+            "NavSim Mosaic - Mosaic Viewer": {
+              "renderer": "2d",
+              "dims": {
+                "width": 1280,
+                "height": 720
+              },
+              "channels": [
+                {
+                  "name": "mosaic/viewer/mosaic/mosaic",
+                  "active": true
+                }
+              ]
+            }
+          },
+          "assets": {}
+        }
+      }
+    }
+  }
+}

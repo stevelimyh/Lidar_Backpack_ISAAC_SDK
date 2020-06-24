@@ -1,0 +1,55 @@
+{
+  "name": "logitech_c920pro_cpu",
+  "modules": [
+    "deepstream",
+    "sight",
+    "viewers"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "camera",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "pipeline",
+            "type": "isaac::deepstream::Pipeline"
+          },
+          {
+            "name": "viewer",
+            "type": "isaac::viewers::ColorCameraViewer"
+          },
+          {
+            "name": "viewer_widget",
+            "type": "isaac::sight::SightWidget"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "camera/pipeline/image",
+        "target": "camera/viewer/color_listener"
+      }
+    ]
+  },
+  "config": {
+    "camera": {
+      "pipeline": {
+        "pipeline": "v4l2src device=/dev/video0 ! video/x-h264 ! h264parse ! avdec_h264 ! videoconvert ! video/x-raw,format=RGB,height=1080,framerate=10/1 ! appsink name=image"
+      },
+      "viewer_widget": {
+        "title": "Viewer: Logitech C920 Pro",
+        "type": "2d",
+        "channels": [
+          {
+            "name": "camera/viewer/Color"
+          }
+        ]
+      }
+    }
+  }
+}

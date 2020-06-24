@@ -1,0 +1,72 @@
+{
+  "graph": {
+    "nodes": [
+      {
+        "name": "pose_initializers",
+        "components": [
+          {
+            "name": "lidar_initializer",
+            "type": "isaac::alice::PoseInitializer"
+          }
+        ]
+      }
+    ]
+  },
+  "config": {
+    "navigation.shared_robot_model": {
+      "SphericalRobotShapeComponent": {
+        "circles": [
+          {
+            "center": [
+              0.0,
+              0.0
+            ],
+            "radius": 0.35
+          },
+          {
+            "center": [
+              0.45,
+              0.0
+            ],
+            "radius": 0.15
+          },
+          {
+            "center": [
+              -0.225,
+              -0.39
+            ],
+            "radius": 0.15
+          },
+          {
+            "center": [
+              -0.225,
+              0.39
+            ],
+            "radius": 0.15
+          }
+        ]
+      }
+    },
+    "pose_initializers": {
+      "lidar_initializer": {
+        "lhs_frame": "robot",
+        "rhs_frame": "lidar",
+        "pose": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.4,
+          0,
+          0.3
+        ]
+      }
+    },
+    "simulation.scenario_manager": {
+      "scenario_manager": {
+        "robot_name": "triangle_robot",
+        "robot_prefab": "TriangleRobot"
+      }
+    }
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "name": "log_gmapping",
+  "modules": [
+    "perception"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "replay",
+        "subgraph": "packages/record_replay/apps/replay.subgraph.json"
+      },
+      {
+        "name": "gmapping",
+        "subgraph": "packages/lidar_slam/apps/differential_base_gmapping.subgraph.json"
+      },
+      {
+        "name": "lidar_pose_initializer",
+        "start_order": -200,
+        "components": [
+          {
+            "name": "PoseInitializer",
+            "type": "isaac::alice::PoseInitializer"
+          }
+        ]
+      },
+      {
+        "name": "range_scan_flattening",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "RangeScanFlattening",
+            "type": "isaac::perception::RangeScanFlattening"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "replay.interface/output/fullscan",
+        "target": "range_scan_flattening/RangeScanFlattening/scan"
+      },
+      {
+        "source": "range_scan_flattening/RangeScanFlattening/flatscan",
+        "target": "gmapping.interface/Subgraph/flatscan"
+      },
+      {
+        "source": "replay.interface/output/base_state",
+        "target": "gmapping.interface/Subgraph/base_state"
+      },
+      {
+        "source": "replay.interface/output/imu_raw",
+        "target": "gmapping.interface/Subgraph/imu_raw"
+      }
+    ]
+  },
+  "config": {
+    "range_scan_flattening": {
+      "RangeScanFlattening": {
+        "pitch_fudge": 0.005
+      }
+    },
+    "lidar_pose_initializer": {
+      "PoseInitializer": {
+        "lhs_frame": "robot",
+        "rhs_frame": "lidar",
+        "pose": {
+          "translation": [-0.04, 0.0, 0.59]
+        }
+      }
+    }
+  }
+}

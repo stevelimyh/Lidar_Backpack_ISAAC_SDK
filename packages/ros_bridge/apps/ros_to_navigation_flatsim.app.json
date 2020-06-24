@@ -1,0 +1,133 @@
+{
+  "name": "ros_to_navigation_flatsim",
+  "graph": {
+    "nodes": [
+      {
+        "name": "simulation",
+        "subgraph": "packages/flatsim/apps/2d_differential_base_simulation.subgraph.json"
+      },
+      {
+        "name": "ros_navigation",
+        "subgraph": "packages/ros_bridge/apps/ros_to_navigation.subgraph.json"
+      },
+      {
+        "name": "pose_as_goal",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "PoseAsGoal",
+            "type": "isaac::navigation::PoseAsGoal"
+          },
+          {
+            "name": "goal_pose",
+            "type": "isaac::alice::PoseInitializer"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "ros_navigation.subgraph/interface/command",
+        "target": "simulation.subgraph/interface/diff_base_command"
+      },
+      {
+        "source": "simulation.subgraph/interface/flatscan",
+        "target": "ros_navigation.subgraph/interface/flatscan"
+      },
+      {
+        "source": "simulation.subgraph/interface/diff_base_state",
+        "target": "ros_navigation.subgraph/interface/base_state"
+      },
+      {
+        "source": "pose_as_goal/PoseAsGoal/goal",
+        "target": "ros_navigation.subgraph/interface/goal"
+      }
+    ]
+  },
+  "config": {
+    "simulation.flatscan_noiser": {
+      "FlatscanNoiser": {
+        "beam_invalid_probability": 0.0,
+        "beam_random_probability": 0.0,
+        "beam_short_probability": 0.0,
+        "range_sigma_abs": 0.0,
+        "range_sigma_rel": 0.0
+      }
+    },
+    "simulation.base_simulation": {
+      "DifferentialBasePhysics": {
+        "wheel_acceleration_noise": 0.0,
+        "slippage_duration_range": [0.0, 0.0],
+        "robot_model": "ros_navigation.shared_robot_model"
+      },
+      "DifferentialBaseSimulator": {
+        "max_wheel_acceleration": 5.0,
+        "power": 0.5,
+        "robot_model": "ros_navigation.shared_robot_model"
+      }
+    },
+    "simulation.robot_spawn_pose": {
+      "PoseInitializer": {
+        "lhs_frame": "world",
+        "rhs_frame": "robot_init_gt",
+        "pose": {
+          "rotation": { "yaw_degrees": 90 },
+          "translation": [10.0, 12.0, 0.0]
+        }
+      }
+    },
+    "simulation.sim_range_scan": {
+      "lidar_initializer": {
+        "lhs_frame": "robot",
+        "rhs_frame": "lidar",
+        "pose": [1.0, 0.0, 0.0, 0.0, -0.064, 0.0, 0.1]
+      }
+    },
+    "pose_as_goal": {
+      "PoseAsGoal": {
+        "goal_frame": "pose_as_goal",
+        "reference_frame": "ros_map",
+        "tick_period": "250ms"
+      },
+      "goal_pose": {
+        "lhs_frame": "world",
+        "rhs_frame": "pose_as_goal",
+        "pose": {
+          "rotation": { "yaw_radians": 1.0 },
+          "translation": [9.0, 17.5, 0.0]
+        },
+        "attach_interactive_marker": true
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "port": 3000,
+        "assetroot": "external/isaac_assets",
+        "ui_config": {
+          "windows": {
+            "Map": {
+              "renderer": "2d",
+              "dims": {
+                "width": 432,
+                "height": 548
+              },
+              "channels": [
+                { "name": "ros_to_navigation_flatsim/map/occupancy/map" },
+                { "name": "ros_to_navigation_flatsim/ros_navigation.robot_viewers/estimation/robot" },
+                { "name": "ros_to_navigation_flatsim/ros_navigation.robot_viewers/ground_truth/robot" },
+                { "name": "ros_to_navigation_flatsim/ros_navigation.flatscan_viewer/FlatscanViewer/beam_endpoints" },
+                { "name": "ros_to_navigation_flatsim/ros_navigation.goal_viewer/GoalViewer/goal" }
+              ],
+              "markers": [
+                { "name": "pose_as_goal" }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,210 @@
+{
+  "name": "navsim_viewer_tcp",
+  "modules": [
+    "ml",
+    "viewers"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "simulation",
+        "subgraph": "packages/navsim/apps/navsim_training.subgraph.json"
+      },
+      {
+        "name": "viewer",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "color_viewer",
+            "type": "isaac::viewers::ColorCameraViewer"
+          },
+          {
+            "name": "color_viewer_right",
+            "type": "isaac::viewers::ColorCameraViewer"
+          },
+          {
+            "name": "depth_viewer",
+            "type": "isaac::viewers::DepthCameraViewer"
+          },
+          {
+            "name": "depth_viewer_right",
+            "type": "isaac::viewers::DepthCameraViewer"
+          },
+          {
+            "name": "segmentation_viewer",
+            "type": "isaac::viewers::SegmentationCameraViewer"
+          }
+        ]
+      },
+      {
+        "name": "bounding_box_viewer",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "viewer",
+            "type": "isaac::viewers::DetectionsViewer"
+          }
+        ]
+      },
+      {
+        "name": "teleport",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "random",
+            "type": "isaac::alice::Random"
+          },
+          {
+            "name": "teleportation",
+            "type": "isaac::ml::Teleportation"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "simulation.interface/output/color",
+        "target": "viewer/color_viewer/color_listener"
+      },
+      {
+        "source": "simulation.interface/output/color_right",
+        "target": "viewer/color_viewer_right/color_listener"
+      },
+      {
+        "source": "simulation.interface/output/depth",
+        "target": "viewer/depth_viewer/depth_listener"
+      },
+      {
+        "source": "simulation.interface/output/depth_right",
+        "target": "viewer/depth_viewer_right/depth_listener"
+      },
+      {
+        "source": "simulation.interface/output/segmentation",
+        "target": "viewer/segmentation_viewer/segmentation_listener"
+      },
+      {
+        "source": "teleport/teleportation/rigid_command",
+        "target": "simulation.interface/input/teleport"
+      },
+      {
+        "source": "simulation.interface/output/bounding_boxes",
+        "target": "bounding_box_viewer/viewer/detections"
+      }
+    ]
+  },
+  "config": {
+    "viewer": {
+      "depth_viewer": {
+        "colormap": [
+          [ 128, 0, 0 ],
+          [ 255, 0, 0 ],
+          [ 255, 255, 0 ],
+          [ 0, 255, 255 ],
+          [ 0, 0, 255 ],
+          [ 0, 0, 128 ]
+        ],
+        "min_visualization_depth": 0.0,
+        "max_visualization_depth": 20.0
+      },
+      "depth_viewer_right": {
+        "colormap": [
+          [ 128, 0, 0 ],
+          [ 255, 0, 0 ],
+          [ 255, 255, 0 ],
+          [ 0, 255, 255 ],
+          [ 0, 0, 255 ],
+          [ 0, 0, 128 ]
+        ],
+        "min_visualization_depth": 0.0,
+        "max_visualization_depth": 20.0
+      },
+      "segmentation_viewer": {
+        "camera_name": "camera",
+        "target_fps": 15
+      }
+    },
+    "teleport": {
+      "teleportation": {
+        "name": "CameraGroup",
+        "min": [-5.0, -5.0, 14.0],
+        "max": [5.0, 5.0, 16.0],
+        "enable_pitch": true,
+        "min_pitch": -0.5,
+        "max_pitch": 0.5,
+        "enable_yaw": true,
+        "min_yaw": -1.5708,
+        "max_yaw": -1.5708,
+        "tick_period": "3Hz"
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "port": 3000,
+        "ui_config": {
+          "windows": {
+            "navsim_viewer_tcp - Color Camera": {
+              "renderer": "2d",
+              "channels": [
+                {
+                  "name": "navsim_viewer_tcp/viewer/color_viewer/Color"
+                },
+                {
+                  "name": "navsim_viewer_tcp/bounding_box_viewer/viewer/detections"
+                }
+              ]
+            },
+            "navsim_viewer_tcp - Color Camera (Right)": {
+              "renderer": "2d",
+              "channels": [
+                {
+                  "name": "navsim_viewer_tcp/viewer/color_viewer_right/Color"
+                }
+              ]
+            },
+            "navsim_viewer_tcp - Depth Camera": {
+              "renderer": "2d",
+              "channels": [
+                {
+                  "name": "navsim_viewer_tcp/viewer/depth_viewer/Depth"
+                }
+              ]
+            },
+            "navsim_viewer_tcp - Depth Camera (Right)": {
+              "renderer": "2d",
+              "channels": [
+                {
+                  "name": "navsim_viewer_tcp/viewer/depth_viewer_right/Depth"
+                }
+              ]
+            },
+            "navsim_viewer_tcp - Instance Camera": {
+              "renderer": "2d",
+              "channels": [
+                {
+                  "name": "navsim_viewer_tcp/viewer/segmentation_viewer/Instances"
+                }
+              ]
+            },
+            "navsim_viewer_tcp - Label Camera": {
+              "renderer": "2d",
+              "channels": [
+                {
+                  "name": "navsim_viewer_tcp/viewer/segmentation_viewer/Classes"
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

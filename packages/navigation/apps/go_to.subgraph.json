@@ -1,0 +1,134 @@
+{
+  "modules": [
+    "behavior_tree",
+    "navigation",
+    "viewers"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "subgraph",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "interface",
+            "type": "isaac::alice::Subgraph"
+          }
+        ]
+      },
+      {
+        "name": "goal_viewer",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "GoalViewer",
+            "type": "isaac::viewers::GoalViewer"
+          }
+        ]
+      },
+      {
+        "name": "goal_monitor",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "GoalMonitor",
+            "type": "isaac::navigation::GoalMonitor"
+          }
+        ]
+      },
+      {
+        "name": "repeat_go_to_behavior",
+        "components": [
+          {
+            "name": "NodeGroup",
+            "type": "isaac::behavior_tree::NodeGroup"
+          },
+          {
+            "name": "RepeatBehavior",
+            "type": "isaac::behavior_tree::RepeatBehavior"
+          }
+        ]
+      },
+      {
+        "name": "go_to_behavior",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "GoToBehavior",
+            "type": "isaac::navigation::GoToBehavior"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "move_until_arrival",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "MoveUntilArrival",
+            "type": "isaac::navigation::MoveUntilArrival"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "subgraph/interface/goal",
+        "target": "goal_viewer/GoalViewer/goal"
+      },
+      {
+        "source": "subgraph/interface/goal",
+        "target": "goal_monitor/GoalMonitor/goal"
+      },
+      {
+        "source": "subgraph/interface/odometry",
+        "target": "goal_monitor/GoalMonitor/odometry"
+      },
+      {
+        "source": "goal_monitor/GoalMonitor/feedback",
+        "target": "subgraph/interface/feedback"
+      },
+      {
+        "source": "goal_monitor/GoalMonitor/feedback",
+        "target": "go_to_behavior/GoToBehavior/feedback"
+      },
+      {
+        "source": "subgraph/interface/goal",
+        "target": "move_until_arrival/MoveUntilArrival/goal"
+      },
+      {
+        "source": "goal_monitor/GoalMonitor/feedback",
+        "target": "move_until_arrival/MoveUntilArrival/feedback"
+      }
+    ]
+  },
+  "config": {
+    "goal_monitor": {
+      "GoalMonitor": {
+        "tick_period": "100ms"
+      }
+    },
+    "repeat_go_to_behavior": {
+      "NodeGroup": {
+        "node_names": [
+          "$(fullname go_to_behavior)"
+        ]
+      }
+    }
+  }
+}

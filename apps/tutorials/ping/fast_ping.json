@@ -1,0 +1,7 @@
+{
+  "ping" : {
+    "ping" : {
+      "tick_period" : "10Hz"
+    }
+  }
+}

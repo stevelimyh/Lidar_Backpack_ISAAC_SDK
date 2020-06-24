@@ -1,0 +1,115 @@
+{
+  "name": "stereo_matching_depth",
+  "modules": [
+    "//packages/stereo_depth:coarse_to_fine",
+    "viewers",
+    "zed"
+  ],
+  "graph": {
+    "nodes": [
+      {
+          "name": "input_images",
+          "components": [
+              {
+                  "name": "isaac.alice.MessageLedger",
+                  "type": "isaac::alice::MessageLedger"
+              },
+              {
+                "name": "isaac.ZedCamera",
+                "type": "isaac::ZedCamera"
+              }
+          ]
+      },
+      {
+          "name": "depth_visualization",
+          "components": [
+              {
+                  "name": "isaac.alice.MessageLedger",
+                  "type": "isaac::alice::MessageLedger"
+              },
+              {
+                  "name": "isaac.viewers.DepthCameraViewer",
+                  "type": "isaac::viewers::DepthCameraViewer"
+              }
+          ]
+      },
+      {
+          "name": "depth_estimation",
+          "components": [
+              {
+                  "name": "isaac.alice.MessageLedger",
+                  "type": "isaac::alice::MessageLedger"
+              },
+              {
+                  "name": "isaac.stereo_depth.CoarseToFineStereoDepth",
+                  "type": "isaac::stereo_depth::CoarseToFineStereoDepth"
+              }
+          ]
+      }
+  ],
+  "edges": [
+      {
+          "source": "input_images/isaac.ZedCamera/left_camera_rgb",
+          "target": "depth_estimation/isaac.stereo_depth.CoarseToFineStereoDepth/left_image"
+      },
+      {
+          "source": "input_images/isaac.ZedCamera/extrinsics",
+          "target": "depth_estimation/isaac.stereo_depth.CoarseToFineStereoDepth/extrinsics"
+      },
+      {
+          "source": "input_images/isaac.ZedCamera/right_camera_rgb",
+          "target": "depth_estimation/isaac.stereo_depth.CoarseToFineStereoDepth/right_image"
+      },
+      {
+          "source": "depth_estimation/isaac.stereo_depth.CoarseToFineStereoDepth/left_depth_image",
+          "target": "depth_visualization/isaac.viewers.DepthCameraViewer/depth_listener"
+      }
+    ]
+  },
+  "config": {
+    "depth_estimation": {
+      "isaac.stereo_depth.CoarseToFineStereoDepth": {
+        "min_depth": 0.0,
+        "max_depth": 20.0,
+        "baseline" : 0.12
+      }
+    },
+    "depth_visualization": {
+      "isaac.viewers.DepthCameraViewer": {
+        "max_visualization_depth": 20.0,
+        "camera_name" : "left_camera"
+      }
+    },
+    "input_images": {
+      "isaac.ZedCamera": {
+        "resolution": "672x376",
+        "tick_period": "60Hz"
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "port": 3000,
+        "ui_config": {
+          "windows": {
+            "Depth": {
+              "renderer": "2d",
+              "channels": [
+                {
+                  "name": "stereo_matching_depth/depth_visualization/isaac.viewers.DepthCameraViewer/Depth"
+                }
+              ]
+            },
+            "LeftCamera": {
+              "renderer": "2d",
+              "channels": [
+                {
+                  "name": "stereo_matching_depth/input_images/isaac.ZedCamera/left_rgb"
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

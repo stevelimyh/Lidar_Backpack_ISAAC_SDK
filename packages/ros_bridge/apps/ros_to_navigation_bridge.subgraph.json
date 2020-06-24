@@ -1,0 +1,277 @@
+{
+  "modules": [
+    "behavior_tree",
+    "ros_bridge"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "subgraph",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "interface",
+            "type": "isaac::alice::Subgraph"
+          }
+        ]
+      },
+      {
+        "name": "behavior_bridge",
+        "components": [
+          {
+            "name": "NodeGroup",
+            "type": "isaac::behavior_tree::NodeGroup"
+          },
+          {
+            "name": "MemorySequenceBehavior",
+            "type": "isaac::behavior_tree::MemorySequenceBehavior"
+          }
+        ]
+      },
+      {
+        "name": "behavior_convert",
+        "components": [
+          {
+            "name": "NodeGroup",
+            "type": "isaac::behavior_tree::NodeGroup"
+          },
+          {
+            "name": "ParallelBehavior",
+            "type": "isaac::behavior_tree::ParallelBehavior"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "behavior_move_after_localized",
+        "components": [
+          {
+            "name": "NodeGroup",
+            "type": "isaac::behavior_tree::NodeGroup"
+          },
+          {
+            "name": "MemorySequenceBehavior",
+            "type": "isaac::behavior_tree::MemorySequenceBehavior"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "ros_node",
+        "components": [
+          {
+            "name": "RosNode",
+            "type": "isaac::ros_bridge::RosNode"
+          },
+          {
+            "name": "TimeSynchronizer",
+            "type": "isaac::alice::TimeSynchronizer"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "localization_check",
+        "components": [
+          {
+            "name": "Pose2Comparer",
+            "type": "isaac::alice::Pose2Comparer"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "ros_move",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "GoalToRosAction",
+            "type": "isaac::ros_bridge::GoalToRosAction"
+          },
+          {
+            "name": "RosToDifferentialBaseCommand",
+            "type": "isaac::ros_bridge::RosToDifferentialBaseCommand"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "ros_converters",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "FlatscanToRos",
+            "type": "isaac::ros_bridge::FlatscanToRos"
+          },
+          {
+            "name": "OdometryToRos",
+            "type": "isaac::ros_bridge::OdometryToRos"
+          },
+          {
+            "name": "PosesToRos",
+            "type": "isaac::ros_bridge::PosesToRos"
+          },
+          {
+            "name": "RosToPoses",
+            "type": "isaac::ros_bridge::RosToPoses"
+          },
+          {
+            "name": "RosToPose2MeanAndCovariance",
+            "type": "isaac::ros_bridge::RosToPose2MeanAndCovariance"
+          },
+          {
+            "name": "initial_pose_to_ros",
+            "type": "isaac::ros_bridge::PoseMessageToRos"
+          }
+        ],
+        "disable_automatic_start": true
+      }
+    ],
+    "edges": [
+      {
+        "source": "subgraph/interface/flatscan",
+        "target": "ros_converters/FlatscanToRos/proto"
+      },
+      {
+        "source": "subgraph/interface/odometry",
+        "target": "ros_converters/OdometryToRos/proto"
+      },
+      {
+        "source": "ros_move/RosToDifferentialBaseCommand/proto",
+        "target": "subgraph/interface/command"
+      },
+      {
+        "source": "ros_converters/RosToPose2MeanAndCovariance/proto",
+        "target": "subgraph/interface/pose_estimate"
+      },
+      {
+        "source": "subgraph/interface/initial_pose",
+        "target": "ros_converters/initial_pose_to_ros/proto"
+      },
+      {
+        "source": "subgraph/interface/odometry",
+        "target": "ros_move/GoalToRosAction/odometry"
+      },
+      {
+        "source": "subgraph/interface/goal",
+        "target": "ros_move/GoalToRosAction/goal"
+      },
+      {
+        "source": "ros_move/GoalToRosAction/feedback",
+        "target": "subgraph/interface/feedback"
+      }
+    ]
+  },
+  "config": {
+    "behavior_bridge": {
+      "NodeGroup": {
+        "node_names": [
+          "$(fullname ros_node)",
+          "$(fullname behavior_convert)"
+        ]
+      }
+    },
+    "behavior_convert": {
+      "NodeGroup": {
+        "node_names": [
+          "$(fullname behavior_move_after_localized)",
+          "$(fullname ros_converters)"
+        ]
+      }
+    },
+    "behavior_move_after_localized": {
+      "NodeGroup": {
+        "node_names": [
+          "$(fullname localization_check)",
+          "$(fullname ros_move)"
+        ]
+      }
+    },
+    "ros_node": {
+      "RosNode": {
+        "tick_period": "100Hz"
+      }
+    },
+    "localization_check": {
+      "Pose2Comparer": {
+        "first_lhs_frame": "world",
+        "first_rhs_frame": "robot",
+        "second_lhs_frame": "world",
+        "second_rhs_frame": "robot_gt",
+        "threshold": [0.5, 0.2618],
+        "tick_period": "100Hz"
+      }
+    },
+    "ros_move": {
+      "GoalToRosAction": {
+        "tick_period": "100Hz"
+      },
+      "RosToDifferentialBaseCommand": {
+        "tick_period": "100Hz",
+        "ros_node": "$(fullname ros_node)",
+        "channel_name": "cmd_vel"
+      }
+    },
+    "ros_converters": {
+      "FlatscanToRos": {
+        "ros_node": "$(fullname ros_node)",
+        "channel_name": "scan"
+      },
+      "OdometryToRos": {
+        "ros_node": "$(fullname ros_node)",
+        "channel_name": "odom"
+      },
+      "PosesToRos": {
+        "tick_period": "100Hz",
+        "ros_node": "$(fullname ros_node)",
+        "pose_mappings": [
+          {
+            "isaac_pose": {
+              "lhs_frame": "odom",
+              "rhs_frame": "robot"
+            },
+            "ros_pose": {
+              "lhs_frame": "odom",
+              "rhs_frame": "base_footprint"
+            }
+          }
+        ]
+      },
+      "RosToPoses": {
+        "tick_period": "100Hz",
+        "ros_node": "$(fullname ros_node)",
+        "pose_mappings": [
+          {
+            "isaac_pose": {
+              "lhs_frame": "ros_map",
+              "rhs_frame": "robot"
+            },
+            "ros_pose": {
+              "lhs_frame": "map",
+              "rhs_frame": "base_link"
+            }
+          }
+        ]
+      },
+      "RosToPose2MeanAndCovariance": {
+        "tick_period": "100Hz",
+        "ros_node": "$(fullname ros_node)",
+        "channel_name": "amcl_pose"
+      },
+      "initial_pose_to_ros": {
+        "ros_node": "$(fullname ros_node)",
+        "channel_name": "initialpose",
+        "report_success": true
+      }
+    }
+  }
+}

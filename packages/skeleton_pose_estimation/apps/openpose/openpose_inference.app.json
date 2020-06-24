@@ -1,0 +1,250 @@
+{
+  "name": "openpose_inference",
+  "modules": [
+    "//packages/ml:ml",
+    "//packages/ml:tensorrt",
+    "//packages/skeleton_pose_estimation",
+    "//packages/perception",
+    "message_generators",
+    "viewers"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "feeder",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "image_feeder",
+            "type": "isaac::message_generators::ImageLoader"
+          }
+        ]
+      },
+      {
+        "name": "tensor_encoder",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.ml.ColorCameraEncoderCuda",
+            "type": "isaac::ml::ColorCameraEncoderCuda"
+          }
+        ]
+      },
+      {
+        "name": "tensor_r_t_inference",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.ml.TensorRTInference",
+            "type": "isaac::ml::TensorRTInference"
+          }
+        ]
+      },
+      {
+        "name": "open_pose_decoder",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.skeleton_pose_estimation.OpenPoseDecoder",
+            "type": "isaac::skeleton_pose_estimation::OpenPoseDecoder"
+          }
+        ]
+      },
+      {
+        "name": "skeleton_viewer",
+        "components": [
+          {
+            "name": "isaac.alice.MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.viewers.SkeletonViewer",
+            "type": "isaac::viewers::SkeletonViewer"
+          },
+          {
+            "name": "isaac.viewers.ColorCameraViewer",
+            "type": "isaac::viewers::ColorCameraViewer"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "feeder/image_feeder/color",
+        "target": "tensor_encoder/isaac.ml.ColorCameraEncoderCuda/rgb_image"
+      },
+      {
+        "source": "tensor_encoder/isaac.ml.ColorCameraEncoderCuda/tensor",
+        "target": "tensor_r_t_inference/isaac.ml.TensorRTInference/input"
+      },
+      {
+        "source": "tensor_r_t_inference/isaac.ml.TensorRTInference/part_affinity_fields",
+        "target": "open_pose_decoder/isaac.skeleton_pose_estimation.OpenPoseDecoder/part_affinity_fields"
+      },
+      {
+        "source": "tensor_r_t_inference/isaac.ml.TensorRTInference/gaussian_heatmap",
+        "target": "open_pose_decoder/isaac.skeleton_pose_estimation.OpenPoseDecoder/gaussian_heatmap"
+      },
+      {
+        "source": "tensor_r_t_inference/isaac.ml.TensorRTInference/maxpool_heatmap",
+        "target": "open_pose_decoder/isaac.skeleton_pose_estimation.OpenPoseDecoder/maxpool_heatmap"
+      },
+      {
+        "source": "open_pose_decoder/isaac.skeleton_pose_estimation.OpenPoseDecoder/skeletons",
+        "target": "skeleton_viewer/isaac.viewers.SkeletonViewer/skeletons"
+      },
+      {
+        "source": "feeder/image_feeder/color",
+        "target": "skeleton_viewer/isaac.viewers.ColorCameraViewer/color_listener"
+      }
+    ]
+  },
+  "config": {
+    "tensor_encoder": {
+      "isaac.ml.ColorCameraEncoderCuda": {
+        "rows": 320,
+        "cols": 320,
+        "pixel_normalization_mode": "HalfAndHalf",
+        "tensor_index_order": "201",
+        "keep_aspect_ratio": false
+      }
+    },
+    "feeder": {
+      "image_feeder": {
+        "color_filename": "packages/skeleton_pose_estimation/apps/openpose/validation_dataset/images/01.png",
+        "tick_period": "1Hz",
+        "focal_length": [
+          100,
+          100
+        ],
+        "optical_center": [
+          500,
+          500
+        ],
+        "distortion_coefficients": [
+          0.01,
+          0.01,
+          0.01,
+          0.01,
+          0.01
+        ]
+      }
+    },
+    "tensor_r_t_inference": {
+      "isaac.ml.TensorRTInference": {
+        "model_file_path": "external/openpose_model/ix-networks-openpose.uff",
+        "engine_file_path": "external/openpose_model/ix-networks-openpose.plan",
+        "input_tensor_info": [
+          {
+            "channel": "input",
+            "operation_name": "input_1",
+            "dims": [3, 320, 320],
+            "uff_input_order": "channels_first"
+          }
+        ],
+        "output_tensor_info": [
+          {
+            "channel": "part_affinity_fields",
+            "operation_name": "lambda_2/conv2d_transpose",
+            "dims": [160, 160, 38]
+          },
+          {
+            "channel": "gaussian_heatmap",
+            "operation_name": "lambda_3/tensBlur_depthwise_conv2d",
+            "dims": [160, 160, 19]
+          },
+          {
+            "channel": "maxpool_heatmap",
+            "operation_name": "tensBlur/MaxPool",
+            "dims": [160, 160, 19]
+          },
+          {
+            "channel": "heatmap",
+            "operation_name": "lambda_1/conv2d_transpose",
+            "dims": [160, 160, 19]
+          }
+        ]
+      }
+    },
+    "open_pose_decoder": {
+      "isaac.skeleton_pose_estimation.OpenPoseDecoder": {
+        "label": "Human",
+        "labels": ["Nose", "Neck", "Rsho", "Relb", "Rwri", "Lsho", "Lelb", "Lwri", "Rhip", "Rkne",
+                   "Rank", "Lhip", "Lkne", "Lank", "Leye", "Reye", "Lear", "Rear"],
+
+        "edges": [[1, 2], [1, 5], [2, 3], [3, 4], [5, 6], [6, 7], [1, 8], [8, 9], [9, 10], [1, 11],
+                [11, 12], [12, 13], [1, 0], [0, 14], [14, 16], [0, 15], [15, 17], [2, 16], [5, 17]],
+
+        "edges_paf": [[12, 13], [20, 21], [14, 15], [16, 17], [22, 23], [24, 25], [0, 1], [2, 3],
+                      [4, 5], [6, 7], [8, 9], [10, 11], [28, 29], [30, 31], [34, 35], [32, 33],
+                      [36, 37], [18, 19], [26, 27]],
+
+        "threshold_heatmap" : 0.05,
+        "threshold_edge_size" : 0.1,
+        "threshold_edge_score" : 0.05,
+        "threshold_edge_sampling_counter" : 8,
+        "threshold_part_counter" : 4,
+        "threshold_object_score" : 0.4,
+        "threshold_split_score" : 2,
+        "edge_sampling_steps" : 10,
+        "refine_parts_coordinates" : true,
+
+        "output_scale" : [320, 320]
+      }
+    },
+    "skeleton_viewer": {
+      "isaac.viewers.SkeletonViewer": {
+        "labels": ["Nose", "Neck", "Rsho", "Relb", "Rwri", "Lsho", "Lelb", "Lwri", "Rhip", "Rkne",
+                  "Rank", "Lhip", "Lkne", "Lank", "Leye", "Reye", "Lear", "Rear"],
+
+        "edges_render": [[1, 2], [1, 5], [2, 3], [3, 4], [5, 6], [6, 7], [1, 8], [8, 9], [9, 10],
+                         [1, 11], [11, 12], [12, 13], [1, 0], [0, 14], [14, 16], [0, 15], [15, 17]]
+      },
+      "isaac.viewers.ColorCameraViewer": {
+        "camera_name": "color_camera_viewer",
+        "target_fps": 20,
+        "reduce_scale": 1
+      }
+    },
+
+    "websight": {
+      "WebsightServer": {
+        "webroot": "packages/sight/webroot",
+        "assetroot": "../isaac_assets",
+        "port": 3000,
+        "ui_config": {
+          "windows": {
+            "Human Pose Decoder - Inference": {
+              "renderer": "2d",
+              "dims": {
+                "width": 450,
+                "height": 450
+              },
+              "channels": [
+                {
+                  "name": "openpose_inference/skeleton_viewer/isaac.viewers.ColorCameraViewer/Color"
+                },
+                {
+                  "name": "openpose_inference/skeleton_viewer/isaac.viewers.SkeletonViewer/skeletons"
+                }
+              ]
+            }
+          },
+          "assets": {}
+        }
+      }
+    }
+  }
+}

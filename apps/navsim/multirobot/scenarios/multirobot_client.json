@@ -1,0 +1,42 @@
+{
+  "scene": "warehouse",
+  "description": "Instantiating multiple robots with only sensors",
+  "robots": [
+    {
+      "prefab": "Carter",
+      "name": "carter_0",
+      "node": "navsim",
+      "pose": [1, 0, 0, 0, 23, -4.1, 0]
+    },
+    {
+      "prefab": "Carter",
+      "name": "carter_1",
+      "node": "navsim",
+      "pose": [1, 0, 0, 0, 23, -2.6, 0]
+    },
+    {
+      "prefab": "Carter",
+      "name": "carter_2",
+      "node": "navsim",
+      "pose": [1, 0, 0, 0, 23, -1.1, 0]
+    },
+    {
+      "prefab": "Carter",
+      "name": "carter_3",
+      "node": "navsim",
+      "pose": [1, 0, 0, 0, 23, -0.4, 0]
+    },
+    {
+      "prefab": "Carter",
+      "name": "carter_4",
+      "node": "navsim",
+      "pose": [1, 0, 0, 0, 23, 1.9, 0]
+    },
+    {
+      "prefab": "Carter",
+      "name": "carter_5",
+      "node": "navsim",
+      "pose": [1, 0, 0, 0, 23, 3.4, 0]
+    }
+  ]
+}

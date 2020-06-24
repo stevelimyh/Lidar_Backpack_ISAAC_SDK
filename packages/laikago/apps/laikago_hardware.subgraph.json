@@ -1,0 +1,102 @@
+{
+  "modules": [
+    "laikago",
+    "velodyne_lidar"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "subgraph",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "interface",
+            "type": "isaac::alice::Subgraph"
+          }
+        ]
+      },
+      {
+        "name": "laikago_driver",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "LaikagoDriver",
+            "type": "isaac::laikago::LaikagoDriver"
+          },
+          {
+            "name": "Failsafe",
+            "type": "isaac::alice::Failsafe"
+          }
+        ]
+      },
+      {
+        "name": "vlp16",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "VelodyneLidar",
+            "type": "isaac::velodyne_lidar::VelodyneLidar"
+          }
+        ]
+      },
+      {
+        "name": "lidar_initializer",
+        "components": [
+          {
+            "name": "PoseInitializers",
+            "type": "isaac::alice::PoseInitializer"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "subgraph/interface/base_command",
+        "target": "laikago_driver/LaikagoDriver/base_command"
+      },
+      {
+        "source": "laikago_driver/LaikagoDriver/base_state",
+        "target": "subgraph/interface/base_state"
+      },
+      {
+        "source": "laikago_driver/LaikagoDriver/imu",
+        "target": "subgraph/interface/imu"
+      },
+      {
+        "source": "vlp16/VelodyneLidar/scan",
+        "target": "subgraph/interface/scan"
+      }
+    ]
+  },
+  "config": {
+    "laikago_driver": {
+      "Failsafe": {
+        "name": "robot_failsafe"
+      },
+      "LaikagoDriver": {
+        "tick_period": "200Hz"
+      }
+    },
+    "vlp16": {
+      "VelodyneLidar": {
+        "ip": "192.168.0.5"
+      }
+    },
+    "lidar_initializer": {
+      "PoseInitializers": {
+        "lhs_frame": "robot",
+        "rhs_frame": "lidar",
+        "pose": [1.0, 0.0, 0.0, 0.0, 0.2, 0.0, 0.15]
+      }
+    }
+  }
+}

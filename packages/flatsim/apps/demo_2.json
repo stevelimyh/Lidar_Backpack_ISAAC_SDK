@@ -1,0 +1,77 @@
+{
+  "modules": [
+    "map",
+    "navigation"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "map",
+        "start_order": -100,
+        "components": [
+          {
+            "name": "isaac.map.Map",
+            "type": "isaac::map::Map"
+          },
+          {
+            "name": "map",
+            "type": "isaac::navigation::NavigationMap"
+          },
+          {
+            "name": "occupancy",
+            "type": "isaac::map::OccupancyGridMapLayer"
+          },
+          {
+            "name": "waypoints",
+            "type": "isaac::map::WaypointMapLayer"
+          },
+          {
+            "name": "restricted_area",
+            "type": "isaac::map::PolygonMapLayer"
+          }
+        ]
+      }
+    ]
+  },
+  "config": {
+    "map": {
+      "occupancy": {
+        "cell_size": 0.075,
+        "filename": "apps/assets/maps/elevator_office_1.png"
+      },
+      "waypoints": {
+        "vis_cell_size": 0.075,
+        "waypoints": {
+        },
+        "tick_period": "1.0"
+      },
+      "restricted_area": {
+        "tick_period": "1.0"
+      }
+    },
+    "flatsim.simulation.robot_spawn_pose": {
+      "PoseInitializer": {
+        "lhs_frame": "world",
+        "rhs_frame": "robot_init_gt",
+        "pose": [0.0, 0.0, 0.0, 1.0, 13.5, 23.75, 0.0]
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "port": 3000,
+        "assetroot": "external/isaac_assets",
+        "ui_config": {
+          "assets": {
+            "carter": {
+              "obj": "apps/assets/carter.obj",
+              "diffuse_map": "apps/assets/carter_albido.png",
+              "normal_map": "apps/assets/carter_normal.png",
+              "rotation": [-0.5, -0.5, 0.5, 0.5],
+              "scale": 0.01
+            }
+          }
+        }
+      }
+    }
+  }
+}

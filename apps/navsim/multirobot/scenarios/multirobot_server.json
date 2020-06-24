@@ -1,0 +1,49 @@
+{
+  "scene": "warehouse",
+  "description": "Instantiating multiple robots with only actuators",
+  "robots": [
+    {
+      "prefab": "Carter",
+      "name": "carter_0",
+      "node": "robot_0",
+      "pose": [0, 0, 0, 1, 23, -4.1, 0]
+    },
+    {
+      "prefab": "Carter",
+      "name": "carter_1",
+      "node": "robot_1",
+      "pose": [0, 0, 0, 1, 23, -2.6, 0]
+    },
+    {
+      "prefab": "Carter",
+      "name": "carter_2",
+      "node": "robot_2",
+      "pose": [0, 0, 0, 1, 23, -1.1, 0]
+    },
+    {
+      "prefab": "Carter",
+      "name": "carter_3",
+      "node": "robot_3",
+      "pose": [0, 0, 0, 1, 23, 0.4, 0]
+    },
+    {
+      "prefab": "Carter",
+      "name": "carter_4",
+      "node": "robot_4",
+      "pose": [0, 0, 0, 1, 23, 1.9, 0]
+    },
+    {
+      "prefab": "Carter",
+      "name": "carter_5",
+      "node": "robot_5",
+      "pose": [0, 0, 0, 1, 23, 3.4, 0]
+    }
+  ],
+  "obstacles": [
+    {
+      "prefab": "Color Camera",
+      "name": "birdeye view",
+      "pose": [0.7071068, -0.7071068, 0, 0, 0, 0, 27]
+    }
+  ]
+}

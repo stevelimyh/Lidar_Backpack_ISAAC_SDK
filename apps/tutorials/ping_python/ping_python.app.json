@@ -1,0 +1,19 @@
+{
+  "name": "ping_python",
+  "graph": {
+    "nodes": [
+      {
+        "name": "ping_node",
+        "components": []
+      }
+    ],
+    "edges": []
+  },
+  "config": {
+    "ping_node": {
+      "PyCodelet": {
+        "message": "Hello Word!"
+      }
+    }
+  }
+}

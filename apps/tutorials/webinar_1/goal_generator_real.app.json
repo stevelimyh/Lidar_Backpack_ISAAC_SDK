@@ -1,0 +1,112 @@
+{
+  "name": "goal_generator_real",
+  "modules": [
+    "//apps/tutorials/webinar_1:goal_generator",
+    "map"
+  ],
+  "config_files": [
+    "apps/assets/maps/nvidia_R_180306.config.json"
+  ],
+  "graph_files": [
+    "apps/assets/maps/nvidia_R_180306.graph.json"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "2d_carter",
+        "subgraph": "apps/carter/2d_carter.subgraph.json"
+      },
+      {
+        "name": "commander",
+        "subgraph": "packages/navigation/apps/differential_base_commander.subgraph.json"
+      },
+      {
+        "name": "navigation",
+        "subgraph": "packages/navigation/apps/differential_base_navigation.subgraph.json"
+      },
+      {
+        "name": "goal_generator",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "GoalGenerator",
+            "type": "isaac::tutorials::GoalGenerator"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "goal_generator/GoalGenerator/goal",
+        "target": "navigation.subgraph/interface/goal"
+      },
+      {
+        "source": "navigation.subgraph/interface/feedback",
+        "target": "goal_generator/GoalGenerator/feedback"
+      },
+      {
+        "source": "2d_carter.subgraph/interface/flatscan",
+        "target": "navigation.subgraph/interface/flatscan_for_localization"
+      },
+      {
+        "source": "2d_carter.subgraph/interface/flatscan",
+        "target": "navigation.subgraph/interface/flatscan_for_obstacles"
+      },
+      {
+        "source": "2d_carter.subgraph/interface/diff_base_state",
+        "target": "navigation.subgraph/interface/state"
+      },
+      {
+        "source": "navigation.subgraph/interface/command",
+        "target": "commander.subgraph/interface/control"
+      },
+      {
+        "source": "commander.subgraph/interface/command",
+        "target": "2d_carter.subgraph/interface/diff_base_command"
+      }
+    ]
+  },
+  "config": {
+    "goal_generator" : {
+      "GoalGenerator" : {
+        "tick_period" : "10Hz"
+      }
+    },
+    "2d_carter.scan_flattener.scan_accumulator": {
+      "isaac.perception.ScanAccumulator": {
+        "min_count": 900
+      }
+    },
+    "2d_carter.scan_flattener.range_scan_flattening": {
+      "isaac.perception.RangeScanFlattening": {
+        "height_min": -0.44,
+        "height_max": 0.71
+      }
+    },
+    "2d_carter.carter_hardware.vlp16_initializer": {
+      "lidar_initializer": {
+        "lhs_frame": "robot",
+        "rhs_frame": "lidar",
+        "pose": [1.0, 0.0, 0.0, 0.0, -0.04, 0.0, 0.59]
+      }
+    },
+    "navigation.control.lqr": {
+      "isaac.planner.DifferentialBaseLqrPlanner": {
+        "manual_mode_channel": "commander.robot_remote/isaac.navigation.RobotRemoteControl/manual_mode"
+      }
+    },
+    "navigation.control.control": {
+      "isaac.planner.DifferentialBaseControl": {
+        "manual_mode_channel": "commander.robot_remote/isaac.navigation.RobotRemoteControl/manual_mode"
+      }
+    },
+    "navigation.imu_odometry.odometry": {
+      "DifferentialBaseWheelImuOdometry": {
+        "use_imu": false
+      }
+    }
+  }
+}

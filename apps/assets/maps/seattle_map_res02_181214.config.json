@@ -1,0 +1,52 @@
+{
+  "map": {
+    "occupancy": {
+      "cell_size": 0.02,
+      "filename": "apps/assets/maps/seattle_map_res02_181214.png"
+    },
+    "waypoints": {
+      "vis_cell_size": 0.02,
+      "waypoints": {
+        "wall": {
+          "pose": [0.99938540, 0, -0.0350554, 0, 33.2317363704, 7.85850556588, 0],
+          "color": [255,0,0]
+        },
+        "dishwasher": {
+          "pose": [0.9953806, 0, -0.0960073, 0,  33.3051780381, 9.04327338565, 0],
+          "color": [0,255,0]
+        },
+        "freespace": {
+          "pose": [0.9136592, 0, -0.4064811, 0, 32.5894639805, 9.43151193435, 0],
+          "color": [0,0,255]
+        }
+      },
+      "tick_period": "1.0"
+    },
+    "restricted_area": {
+      "polygons": {
+        "carpet": {
+          "points": [
+            [14.5, 13.0],
+            [27.0, 13.0],
+            [27.0, 7.0],
+            [14.5, 7.0]
+          ]
+        }
+      },
+      "tick_period": "1.0"
+    },
+    "localization_area": {
+      "polygons": {
+        "kitchen": {
+          "points": [
+            [26.0, 16.0],
+            [34.0, 16.0],
+            [34.0, 4.0],
+            [26.0, 4.0]
+          ]
+        }
+      },
+      "tick_period": "1.0"
+    }
+  }
+}

@@ -1,0 +1,278 @@
+{
+  "name": "imu_sim",
+  "modules": [
+    "flatsim",
+    "imu",
+    "navigation",
+    "sensors:joystick"
+  ],
+  "config": {
+    "ActuatorPublisher": {
+      "isaac.alice.TcpPublisher": {
+        "port": 5002,
+        "host": "localhost"
+      }
+    },
+    "BaseSimulation": {
+      "isaac.flatsim.DifferentialBaseSimulator": {
+        "flip_right_wheel": true,
+        "flip_left_wheel": true,
+        "tick_period": "100Hz"
+      },
+      "isaac.alice.Failsafe": {
+        "name": "carter"
+      }
+    },
+    "CarterJoystick": {
+      "isaac.alice.FailsafeHeartbeat": {
+        "interval": 0.25,
+        "failsafe_name": "carter",
+        "heartbeat_name": "deadman_switch"
+      },
+      "isaac.navigation.RobotRemoteControl": {
+        "tick_period": "10ms"
+      }
+    },
+    "Imu1": {
+      "isaac.imu.imusim": {
+        "robot_name": "carter_1",
+        "imu_name": "imu_1",
+        "robot_T_imu": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "accel_bias": [
+          0.2,
+          0.3,
+          0.4
+        ],
+        "gyro_bias": [
+          0.01,
+          0.02,
+          0.02
+        ],
+        "accel_noise": [
+          0.01,
+          0.01,
+          0.01
+        ],
+        "gyro_noise": [
+          0.001,
+          0.001,
+          0.001
+        ]
+      },
+      "isaac.imu.imucorrector": {
+        "imu_calibration_file": "apps/samples/imu_sim/imu_calib.json"
+      }
+    },
+    "Imu2": {
+      "isaac.imu.imusim": {
+        "robot_name": "carter_1",
+        "imu_name": "imu_2",
+        "robot_T_imu": [
+          0.7071068,
+          0,
+          0,
+          0.7071068,
+          0,
+          0,
+          0
+        ],
+        "accel_bias": [
+          0.2,
+          0.3,
+          0.4
+        ],
+        "gyro_bias": [
+          0.01,
+          0.02,
+          0.02
+        ],
+        "accel_noise": [
+          0.01,
+          0.01,
+          0.01
+        ],
+        "gyro_noise": [
+          0.001,
+          0.001,
+          0.001
+        ]
+      },
+      "isaac.imu.imucorrector": {
+        "imu_calibration_file": "apps/samples/imu_sim/imu_calib.json"
+      }
+    },
+    "RigidBodySubscriber": {
+      "isaac.alice.TcpSubscriber": {
+        "port": 5001,
+        "host": "localhost"
+      }
+    },
+    "shared_robot_model": {
+      "DifferentialBaseModel": {
+        "robot_radius": 0.5
+      }
+    }
+  },
+  "graph": {
+    "nodes": [
+      {
+        "name": "ActuatorPublisher",
+        "components": [
+          {
+            "name": "isaac.alice.MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.alice.TcpPublisher",
+            "type": "isaac::alice::TcpPublisher"
+          }
+        ]
+      },
+      {
+        "name": "BaseSimulation",
+        "components": [
+          {
+            "name": "isaac.alice.MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.flatsim.DifferentialBaseSimulator",
+            "type": "isaac::flatsim::DifferentialBaseSimulator"
+          },
+          {
+            "name": "isaac.alice.Failsafe",
+            "type": "isaac::alice::Failsafe"
+          }
+        ]
+      },
+      {
+        "name": "CarterJoystick",
+        "components": [
+          {
+            "name": "isaac.alice.MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.navigation.RobotRemoteControl",
+            "type": "isaac::navigation::RobotRemoteControl"
+          },
+          {
+            "name": "isaac.alice.FailsafeHeartbeat",
+            "type": "isaac::alice::FailsafeHeartbeat"
+          }
+        ]
+      },
+      {
+        "name": "Joystick",
+        "components": [
+          {
+            "name": "isaac.alice.MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.Joystick",
+            "type": "isaac::Joystick"
+          }
+        ]
+      },
+      {
+        "name": "Imu1",
+        "components": [
+          {
+            "name": "isaac.alice.MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.imu.imusim",
+            "type": "isaac::imu::ImuSim"
+          },
+          {
+            "name": "isaac.imu.imucorrector",
+            "type": "isaac::imu::ImuCorrector"
+          }
+        ]
+      },
+      {
+        "name": "Imu2",
+        "components": [
+          {
+            "name": "isaac.alice.MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.imu.imusim",
+            "type": "isaac::imu::ImuSim"
+          },
+          {
+            "name": "isaac.imu.imucorrector",
+            "type": "isaac::imu::ImuCorrector"
+          }
+        ]
+      },
+      {
+        "name": "RigidBodySubscriber",
+        "components": [
+          {
+            "name": "isaac.alice.MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.alice.TcpSubscriber",
+            "type": "isaac::alice::TcpSubscriber"
+          }
+        ]
+      },
+      {
+        "name": "shared_robot_model",
+        "components": [
+          {
+            "name": "DifferentialBaseModel",
+            "type": "isaac::planner::DifferentialBaseModel"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "RigidBodySubscriber/isaac.alice.TcpSubscriber/bodies",
+        "target": "Imu1/isaac.imu.imusim/bodies"
+      },
+      {
+        "source": "Imu1/isaac.imu.imusim/imu_raw",
+        "target": "Imu1/isaac.imu.imucorrector/raw"
+      },
+      {
+        "source": "RigidBodySubscriber/isaac.alice.TcpSubscriber/bodies",
+        "target": "Imu2/isaac.imu.imusim/bodies"
+      },
+      {
+        "source": "Imu2/isaac.imu.imusim/imu_raw",
+        "target": "Imu2/isaac.imu.imucorrector/raw"
+      },
+      {
+        "source": "RigidBodySubscriber/isaac.alice.TcpSubscriber/bodies",
+        "target": "BaseSimulation/isaac.flatsim.DifferentialBaseSimulator/physics_bodies"
+      },
+      {
+        "source": "Joystick/isaac.Joystick/js_state",
+        "target": "CarterJoystick/isaac.navigation.RobotRemoteControl/js_state"
+      },
+      {
+        "source": "CarterJoystick/isaac.navigation.RobotRemoteControl/segway_cmd",
+        "target": "BaseSimulation/isaac.flatsim.DifferentialBaseSimulator/diff_base_command"
+      },
+      {
+        "source": "BaseSimulation/isaac.flatsim.DifferentialBaseSimulator/physics_actuation",
+        "target": "ActuatorPublisher/isaac.alice.TcpPublisher/physics_actuation"
+      }
+    ]
+  }
+}

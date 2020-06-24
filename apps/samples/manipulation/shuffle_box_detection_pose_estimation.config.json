@@ -1,0 +1,126 @@
+{
+  "config": {
+    "detection_pose_estimation.detections_filter": {
+      "Detections3Filter": {
+        "detection_frame": "camera",
+        "threshold_translation": [
+          3,
+          3,
+          3
+        ],
+        "threshold_rotation": [
+          6.3,
+          6.3,
+          6.3
+        ]
+      }
+    },
+    "detection_pose_estimation.object_detection.tensor_r_t_inference": {
+      "isaac.ml.TensorRTInference": {
+        "model_file_path": "external/sortbot_pose_estimation_models/resnet18_detector_kltSmall.etlt",
+        "etlt_password": "sortbot_2020",
+        "force_engine_update": false
+      }
+    },
+    "detection_pose_estimation.object_detection.detection_decoder": {
+      "isaac.detect_net.DetectNetDecoder": {
+        "labels": [
+          "box"
+        ],
+        "non_maximum_suppression_threshold": 0.1,
+        "confidence_threshold": 0.50,
+        "output_scale": [720, 1280]
+      }
+    },
+    "detection_pose_estimation.object_pose_estimation.pose_encoder": {
+      "TensorRTInference": {
+        "model_file_path": "external/sortbot_pose_estimation_models/pose_estimation_cnn_kltSmall.uff",
+        "force_engine_update": false
+      }
+    },
+    "detection_pose_estimation.object_pose_estimation.detection_convertor": {
+      "BoundingBoxEncoder": {
+        "class_names": [
+          "Box",
+          "box"
+        ]
+      }
+    },
+    "detection_pose_estimation.viewers": {
+      "Detections3Viewer": {
+        "frame": "camera",
+        "object_T_box_center": [
+          1.0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0.075
+        ],
+        "box_dimensions": [
+          0.2,
+          0.3,
+          0.15
+        ],
+        "mesh_name": "box"
+      }
+    },
+    "detection_pose_estimation.object_pose_estimation.detection_filter": {
+      "FilterDetectionsByLabel": {
+        "whitelist_labels": [
+          "Box",
+          "box"
+        ]
+      }
+    },
+    "detection_pose_estimation.sight_widgets": {
+      "Pose Estimation": {
+        "type": "2d",
+        "channels": [
+          {
+            "name": "$(fullname detection_pose_estimation.object_detection.color_camera_visualizer/isaac.viewers.ColorCameraViewer/Color)"
+          },
+          {
+            "name": "$(fullname detection_pose_estimation.object_detection.detection_viewer/isaac.viewers.DetectionsViewer/detections)",
+            "active": false
+          },
+          {
+            "name": "$(fullname detection_pose_estimation.viewers/Detections3Viewer/bounding_box)",
+            "size": 3
+          },
+          {
+            "name": "$(fullname detection_pose_estimation.viewers/Detections3Viewer/mesh)",
+            "active": false
+          }
+        ]
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "webroot": "packages/sight/webroot",
+        "assetroot": "external/sortbot_pose_estimation_models",
+        "port": 3000,
+        "ui_config": {
+          "assets": {
+            "box": {
+              "obj": "/apps/assets/KLTSmall.obj",
+              "rotation": [
+                0.70710678118,
+                0.70710678118,
+                0,
+                0
+              ],
+              "translation": [
+                0,
+                0,
+                0.0
+              ],
+              "scale": 1.0
+            }
+          }
+        }
+      }
+    }
+  }
+}

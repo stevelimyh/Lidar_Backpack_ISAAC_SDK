@@ -1,0 +1,222 @@
+{
+  "modules": [
+    "ml",
+    "object_pose_estimation"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "interface",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "Subgraph",
+            "type": "isaac::alice::Subgraph"
+          }
+        ]
+      },
+      {
+        "name": "detection_filter",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "FilterDetectionsByLabel",
+            "type": "isaac::ml::FilterDetectionsByLabel"
+          }
+        ]
+      },
+      {
+        "name": "crop_downsample",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "DetectionImageExtraction",
+            "type": "isaac::ml::DetectionImageExtraction"
+          }
+        ]
+      },
+      {
+        "name": "pose_encoder",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "TensorRTInference",
+            "type": "isaac::ml::TensorRTInference"
+          }
+        ]
+      },
+      {
+        "name": "detection_convertor",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "BoundingBoxEncoder",
+            "type": "isaac::object_pose_estimation::BoundingBoxEncoder"
+          }
+        ]
+      },
+      {
+        "name": "pose_estimation",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "PoseCnnDecoder",
+            "type": "isaac::object_pose_estimation::PoseCnnDecoder"
+          }
+        ]
+      },
+      {
+        "name": "decoder_output_reshape",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "TensorReshape",
+            "type": "isaac::ml::TensorReshape"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "interface/Subgraph/input_image",
+        "target": "crop_downsample/DetectionImageExtraction/input_image"
+      },
+      {
+        "source": "interface/Subgraph/input_detections",
+        "target": "detection_filter/FilterDetectionsByLabel/input_detections"
+      },
+      {
+        "source": "detection_filter/FilterDetectionsByLabel/output_detections",
+        "target": "crop_downsample/DetectionImageExtraction/input_detections"
+      },
+      {
+        "source": "crop_downsample/DetectionImageExtraction/output_tensors",
+        "target": "pose_encoder/TensorRTInference/input_tensors_image"
+      },
+      {
+        "source": "detection_filter/FilterDetectionsByLabel/output_detections",
+        "target": "detection_convertor/BoundingBoxEncoder/detection"
+      },
+      {
+        "source": "detection_convertor/BoundingBoxEncoder/tensor",
+        "target": "pose_encoder/TensorRTInference/input_tensors_bbox"
+      },
+      {
+        "source": "pose_encoder/TensorRTInference/output_tensors_translation",
+        "target": "pose_estimation/PoseCnnDecoder/translation"
+      },
+      {
+        "source": "pose_encoder/TensorRTInference/output_tensors_rotation",
+        "target": "pose_estimation/PoseCnnDecoder/rotation"
+      },
+      {
+        "source": "interface/Subgraph/input_image",
+        "target": "pose_estimation/PoseCnnDecoder/image"
+      },
+      {
+        "source": "detection_filter/FilterDetectionsByLabel/output_detections",
+        "target": "pose_estimation/PoseCnnDecoder/detections"
+      },
+      {
+        "source": "pose_estimation/PoseCnnDecoder/output_poses",
+        "target": "interface/Subgraph/output_poses"
+      },
+      {
+        "source": "pose_encoder/TensorRTInference/decoder_output",
+        "target": "decoder_output_reshape/TensorReshape/input_tensors"
+      },
+      {
+        "source": "decoder_output_reshape/TensorReshape/output_tensors",
+        "target": "interface/Subgraph/output_decoder"
+      }
+    ]
+  },
+  "config": {
+    "detection_filter": {
+      "FilterDetectionsByLabel": {
+        "whitelist_labels": ["IndustrialDolly", "Dolly"]
+      }
+    },
+    "crop_downsample": {
+      "DetectionImageExtraction": {
+        "downsample_size": [128, 128],
+        "pixel_normalization_mode": "Unit",
+        "tensor_index_order": "201"
+      }
+    },
+    "detection_convertor": {
+      "BoundingBoxEncoder": {
+        "class_names": ["IndustrialDolly", "Dolly", "dolly", "box", "PickupBox"]
+      }
+    },
+    "pose_encoder": {
+      "TensorRTInference": {
+        "model_file_path": "external/industrial_dolly_pose_estimation_cnn_model/pose_estimation_cnn_industrial_dolly_bldgK.uff",
+        "inference_mode": "FP16",
+        "max_workspace_size": 116777216,
+        "force_engine_update": false,
+        "max_batch_size": 4,
+        "input_tensor_info": [
+          {
+            "use_batch_dimension": true,
+            "operation_name": "encoder_input",
+            "channel": "input_tensors_image",
+            "dims": [-1, 3, 128, 128],
+            "uff_input_order": "channels_last"
+          },
+          {
+            "use_batch_dimension": true,
+            "allow_tensor_reshape": true,
+            "operation_name": "encoder_bbox_input",
+            "channel": "input_tensors_bbox",
+            "dims": [-1, 4, 1, 1],
+            "uff_input_order": "channels_last"
+          }
+        ],
+        "output_tensor_info": [
+          {
+            "operation_name": "translation_output",
+            "channel": "output_tensors_translation",
+            "dims": [-1, 3]
+          },
+          {
+            "operation_name": "rotation_output_1",
+            "channel": "output_tensors_rotation",
+            "dims": [-1, 4]
+          },
+          {
+            "operation_name": "decoder_output",
+            "allow_tensor_reshape": true,
+            "dims": [-1, 128, 128, 1]
+          }
+        ]
+      }
+    },
+    "decoder_output_reshape": {
+      "TensorReshape": {
+        "output_tensor_dimensions": [-1, 128, 128]
+      }
+    }
+  }
+}

@@ -1,0 +1,130 @@
+{
+  "modules": [
+    "navsim",
+    "ml",
+    "utils"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "interface",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "subgraph",
+            "type": "isaac::alice::Subgraph"
+          },
+          {
+            "name": "sight",
+            "type": "isaac::alice::Subgraph"
+          },
+          {
+            "name": "noisy",
+            "type": "isaac::alice::Subgraph"
+          },
+          {
+            "name": "input",
+            "type": "isaac::alice::TcpPublisher"
+          },
+          {
+            "name": "output",
+            "type": "isaac::alice::TcpSubscriber"
+          },
+          {
+            "name": "time_sync",
+            "type": "isaac::alice::TimeSynchronizer"
+          }
+        ]
+      },
+      {
+        "name": "pose_injector",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "pose_injector",
+            "type": "isaac::alice::PoseMessageInjector"
+          }
+        ]
+      },
+      {
+        "name": "scenario_manager",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "scenario_manager",
+            "type": "isaac::navsim::ScenarioManager"
+          }
+        ]
+      },
+      {
+        "name": "bounding_boxes",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "conversion",
+            "type": "isaac::ml::LabelToBoundingBox"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "interface/output/pose",
+        "target": "pose_injector/pose_injector/pose"
+      },
+      {
+        "source": "scenario_manager/scenario_manager/scenario_control",
+        "target": "interface/input/scenario_control"
+      },
+      {
+        "source": "scenario_manager/scenario_manager/robot",
+        "target": "interface/input/scenario_actors"
+      },
+      {
+        "source": "interface/output/scenario_reply",
+        "target": "scenario_manager/scenario_manager/scenario_reply"
+      },
+      {
+        "source": "interface/output/segmentation",
+        "target": "bounding_boxes/conversion/segmentation"
+      },
+      {
+        "source": "bounding_boxes/conversion/detections",
+        "target": "interface/output/bounding_boxes"
+      }
+    ]
+  },
+  "config": {
+    "interface": {
+      "input": {
+        "port": 55001
+      },
+      "output": {
+        "port": 55000,
+        "host": "localhost"
+      }
+    },
+    "bounding_boxes": {
+      "conversion": {
+        "resolution": 2
+      }
+    },
+    "scenario_manager": {
+      "scenario_manager": {
+        "ref_pose_name": "unity"
+      }
+    }
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "graph": {
+    "nodes": [
+      {
+        "name": "map",
+        "start_order": -100,
+        "components": [
+          {
+            "name": "isaac.map.Map",
+            "type": "isaac::map::Map"
+          },
+          {
+            "name": "map",
+            "type": "isaac::navigation::NavigationMap"
+          },
+          {
+            "name": "occupancy",
+            "type": "isaac::map::OccupancyGridMapLayer"
+          },
+          {
+            "name": "waypoints",
+            "type": "isaac::map::WaypointMapLayer"
+          },
+          {
+            "name": "restricted_area",
+            "type": "isaac::map::PolygonMapLayer"
+          },
+          {
+            "name": "unity_initializer",
+            "type": "isaac::alice::PoseInitializer"
+          }
+        ]
+      }
+    ],
+    "edges": []
+  },
+  "config": {
+    "simulation.scenario_manager": {
+      "scenario_manager": {
+        "scene": "tutorial"
+      }
+    },
+    "map": {
+      "occupancy": {
+        "filename": "apps/assets/maps/virtual_tutorial.png",
+        "cell_size": 0.1
+      },
+      "waypoints": {
+        "tick_period": "1.0"
+      },
+      "restricted_area": {
+        "tick_period": "1.0"
+      },
+      "unity_initializer": {
+        "lhs_frame": "world",
+        "rhs_frame": "unity",
+        "attach_interactive_marker": true,
+        "pose": [
+          0.7074,
+          0.0,
+          0.0,
+          0.7074,
+          5.15,
+          5.15,
+          0.0
+        ]
+      }
+    }
+  }
+}

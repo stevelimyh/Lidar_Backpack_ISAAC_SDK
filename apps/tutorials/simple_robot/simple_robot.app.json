@@ -1,0 +1,82 @@
+{
+  "name": "simple_robot",
+  "modules": [
+    "navigation"
+  ],
+  "config": {
+    "carter_hardware.vlp16_initializer": {
+      "lidar_initializer": {
+        "lhs_frame": "robot",
+        "rhs_frame": "lidar",
+        "pose": [1.0, 0.0, 0.0, 0.0, -0.04, 0.0, 0.59]
+      }
+    },
+    "segway_odometry": {
+      "isaac.navigation.DifferentialBaseOdometry": {
+        "tick_period": "100Hz"
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "port": 3000,
+        "ui_config": {
+          "windows": {
+            "segway": {
+              "renderer": "plot",
+              "channels": [
+                { "name": "simple_robot/carter_hardware.segway_rmp/isaac.SegwayRmpDriver/aux_batt_soc" },
+                { "name": "simple_robot/carter_hardware.segway_rmp/isaac.SegwayRmpDriver/min_propulsion_batt_soc" },
+                { "name": "simple_robot/carter_hardware.segway_rmp/isaac.SegwayRmpDriver/linear_accel_msp2" },
+                { "name": "simple_robot/carter_hardware.segway_rmp/isaac.SegwayRmpDriver/linear_vel_mps" }
+              ]
+            },
+            "odometry": {
+              "renderer": "plot",
+              "channels": [
+                { "name": "simple_robot/segway_odometry/isaac.navigation.DifferentialBaseOdometry/dynamics.estimated_speed" },
+                { "name": "simple_robot/segway_odometry/isaac.navigation.DifferentialBaseOdometry/dynamics.estimated_angular_speed" },
+                { "name": "simple_robot/segway_odometry/isaac.navigation.DifferentialBaseOdometry/dynamics.observed_speed" },
+                { "name": "simple_robot/segway_odometry/isaac.navigation.DifferentialBaseOdometry/dynamics.observed_angular_speed" }
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "graph": {
+    "nodes": [
+      {
+        "name": "carter_hardware",
+        "subgraph": "apps/carter/carter_hardware.subgraph.json"
+      },
+      {
+        "name": "commander",
+        "subgraph": "packages/navigation/apps/differential_base_commander.subgraph.json"
+      },
+      {
+        "name": "segway_odometry",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.navigation.DifferentialBaseOdometry",
+            "type": "isaac::navigation::DifferentialBaseOdometry"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "carter_hardware.subgraph/interface/diff_base_state",
+        "target": "segway_odometry/isaac.navigation.DifferentialBaseOdometry/state"
+      },
+      {
+        "source": "commander.subgraph/interface/command",
+        "target": "carter_hardware.subgraph/interface/diff_base_command"
+      }
+    ]
+  }
+}

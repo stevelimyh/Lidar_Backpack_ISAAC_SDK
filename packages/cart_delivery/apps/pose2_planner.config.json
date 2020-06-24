@@ -1,0 +1,111 @@
+{
+  "graph": {
+    "nodes": [
+      {
+        "name": "flatmap_cost",
+        "start_order": -100,
+        "components": [
+          {
+            "name": "inside_round",
+            "type": "isaac::map::PolylineFlatmapCost"
+          },
+          {
+            "name": "outside_round",
+            "type": "isaac::map::PolylineFlatmapCost"
+          }
+        ]
+      }
+    ]
+  },
+  "config": {
+     "flatmap_cost": {
+        "inside_round": {
+          "polyline": [
+            [35.5, 50.0], [36.0, 16.0], [34.5, 14.5], [16.0, 14.5], [14.5, 16.0],
+            [14.5, 109.5], [16.5, 111.0], [34.5, 111.0], [35.5, 109.5], [35.5, 50.0]
+          ],
+          "width": 0.8,
+          "penality_angle": 1.0,
+          "penality_distance": 2.0,
+          "outside_weight": 10.0
+        },
+        "outside_round": {
+          "polyline": [
+            [38.0, 50.0], [38.0, 110.0], [35.0, 113.0], [16.0, 113.0], [12.5, 110.0],
+            [12.5, 15.5], [15.5, 12.5], [35.0, 12.5], [38.0, 15.5], [38.0, 50.0]
+          ],
+          "width": 0.8,
+          "penality_angle": 1.0,
+          "penality_distance": 2.0,
+          "outside_weight": 10.0
+        }
+    },
+    "navigation.planner.planner_switch_behavior": {
+      "SwitchBehavior": {
+        "desired_behavior": "$(fullname navigation.planner.pose2_graph_planner)"
+      }
+    },
+    "config_for_planner_graph_with_dolly": {
+      "ConfigLoader": {
+        "config": {
+          "delivery.navigation.planner.pose2_graph_planner": {
+            "Pose2GraphPlanner": {
+              "graph_filename": "external/pose2_grid_graphs_factory/pose2_grid_graph_with_dolly.capnp.bin"
+            }
+          }
+        }
+      }
+    },
+    "config_for_planner_graph_without_dolly": {
+      "ConfigLoader": {
+        "config": {
+          "delivery.navigation.planner.pose2_graph_planner": {
+            "Pose2GraphPlanner": {
+              "graph_filename": "external/pose2_grid_graphs_factory/pose2_grid_graph_without_dolly.capnp.bin"
+            }
+          }
+        }
+      }
+    },
+    "navigation.sight_widgets": {
+      "Planner View": {
+        "type": "2d",
+        "channels": [
+          { "name": "$(fullname navigation.local_map.local_map/isaac.navigation.LocalMap/local_map)" },
+          { "name": "$(fullname flatmap_cost/outside_round/area)" },
+          { "name": "$(fullname flatmap_cost/outside_round/polyline)" },
+          { "name": "$(fullname flatmap_cost/inside_round/polyline)" },
+          { "name": "$(fullname flatmap_cost/inside_round/area)" },
+          { "name": "$(fullname navigation.go_to.goal_viewer/GoalViewer/goal)" },
+          { "name": "$(fullname navigation.planner.pose2_graph_planner/Pose2GraphPlanner/path)" },
+          { "name": "$(fullname navigation.localization.viewers/RobotViewer/robot_model)" },
+          { "name": "$(fullname navigation.localization.viewers/PoseTrailViewer/pose_trail)" },
+          { "name": "$(fullname dolly_wheels_as_static_obstacle/wheel_1/obstacle)" },
+          { "name": "$(fullname dolly_wheels_as_static_obstacle/wheel_2/obstacle)" },
+          { "name": "$(fullname dolly_wheels_as_static_obstacle/wheel_3/obstacle)" },
+          { "name": "$(fullname dolly_wheels_as_static_obstacle/wheel_4/obstacle)" },
+          { "name": "$(fullname navigation.control.lqr/isaac.planner.DifferentialBaseLqrPlanner/plan)" },
+          { "name": "$(fullname detections_filter/Detections3Filter/roi_2D)" }
+        ]
+      },
+      "Map View": {
+        "type": "2d",
+        "channels": [
+          { "name": "map/occupancy/map" },
+          { "name": "map/waypoints/waypoints" },
+          { "name": "$(fullname flatmap_cost/outside_round/area)" },
+          { "name": "$(fullname flatmap_cost/outside_round/polyline)" },
+          { "name": "$(fullname flatmap_cost/inside_round/polyline)" },
+          { "name": "$(fullname flatmap_cost/inside_round/area)" },
+          { "name": "$(fullname navigation.localization.viewers/FlatscanViewer/beam_endpoints)" },
+          { "name": "$(fullname navigation.localization.viewers/FlatscanViewer2/beam_endpoints)" },
+          { "name": "$(fullname navigation.go_to.goal_viewer/GoalViewer/goal)" },
+          { "name": "$(fullname navigation.localization.viewers/RobotViewer/robot_model)" },
+          { "name": "$(fullname navigation.localization.viewers/RobotViewer/robot)" },
+          { "name": "$(fullname navigation.planner.pose2_graph_planner/Pose2GraphPlanner/path)" },
+          { "name": "$(fullname navigation.control.lqr/isaac.planner.DifferentialBaseLqrPlanner/plan)" }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,56 @@
+{
+    "name": "navsim_sub_gmap",
+    "graph": {
+      "nodes": [
+        {
+          "name": "gmapping",
+          "subgraph": "packages/lidar_slam/apps/differential_base_gmapping.subgraph.json"
+        },
+        {
+            "name": "tcp_subscriber",
+            "components": [
+              {
+                "name": "isaac.alice.MessageLedger",
+                "type": "isaac::alice::MessageLedger"
+              },
+              {
+                "name": "isaac.alice.TcpSubscriber",
+                "type": "isaac::alice::TcpSubscriber"
+              }
+            ]
+        }
+      ],
+      "edges": [
+        {
+          "source": "tcp_subscriber/isaac.alice.TcpSubscriber/flatscan",
+          "target": "gmapping.interface/Subgraph/flatscan"
+        },
+        {
+          "source": "tcp_subscriber/isaac.alice.TcpSubscriber/base_state",
+          "target": "gmapping.interface/Subgraph/base_state"
+        },
+        {
+          "source": "tcp_subscriber/isaac.alice.TcpSubscriber/imu_raw",
+          "target": "gmapping.interface/Subgraph/imu_raw"
+        }
+      ]
+    },
+    "config": {
+      "gmapping.odometry.odometry": {
+        "DifferentialBaseWheelImuOdometry": {
+          "use_imu": true
+        }
+      },
+    "tcp_subscriber": {
+      "isaac.alice.TcpSubscriber": {
+        "port": 5000,
+        "host": "localhost"
+      }
+    },
+    "websight": {
+        "WebsightServer": {
+          "port": 4000
+        }
+    }
+    }
+  }

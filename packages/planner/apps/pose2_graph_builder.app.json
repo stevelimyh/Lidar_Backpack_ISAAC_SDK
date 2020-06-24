@@ -1,0 +1,154 @@
+{
+  "name": "pose2_graph_builder",
+  "modules": [
+    "map",
+    "planner"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "map",
+        "start_order": -200,
+        "components": [
+          {
+            "name": "isaac.map.Map",
+            "type": "isaac::map::Map"
+          },
+          {
+            "name": "map",
+            "type": "isaac::navigation::NavigationMap"
+          },
+          {
+            "name": "occupancy",
+            "type": "isaac::map::OccupancyGridMapLayer"
+          },
+          {
+            "name": "restricted_area",
+            "type": "isaac::map::PolygonMapLayer"
+          }
+        ]
+      },
+      {
+       "name": "obstacle_atlas",
+       "components": [
+         {
+           "name": "obstacle_atlas",
+           "type": "isaac::map::ObstacleAtlas"
+         }
+       ]
+      },
+      {
+        "name": "flatmap_cost",
+        "start_order": -100,
+        "components": [
+          {
+            "name": "OccupancyFlatmapCost",
+            "type": "isaac::map::OccupancyFlatmapCost"
+          },
+          {
+            "name": "inside_round",
+            "type": "isaac::map::PolylineFlatmapCost"
+          },
+          {
+            "name": "outside_round",
+            "type": "isaac::map::PolylineFlatmapCost"
+          },
+          {
+            "name": "restricted_area",
+            "type": "isaac::map::PolygonFlatmapCost"
+          },
+          {
+            "name": "MultiplicationFlatmapCost",
+            "type": "isaac::map::MultiplicationFlatmapCost"
+          }
+        ]
+      },
+      {
+        "name": "pose2_graph_builder",
+        "subgraph": "packages/planner/apps/pose2_graph_builder.subgraph.json"
+      },
+      {
+        "name": "shared_robot_model",
+        "components": [
+          {
+            "name": "SphericalRobotShapeComponent",
+            "type": "isaac::planner::SphericalRobotShapeComponent"
+          }
+        ]
+      }
+    ]
+  },
+  "config": {
+    "shared_robot_model": {
+      "SphericalRobotShapeComponent": {
+        "circles": [
+          { "center": [-0.17 ,0.0], "radius": 0.31},
+          { "center": [-0.43 ,0.0], "radius": 0.31},
+          { "center": [ 0.1 , 0.0], "radius": 0.31},
+          { "center": [-0.7 , 0.0], "radius": 0.31},
+          { "center": [ 0.31, 0.21], "radius": 0.105},
+          { "center": [-0.91,-0.21], "radius": 0.105},
+          { "center": [-0.91, 0.21], "radius": 0.105},
+          { "center": [ 0.31,-0.21], "radius": 0.105}
+        ]
+      }
+    },
+    "map": {
+      "occupancy": {
+        "cell_size": 0.05,
+        "filename": "apps/assets/maps/virtual_factory_1.png"
+      },
+      "restricted_area": {
+        "tick_period": "1.0",
+        "polygons": {
+          "assembly_line": {
+            "points": [
+              [19.0, 20.0], [19.0, 105.5], [31.0, 105.5], [31.0, 20.0]
+            ]
+          }
+        }
+      }
+    },
+    "flatmap_cost": {
+      "MultiplicationFlatmapCost": {
+        "maximum_weight": 100.0,
+        "minimum_weight": 0.001
+      },
+      "OccupancyFlatmapCost": {
+        "offset_weight": 1.0,
+        "target_distance": 1.0,
+        "target_distance_penality": 5.0
+      },
+      "restricted_area": {
+        "polygon_layer_name": "map/restricted_area",
+        "use_robot_center": false,
+        "outside_weight": 1.0
+      },
+      "inside_round": {
+        "polyline": [
+          [36.0, 109.5], [36.0, 16.0], [34.5, 14.5], [16.0, 14.5], [14.5, 16.0],
+          [14.5, 109.5], [16.5, 111.0], [34.5, 111.0], [36.0, 109.5]
+        ],
+        "width": 0.8,
+        "penality_angle": 1.0,
+        "penality_distance": 2.0,
+        "outside_weight": 10.0
+      },
+      "outside_round": {
+        "polyline": [
+          [38.0, 110.0], [35.0, 113.0], [16.0, 113.0], [12.5, 110.0],
+          [12.5, 15.5], [15.5, 12.5], [35.0, 12.5], [38.0, 15.5], [38.0, 110.0]
+        ],
+        "width": 0.8,
+        "penality_angle": 1.0,
+        "penality_distance": 2.0,
+        "outside_weight": 10.0
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "port": 3000
+      }
+    }
+  }
+}

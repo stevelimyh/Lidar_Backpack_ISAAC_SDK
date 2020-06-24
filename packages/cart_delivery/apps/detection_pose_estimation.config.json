@@ -1,0 +1,73 @@
+{
+  "config": {
+    "detection_pose_estimation.object_detection.color_camera_visualizer": {
+      "isaac.viewers.ColorCameraViewer": {
+        "reduce_scale": 2
+      }
+    },
+    "detection_pose_estimation.object_detection.detection_viewer": {
+      "isaac.viewers.DetectionsViewer": {
+        "reduce_scale": 2,
+        "border_background_color": [0, 132, 113],
+        "border_foreground_color": [0, 132, 113],
+        "enable_labels": false
+      }
+    },
+    "detection_pose_estimation.detections_filter": {
+      "Detections3Filter": {
+        "detection_frame": "camera",
+        "threshold_translation": [7.0, 1.5, 7.0],
+        "threshold_rotation": [6.3, 6.3, 6.3]
+      }
+    },
+    "detection_pose_estimation.object_detection.tensor_r_t_inference": {
+      "isaac.ml.TensorRTInference": {
+        "model_file_path": "external/industrial_dolly_pose_estimation_cnn_model/resnet18_detector_industrial_dolly_fof.etlt",
+        "etlt_password": "test_pilot_2020",
+        "force_engine_update": false
+      }
+    },
+    "detection_pose_estimation.object_detection.detection_decoder": {
+      "isaac.detect_net.DetectNetDecoder": {
+        "labels": ["dolly"],
+        "non_maximum_suppression_threshold": 0.4,
+        "confidence_threshold": 0.55,
+        "output_scale": [720, 1280]
+      }
+    },
+    "detection_pose_estimation.object_pose_estimation.detection_filter": {
+      "FilterDetectionsByLabel": {
+        "max_detections": 4
+      }
+    },
+    "detection_pose_estimation.object_pose_estimation.pose_encoder": {
+      "TensorRTInference": {
+        "model_file_path": "external/industrial_dolly_pose_estimation_cnn_model/pose_estimation_cnn_industrial_dolly_bldgK.uff",
+        "force_engine_update": false,
+        "max_batch_size": 4
+      }
+    },
+    "detection_pose_estimation.object_pose_estimation.detection_convertor": {
+      "BoundingBoxEncoder": {
+        "class_names": ["IndustrialDolly", "Dolly", "dolly"],
+        "image_dimensions": [720, 1280]
+      }
+    },
+    "detection_pose_estimation.viewers": {
+      "Detections3Viewer": {
+        "frame": "camera",
+        "object_T_box_center": [1.0, 0, 0, 0, 0, 0, 0.375],
+        "box_dimensions": [0.9, 1.32, 0.25],
+        "mesh_name": "dolly"
+      }
+    },
+    "detection_pose_estimation.object_pose_estimation.detection_filter": {
+      "FilterDetectionsByLabel": {
+        "whitelist_labels": [
+          "Dolly",
+          "dolly"
+        ]
+      }
+    }
+  }
+}

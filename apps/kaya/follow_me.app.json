@@ -1,0 +1,184 @@
+{
+  "name": "follow_me",
+  "modules": [
+    "navigation",
+    "perception",
+    "perception:april_tags",
+    "planner",
+    "viewers"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "kaya_hardware",
+        "subgraph": "apps/kaya/kaya_hardware.subgraph.json"
+      },
+      {
+        "name": "control",
+        "subgraph": "packages/navigation/apps/holonomic_base_control.subgraph.json"
+      },
+      {
+        "name": "commander",
+        "subgraph": "packages/navigation/apps/holonomic_base_commander.subgraph.json"
+      },
+      {
+        "name": "imu_odometry",
+        "subgraph": "packages/navigation/apps/holonomic_base_imu_odometry.subgraph.json"
+      },
+      {
+        "name": "shared_robot_model",
+        "components": [
+          {
+            "name": "SphericalRobotShapeComponent",
+            "type": "isaac::planner::SphericalRobotShapeComponent"
+          }
+        ]
+      },
+      {
+        "name": "april_tags_detection",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "AprilTagsDetection",
+            "type": "isaac::perception::AprilTagsDetection"
+          },
+          {
+            "name": "FiducialsViewer",
+            "type": "isaac::viewers::FiducialsViewer"
+          },
+          {
+            "name": "Throttle",
+            "type": "isaac::alice::Throttle"
+          }
+        ]
+      },
+      {
+        "name": "fiducial_as_goal",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "FiducialAsGoal",
+            "type": "isaac::perception::FiducialAsGoal"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "kaya_hardware.subgraph/interface/realsense_color",
+        "target": "april_tags_detection/Throttle/input"
+      },
+      {
+        "source": "april_tags_detection/Throttle/output",
+        "target": "april_tags_detection/AprilTagsDetection/image"
+      },
+      {
+        "source": "april_tags_detection/AprilTagsDetection/april_tags",
+        "target": "fiducial_as_goal/FiducialAsGoal/fiducials"
+      },
+      {
+        "source": "april_tags_detection/AprilTagsDetection/april_tags",
+        "target": "april_tags_detection/FiducialsViewer/fiducials"
+      },
+      {
+        "source": "imu_odometry.subgraph/interface/odometry",
+        "target": "control.subgraph/interface/odometry"
+      },
+      {
+        "source": "fiducial_as_goal/FiducialAsGoal/plan",
+        "target": "control.subgraph/interface/plan"
+      },
+      {
+        "source": "kaya_hardware.subgraph/interface/base_state",
+        "target": "imu_odometry.subgraph/interface/state"
+      },
+      {
+        "source": "control.subgraph/interface/command",
+        "target": "commander.subgraph/interface/control"
+      },
+      {
+        "source": "commander.subgraph/interface/command",
+        "target": "kaya_hardware.subgraph/interface/base_command"
+      },
+      {
+        "source": "kaya_hardware.subgraph/interface/imu_raw",
+        "target": "imu_odometry.subgraph/interface/imu_raw"
+      }
+    ]
+  },
+  "config": {
+    "control.lqr": {
+      "isaac.planner.HolonomicBaseLqrPlanner": {
+        "static_frame": "odom",
+        "obstacle_names": [],
+        "gain_angular_acceleration": 0.2,
+        "gain_lat_acceleration": 200,
+        "gain_steering": 1.0,
+        "robot_model": "shared_robot_model/SphericalRobotShapeComponent",
+        "manual_mode_channel": "commander.robot_remote/isaac.navigation.RobotRemoteControl/manual_mode"
+      }
+    },
+    "control.control": {
+      "HolonomicBaseControl": {
+        "manual_mode_channel": "commander.robot_remote/isaac.navigation.RobotRemoteControl/manual_mode"
+      }
+    },
+    "april_tags_detection": {
+      "AprilTagsDetection": {
+        "max_tags": 50,
+        "tag_dimensions": 0.085
+      },
+      "Throttle": {
+        "data_channel": "input",
+        "output_channel": "output",
+        "minimum_interval": 0.1,
+        "use_signal_channel": false
+      }
+    },
+    "fiducial_as_goal": {
+      "FiducialAsGoal": {
+        "target_fiducial_id": "tag36h11_7",
+        "robot_frame": "robot",
+        "camera_frame": "camera"
+      }
+    },
+    "shared_robot_model": {
+      "SphericalRobotShapeComponent": {
+        "circles": [
+          { "center": [0.0 ,0.0], "radius": 0.075},
+          { "center": [0.02 ,0.03464], "radius": 0.055},
+          { "center": [0.02 ,-0.03464], "radius": 0.055},
+          { "center": [-0.04 ,0.0], "radius": 0.055},
+          { "center": [0.0525 ,0.09093], "radius": 0.035},
+          { "center": [0.0525 ,-0.09093], "radius": 0.035},
+          { "center": [-0.105 ,0.0], "radius": 0.035}
+        ]
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "port": 3000,
+        "ui_config": {
+          "windows": {
+            "Camera": {
+              "renderer": "2d",
+              "channels": [
+                { "name": "follow_me/kaya_hardware.camera/color_viewer/Color" },
+                { "name": "follow_me/april_tags_detection/FiducialsViewer/fiducials" },
+                { "name": "follow_me/fiducial_as_goal/FiducialAsGoal/tag_pose" },
+                { "name": "follow_me/fiducial_as_goal/FiducialAsGoal/target" },
+                { "name": "follow_me/control.lqr/isaac.planner.HolonomicBaseLqrPlanner/plan" }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

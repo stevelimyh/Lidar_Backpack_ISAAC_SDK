@@ -1,0 +1,113 @@
+{
+    "name": "imu_test",
+    "modules": [
+      "imu",
+      "message_generators"
+    ],
+    "graph": {
+      "nodes": [
+        {
+          "name": "imu",
+          "components": [
+            {
+              "name": "isaac.alice.MessageLedger",
+              "type": "isaac::alice::MessageLedger"
+            },
+            {
+              "name": "imusim",
+              "type": "isaac::imu::ImuSim"
+            },
+            {
+              "name": "random",
+              "type": "isaac::alice::Random"
+            }
+          ]
+        },
+        {
+          "name": "imu_corrector",
+          "components": [
+            {
+              "name": "isaac.alice.MessageLedger",
+              "type": "isaac::alice::MessageLedger"
+            },
+            {
+              "name": "corrector",
+              "type": "isaac::imu::ImuCorrector"
+            }
+          ]
+        },
+        {
+          "name": "RigidBody",
+          "components": [
+            {
+              "name": "isaac.alice.MessageLedger",
+              "type": "isaac::alice::MessageLedger"
+            },
+            {
+              "name": "rb_gen",
+              "type": "isaac::message_generators::RigidBody3GroupGenerator"
+            }
+          ]
+        },
+        {
+            "name": "record",
+            "subgraph": "packages/record_replay/apps/record.subgraph.json"
+        }
+      ],
+      "edges": [
+        {
+          "source": "RigidBody/rb_gen/bodies",
+          "target": "imu/imusim/bodies"
+        },
+        {
+          "source": "imu/imusim/imu_raw",
+          "target": "imu_corrector/corrector/raw"
+        },
+        {
+          "source": "imu/imusim/imu_raw" ,
+          "target": "record.interface/input/imu_raw"
+        },
+        {
+            "source": "imu_corrector/corrector/corrected" ,
+            "target": "record.interface/input/imu"
+        }
+      ]
+    },
+    "config": {
+      "record.interface": {
+          "input": {
+            "start_recording_automatically": false
+          }
+        },
+        "imu": {
+          "imusim": {
+            "imu_name": "dummy_body",
+            "accel_bias": [
+              0.2,
+              0.3,
+              0.4
+            ],
+            "gyro_bias": [
+              0.01,
+              0.02,
+              0.02
+            ],
+            "accel_noise": [
+              0.01,
+              0.01,
+              0.01
+            ],
+            "gyro_noise": [
+              0.001,
+              0.001,
+              0.001
+            ]
+          }
+        },
+    "RigidBody": {
+      "rb_gen": {
+          "tick_period": "1s"
+      }
+  }
+  }
+  }

@@ -1,0 +1,64 @@
+{
+  "modules": [
+    "perception"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "subgraph",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "interface",
+            "type": "isaac::alice::Subgraph"
+          }
+        ]
+      },
+      {
+        "name": "scan_accumulator",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.perception.ScanAccumulator",
+            "type": "isaac::perception::ScanAccumulator"
+          }
+        ]
+      },
+      {
+        "name": "range_scan_flattening",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.perception.RangeScanFlattening",
+            "type": "isaac::perception::RangeScanFlattening"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "subgraph/interface/scan",
+        "target": "scan_accumulator/isaac.perception.ScanAccumulator/scan"
+      },
+      {
+        "source": "scan_accumulator/isaac.perception.ScanAccumulator/fullscan",
+        "target": "range_scan_flattening/isaac.perception.RangeScanFlattening/scan"
+      },
+      {
+        "source": "range_scan_flattening/isaac.perception.RangeScanFlattening/flatscan",
+        "target": "subgraph/interface/flatscan"
+      }
+    ]
+  },
+  "config": {
+  }
+}

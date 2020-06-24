@@ -1,0 +1,63 @@
+{
+  "graph": {
+    "nodes": [
+      {
+        "name": "subgraph",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "Subgraph",
+            "type": "isaac::alice::Subgraph"
+          }
+        ]
+      },
+      {
+        "name": "interface",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "output",
+            "type": "isaac::alice::Replay"
+          }
+        ]
+      },
+      {
+        "name": "replay_bridge",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "ReplayBridge",
+            "type": "isaac::alice::ReplayBridge"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "/websight/WebsightServer/replay",
+        "target": "replay_bridge/ReplayBridge/request"
+      },
+      {
+        "source": "replay_bridge/ReplayBridge/reply",
+        "target": "/websight/WebsightServer/replay_reply"
+      }
+    ]
+  },
+  "config": {
+    "replay_bridge": {
+      "ReplayBridge": {
+        "replay_component_name": "$(fullname interface/output)",
+        "tick_period": "250ms"
+      }
+    }
+  }
+}

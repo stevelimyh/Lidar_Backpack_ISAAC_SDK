@@ -1,0 +1,138 @@
+{
+  "modules": [
+    "imu",
+    "segway",
+    "sight",
+    "velodyne_lidar"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "subgraph",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "interface",
+            "type": "isaac::alice::Subgraph"
+          }
+        ]
+      },
+      {
+        "name": "segway_rmp",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.SegwayRmpDriver",
+            "type": "isaac::SegwayRmpDriver"
+          },
+          {
+            "name": "isaac.alice.Failsafe",
+            "type": "isaac::alice::Failsafe"
+          }
+        ]
+      },
+      {
+        "name": "vlp16",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "VelodyneLidar",
+            "type": "isaac::velodyne_lidar::VelodyneLidar"
+          }
+        ]
+      },
+      {
+        "name": "vlp16_initializer",
+        "start_order": -200,
+        "components": [
+          {
+            "name": "lidar_initializer",
+            "type": "isaac::alice::PoseInitializer"
+          }
+        ]
+      },
+      {
+        "name": "imu",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "IioBmi160",
+            "type": "isaac::imu::IioBmi160"
+          }
+        ]
+      },
+      {
+        "name": "sight_widgets",
+        "components": [
+          {
+            "type": "isaac::sight::SightWidget",
+            "name": "Segway"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "subgraph/interface/diff_base_command",
+        "target": "segway_rmp/isaac.SegwayRmpDriver/segway_cmd"
+      },
+      {
+        "source": "segway_rmp/isaac.SegwayRmpDriver/segway_state",
+        "target": "subgraph/interface/diff_base_state"
+      },
+      {
+        "source": "vlp16/VelodyneLidar/scan",
+        "target": "subgraph/interface/scan"
+      },
+      {
+        "source": "imu/IioBmi160/imu_raw",
+        "target": "subgraph/interface/imu_raw"
+      }
+    ]
+  },
+  "config": {
+    "segway_rmp": {
+      "isaac.SegwayRmpDriver": {
+        "ip": "192.168.0.40",
+        "tick_period": "20ms"
+      },
+      "isaac.alice.Failsafe": {
+        "name": "robot_failsafe"
+      }
+    },
+    "vlp16": {
+      "VelodyneLidar": {
+        "ip": "192.168.0.5"
+      }
+    },
+    "imu": {
+      "IioBmi160": {
+        "i2c_device_id": 1,
+        "tick_period": "100Hz"
+      }
+    },
+    "sight_widgets": {
+      "Segway": {
+        "type": "plot",
+        "channels": [
+          { "name": "$(fullname segway_rmp/isaac.SegwayRmpDriver/aux_batt_soc)" },
+          { "name": "$(fullname segway_rmp/isaac.SegwayRmpDriver/min_propulsion_batt_soc)" },
+          { "name": "$(fullname segway_rmp/isaac.SegwayRmpDriver/linear_accel_msp2)" },
+          { "name": "$(fullname segway_rmp/isaac.SegwayRmpDriver/linear_vel_mps)" }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,305 @@
+{
+  "name": "hgmm_matching",
+  "modules": [
+    "hgmm",
+    "rgbd_processing",
+    "realsense",
+    "viewers"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "camera",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "realsense",
+            "type": "isaac::RealsenseCamera"
+          }
+        ]
+      },
+      {
+        "name": "viewer",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "depth",
+            "type": "isaac::viewers::DepthCameraViewer"
+          },
+          {
+            "name": "color",
+            "type": "isaac::viewers::ColorCameraViewer"
+          }
+        ]
+      },
+      {
+        "name": "point_cloud",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "pose",
+            "type": "isaac::alice::PoseInitializer"
+          },
+          {
+            "name": "depth_to_pointcloud",
+            "type": "isaac::rgbd_processing::DepthImageToPointCloud"
+          },
+          {
+            "name": "viewer",
+            "type": "isaac::viewers::PointCloudViewer"
+          }
+        ]
+      },
+      {
+        "name": "hgmm",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "hgmm_pose",
+            "type": "isaac::hgmm::HgmmPointCloudMatching"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "camera/realsense/depth",
+        "target": "viewer/depth/depth_listener"
+      },
+      {
+        "source": "camera/realsense/color",
+        "target": "viewer/color/color_listener"
+      },
+      {
+        "source": "camera/realsense/depth",
+        "target": "point_cloud/depth_to_pointcloud/depth"
+      },
+      {
+        "source": "camera/realsense/color",
+        "target": "point_cloud/depth_to_pointcloud/color"
+      },
+      {
+        "source": "point_cloud/depth_to_pointcloud/cloud",
+        "target": "point_cloud/viewer/cloud"
+      },
+      {
+        "source": "point_cloud/depth_to_pointcloud/cloud",
+        "target": "hgmm/hgmm_pose/cloud"
+      }
+    ]
+  },
+  "config": {
+    "camera": {
+      "realsense": {
+        "rows": 720,
+        "cols": 1280,
+        "color_framerate": 15,
+        "depth_framerate": 15,
+        "enable_ir_stereo": false,
+        "align_to_color": true,
+        "frame_queue_size": 2,
+        "auto_exposure_priority": false
+      }
+    },
+    "viewer": {
+      "color": {
+        "reduce_scale": 2
+      },
+      "depth": {
+        "reduce_scale": 2,
+        "min_visualization_depth": 0.2,
+        "max_visualization_depth": 5,
+        "camera_name": "Realsense 1",
+        "colormap": [
+          [
+            128,
+            0,
+            0
+          ],
+          [
+            255,
+            0,
+            0
+          ],
+          [
+            255,
+            255,
+            0
+          ],
+          [
+            0,
+            255,
+            255
+          ],
+          [
+            0,
+            0,
+            255
+          ],
+          [
+            0,
+            0,
+            128
+          ]
+        ]
+      },
+      "ir": {
+        "reduce_scale": 2
+      }
+    },
+    "point_cloud": {
+      "depth_to_pointcloud": {
+        "use_color": true
+      },
+      "pose": {
+        "lhs_frame": "cloud",
+        "rhs_frame": "camera",
+        "pose": [
+          0.270598,
+          -0.653281,
+          0.653281,
+          -0.270598,
+          0,
+          0,
+          0.775
+        ]
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "port": 3000,
+        "ui_config": {
+          "windows": {
+            "Realsense - Color": {
+              "renderer": "2d",
+              "dims": {
+                "width": 640,
+                "height": 360
+              },
+              "channels": [
+                {
+                  "name": "hgmm_matching/viewer/color/Color"
+                }
+              ]
+            },
+            "Realsense - Depth": {
+              "renderer": "2d",
+              "dims": {
+                "width": 640,
+                "height": 360
+              },
+              "channels": [
+                {
+                  "name": "hgmm_matching/viewer/depth/Depth"
+                }
+              ]
+            },
+            "Realsense - Points": {
+              "renderer": "3d",
+              "dims": {
+                "width": 640,
+                "height": 480
+              },
+              "channels": [
+                {
+                  "name": "hgmm_matching/point_cloud/viewer/points"
+                }
+              ]
+            },
+            "HGMM - Ego Pose": {
+              "renderer": "3d",
+              "dims": {
+                "width": 640,
+                "height": 480
+              },
+              "channels": [
+                {
+                  "name": "hgmm_matching/hgmm/hgmm_pose/ego_pose"
+                },
+                {
+                  "name": "hgmm_matching/hgmm/hgmm_pose/points_0"
+                },
+                {
+                  "name": "hgmm_matching/hgmm/hgmm_pose/points_1"
+                },
+                {
+                  "name": "hgmm_matching/hgmm/hgmm_pose/points_2"
+                },
+                {
+                  "name": "hgmm_matching/hgmm/hgmm_pose/points_3"
+                },
+                {
+                  "name": "hgmm_matching/hgmm/hgmm_pose/points_4"
+                },
+                {
+                  "name": "hgmm_matching/hgmm/hgmm_pose/points_5"
+                },
+                {
+                  "name": "hgmm_matching/hgmm/hgmm_pose/points_6"
+                },
+                {
+                  "name": "hgmm_matching/hgmm/hgmm_pose/points_7"
+                },
+                {
+                  "name": "hgmm_matching/hgmm/hgmm_pose/points_8"
+                },
+                {
+                  "name": "hgmm_matching/hgmm/hgmm_pose/points_9"
+                }
+              ]
+            },
+            "HGMM - Translation": {
+              "renderer": "plot",
+              "dims": {
+                "width": 320,
+                "height": 240
+              },
+              "timeseries": [
+                {
+                  "name": "hgmm_matching/hgmm/hgmm_pose/x"
+                },
+                {
+                  "name": "hgmm_matching/hgmm/hgmm_pose/y"
+                },
+                {
+                  "name": "hgmm_matching/hgmm/hgmm_pose/z"
+                }
+              ]
+            },
+            "HGMM - Delta Translation": {
+              "renderer": "plot",
+              "dims": {
+                "width": 320,
+                "height": 240
+              },
+              "timeseries": [
+                {
+                  "name": "hgmm_matching/hgmm/hgmm_pose/dx"
+                },
+                {
+                  "name": "hgmm_matching/hgmm/hgmm_pose/dy"
+                },
+                {
+                  "name": "hgmm_matching/hgmm/hgmm_pose/dz"
+                }
+              ]
+            }
+          },
+          "assets": {}
+        }
+      }
+    }
+  }
+}

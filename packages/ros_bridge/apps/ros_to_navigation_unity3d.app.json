@@ -1,0 +1,112 @@
+{
+  "name": "ros_to_navigation_unity3d",
+  "graph": {
+    "nodes": [
+      {
+        "name": "simulation",
+        "subgraph": "packages/navsim/apps/navsim_navigation.subgraph.json"
+      },
+      {
+        "name": "ros_navigation",
+        "subgraph": "packages/ros_bridge/apps/ros_to_navigation.subgraph.json"
+      },
+      {
+        "name": "pose_as_goal",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "PoseAsGoal",
+            "type": "isaac::navigation::PoseAsGoal"
+          },
+          {
+            "name": "goal_pose",
+            "type": "isaac::alice::PoseInitializer"
+          }
+        ]
+      },
+      {
+        "name": "pose_initializers",
+        "components": [
+          {
+            "name": "lidar_initializer",
+            "type": "isaac::alice::PoseInitializer"
+          }
+        ],
+        "start_order": -200
+      }
+    ],
+    "edges": [
+      {
+        "source": "ros_navigation.subgraph/interface/command",
+        "target": "simulation.interface/input/base_command"
+      },
+      {
+        "source": "simulation.interface/noisy/flatscan",
+        "target": "ros_navigation.subgraph/interface/flatscan"
+      },
+      {
+        "source": "simulation.interface/output/base_state",
+        "target": "ros_navigation.subgraph/interface/base_state"
+      },
+      {
+        "source": "pose_as_goal/PoseAsGoal/goal",
+        "target": "ros_navigation.subgraph/interface/goal"
+      }
+    ]
+  },
+  "config": {
+    "pose_initializers": {
+      "lidar_initializer": {
+        "lhs_frame": "robot",
+        "rhs_frame": "lidar",
+        "pose": [1.0, 0.0, 0.0, 0.0, -0.064, 0.0, 0.1]
+      }
+    },
+    "pose_as_goal": {
+      "PoseAsGoal": {
+        "goal_frame": "pose_as_goal",
+        "reference_frame": "ros_map",
+        "tick_period": "250ms"
+      },
+      "goal_pose": {
+        "lhs_frame": "world",
+        "rhs_frame": "pose_as_goal",
+        "pose": {
+          "rotation": { "yaw_radians": 1.0 },
+          "translation": [9.0, 17.5, 0.0]
+        },
+        "attach_interactive_marker": true
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "port": 3000,
+        "assetroot": "external/isaac_assets",
+        "ui_config": {
+          "windows": {
+            "Map": {
+              "renderer": "2d",
+              "dims": {
+                "width": 432,
+                "height": 548
+              },
+              "channels": [
+                { "name": "ros_to_navigation_unity3d/map/occupancy/map" },
+                { "name": "ros_to_navigation_unity3d/ros_navigation.robot_viewers/estimation/robot" },
+                { "name": "ros_to_navigation_unity3d/ros_navigation.robot_viewers/ground_truth/robot" },
+                { "name": "ros_to_navigation_unity3d/ros_navigation.flatscan_viewer/FlatscanViewer/beam_endpoints" },
+                { "name": "ros_to_navigation_unity3d/ros_navigation.goal_viewer/GoalViewer/goal" }
+              ],
+              "markers": [
+                { "name": "pose_as_goal" }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

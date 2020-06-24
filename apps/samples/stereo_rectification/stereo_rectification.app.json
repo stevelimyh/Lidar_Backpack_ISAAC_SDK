@@ -1,0 +1,131 @@
+{
+  "name": "stereo_rectification",
+  "modules": [
+    "perception:stereo_visual_odometry",
+    "//packages/perception",
+    "viewers",
+    "zed"
+  ],
+  "config": {
+    "zed": {
+      "zed_camera": {
+        "resolution": "672x376",
+        "gray_scale": false,
+        "rgb": true,
+        "enable_factory_rectification": false,
+        "enable_imu": false,
+        "tick_period": "60Hz"
+      }
+    },
+    "stereo_rectification": {
+      "stereo_rectification": {
+        "horizontal_stereo_camera": true
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "port": 3000,
+        "ui_config": {
+          "windows": {
+            "rectified - left camera": {
+              "renderer": "2d",
+              "channels": [
+                {
+                  "name": "stereo_rectification/leftViewer/ColorCameraViewer/Color",
+                  "active": true
+                }
+              ]
+            },
+            "rectified - right camera": {
+              "renderer": "2d",
+              "channels": [
+                {
+                  "name": "stereo_rectification/rightViewer/ColorCameraViewer/Color",
+                  "active": true
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "graph": {
+    "nodes": [
+      {
+        "name": "zed",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "zed_camera",
+            "type": "isaac::ZedCamera"
+          }
+        ]
+      },
+      {
+        "name": "stereo_rectification",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "stereo_rectification",
+            "type": "isaac::perception::StereoRectification"
+          }
+        ]
+      },
+      {
+        "name": "leftViewer",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "ColorCameraViewer",
+            "type": "isaac::viewers::ColorCameraViewer"
+          }
+        ]
+      },
+      {
+        "name": "rightViewer",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "ColorCameraViewer",
+            "type": "isaac::viewers::ColorCameraViewer"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "zed/zed_camera/left_camera_rgb",
+        "target": "stereo_rectification/stereo_rectification/input_left_image"
+      },
+      {
+        "source": "zed/zed_camera/right_camera_rgb",
+        "target": "stereo_rectification/stereo_rectification/input_right_image"
+      },
+      {
+        "source": "zed/zed_camera/extrinsics",
+        "target": "stereo_rectification/stereo_rectification/input_right_pose"
+      },
+      {
+        "source": "stereo_rectification/stereo_rectification/output_left_image",
+        "target": "leftViewer/ColorCameraViewer/color_listener"
+      },
+      {
+        "source": "stereo_rectification/stereo_rectification/output_right_image",
+        "target": "rightViewer/ColorCameraViewer/color_listener"
+      }
+    ]
+  }
+}

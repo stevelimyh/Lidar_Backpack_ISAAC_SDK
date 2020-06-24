@@ -1,0 +1,67 @@
+{
+  "name": "viewer",
+  "modules": [
+    "sight",
+    "viewers"
+  ],
+  "config": {
+    "viewer": {
+      "camera": {
+        "use_png": false
+      },
+      "Image from C API": {
+        "type": "2d",
+        "channels": [
+          {
+            "name": "viewer/camera/Color",
+            "active": true
+          }
+        ]
+      }
+    }
+  },
+  "graph": {
+    "nodes": [
+      {
+        "name": "viewer",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "camera",
+            "type": "isaac::viewers::ColorCameraViewer"
+          },
+          {
+            "name": "Image from C API",
+            "type": "isaac::sight::SightWidget"
+          }
+        ]
+      },
+      {
+        "name": "websight",
+        "start_order": -1100,
+        "components": [
+          {
+            "name": "isaac.alice.MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "WebsightServer",
+            "type": "isaac::sight::WebsightServer"
+          },
+          {
+            "name": "isaac.alice.SightChannelStatus",
+            "type": "isaac::alice::SightChannelStatus"
+          },
+          {
+            "name": "isaac.sight.AliceSight",
+            "type": "isaac::sight::AliceSight"
+          }
+        ]
+      }
+    ],
+    "edges": []
+  }
+}

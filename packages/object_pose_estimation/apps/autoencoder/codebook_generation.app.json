@@ -1,0 +1,426 @@
+{
+  "name": "codebook_generation",
+  "modules": [
+    "behavior_tree",
+    "json",
+    "ml",
+    "object_pose_estimation",
+    "viewers"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "simulation",
+        "subgraph": "packages/object_pose_estimation/apps/autoencoder/pose_estimation_sim.subgraph.json"
+      },
+      {
+        "name": "codebook_view_sampler",
+        "disable_automatic_start": true,
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "view_sampler",
+            "type": "isaac::object_pose_estimation::CodebookPoseSampler"
+          }
+        ]
+      },
+      {
+        "name": "codebook_teleporter",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "random",
+            "type": "isaac::alice::Random"
+          },
+          {
+            "name": "teleport",
+            "type": "isaac::ml::Teleportation"
+          }
+        ]
+      },
+      {
+        "name": "rigid_bodies_convertor",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "RigidbodyToDetections3",
+            "type": "isaac::ml::RigidbodyToDetections3"
+          }
+        ]
+      },
+      {
+        "name": "pose_encoder",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "ImagePoseEncoder",
+            "type": "isaac::object_pose_estimation::ImagePoseEncoder"
+          }
+        ]
+      },
+      {
+        "name": "detection_filter",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "FilterDetectionsByLabel",
+            "type": "isaac::ml::FilterDetectionsByLabel"
+          }
+        ]
+      },
+      {
+        "name": "crop_downsample",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "CropAndDownsample",
+            "type": "isaac::ml::DetectionImageExtraction"
+          }
+        ]
+      },
+      {
+        "name": "image_embedding",
+        "start_order": -500,
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "TensorRTInference",
+            "type": "isaac::ml::TensorRTInference"
+          }
+        ]
+      },
+      {
+        "name": "codebook_writer",
+        "disable_automatic_start": true,
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "CodebookWriter",
+            "type": "isaac::object_pose_estimation::CodebookWriter"
+          }
+        ]
+      },
+      {
+        "name": "json_writer",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "JsonWriter",
+            "type": "isaac::json::JsonWriter"
+          }
+        ]
+      },
+      {
+        "name": "color_viewer",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "ColorCameraViewer",
+            "type": "isaac::viewers::ColorCameraViewer"
+          },
+          {
+            "name": "DetectionsViewer",
+            "type": "isaac::viewers::DetectionsViewer"
+          }
+        ]
+      },
+      {
+        "name": "segmentation_viewer",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "SegmentationCameraViewer",
+            "type": "isaac::viewers::SegmentationCameraViewer"
+          }
+        ]
+      },
+      {
+        "name": "behavior_codebook",
+        "components": [
+          {
+            "name": "NodeGroup",
+            "type": "isaac::behavior_tree::NodeGroup"
+          },
+          {
+            "name": "ParallelBehavior",
+            "type": "isaac::behavior_tree::ParallelBehavior"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "behavior_main",
+        "components": [
+          {
+            "name": "NodeGroup",
+            "type": "isaac::behavior_tree::NodeGroup"
+          },
+          {
+            "name": "MemorySequenceBehavior",
+            "type": "isaac::behavior_tree::MemorySequenceBehavior"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "codebook_view_sampler/view_sampler/pose",
+        "target": "codebook_teleporter/teleport/relative_frame"
+      },
+      {
+        "source": "codebook_teleporter/teleport/rigid_command",
+        "target": "simulation.interface/input/teleport_command"
+      },
+      {
+        "source": "simulation.interface/output/bodies",
+        "target": "rigid_bodies_convertor/RigidbodyToDetections3/rigid_bodies"
+      },
+      {
+        "source": "simulation.interface/output/encoder_color",
+        "target": "pose_encoder/ImagePoseEncoder/input_image"
+      },
+      {
+        "source": "rigid_bodies_convertor/RigidbodyToDetections3/detections",
+        "target": "pose_encoder/ImagePoseEncoder/input_poses"
+      },
+      {
+        "source": "simulation.interface/subgraph/encoder_bounding_boxes",
+        "target": "pose_encoder/ImagePoseEncoder/input_detections"
+      },
+      {
+        "source": "pose_encoder/ImagePoseEncoder/pose_encoding",
+        "target": "codebook_writer/CodebookWriter/code"
+      },
+      {
+        "source": "simulation.interface/output/encoder_color",
+        "target": "crop_downsample/CropAndDownsample/input_image"
+      },
+      {
+        "source": "simulation.interface/subgraph/encoder_bounding_boxes",
+        "target": "detection_filter/FilterDetectionsByLabel/input_detections"
+      },
+      {
+        "source": "detection_filter/FilterDetectionsByLabel/output_detections",
+        "target": "crop_downsample/CropAndDownsample/input_detections"
+      },
+      {
+        "source": "crop_downsample/CropAndDownsample/output_tensors",
+        "target": "image_embedding/TensorRTInference/input_tensors"
+      },
+      {
+        "source": "image_embedding/TensorRTInference/output_tensors",
+        "target": "codebook_writer/CodebookWriter/feature"
+      },
+      {
+        "source": "codebook_writer/CodebookWriter/codebook",
+        "target": "json_writer/JsonWriter/json"
+      },
+      {
+        "source": "simulation.interface/output/encoder_color",
+        "target": "color_viewer/ColorCameraViewer/color_listener"
+      },
+      {
+        "source": "simulation.interface/output/encoder_segmentation",
+        "target": "segmentation_viewer/SegmentationCameraViewer/segmentation_listener"
+      },
+      {
+        "source": "detection_filter/FilterDetectionsByLabel/output_detections",
+        "target": "color_viewer/DetectionsViewer/detections"
+      }
+    ]
+  },
+  "config": {
+    "simulation.scenario_manager": {
+      "scenario_manager": {
+        "scene": "pose_estimation_codebook_generation",
+        "robot_prefab": "Dolly"
+      }
+    },
+    "behavior_main": {
+      "MemorySequenceBehavior": {
+        "tick_period": "10Hz"
+      },
+      "NodeGroup": {
+        "node_names": [
+          "simulation.scenario_manager",
+          "behavior_codebook"
+        ],
+        "tick_period": "10Hz"
+      }
+    },
+    "behavior_codebook": {
+      "ParallelBehavior": {
+        "success_threshold": 1
+      },
+      "NodeGroup": {
+        "node_names": [
+          "codebook_writer",
+          "codebook_view_sampler"
+        ],
+        "tick_period": "10Hz"
+      }
+    },
+    "color_viewer": {
+      "ColorCameraViewer": {
+        "target_fps": 10
+      }
+    },
+    "segmentation_viewer": {
+      "SegmentationCameraViewer": {
+        "target_fps": 10,
+        "camera_name": "segmentation_camera"
+      }
+    },
+    "codebook_view_sampler": {
+      "view_sampler": {
+        "tick_period": "10Hz",
+        "radius": [4.0],
+        "num_view": 10242
+      }
+    },
+    "codebook_teleporter": {
+      "teleport": {
+        "enable_on_relative_frame": true,
+        "min": [0, 0, 0],
+        "max": [0, 0, 0],
+        "enable_translation_x": false,
+        "enable_translation_y": false,
+        "enable_translation_z": false,
+        "name": "CameraGroup"
+      }
+    },
+    "detection_filter": {
+      "FilterDetectionsByLabel": {
+        "whitelist_labels": ["Dolly"]
+      }
+    },
+    "crop_downsample": {
+      "CropAndDownsample": {
+        "downsample_size": [128, 128],
+        "pixel_normalization_mode": "Unit",
+        "tensor_index_order": "201"
+      }
+    },
+    "image_embedding": {
+      "TensorRTInference": {
+        "model_file_path": "external/dolly_pose_estimation_model/dolly_ae_model.uff",
+        "force_engine_update": true,
+        "max_batch_size": 1,
+        "input_tensor_info": [
+          {
+            "use_batch_dimension": true,
+            "operation_name": "encoder_input",
+            "channel": "input_tensors",
+            "dims": [-1, 3, 128, 128],
+            "uff_input_order": "channels_last"
+          }
+        ],
+        "output_tensor_info": [
+          {
+            "operation_name": "encoder_output/BiasAdd",
+            "channel": "output_tensors",
+            "dims": [-1, 128]
+          }
+        ]
+      }
+    },
+    "json_writer": {
+      "JsonWriter": {
+        "filename": "/tmp/codebook.jsonl"
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "webroot": "packages/sight/webroot",
+        "ui_config": {
+          "windows": {
+            "Pose Estimation - Color": {
+              "renderer": "2d",
+              "dims": {
+                "width": 640,
+                "height": 360
+              },
+              "channels": [
+                {
+                  "name": "codebook_generation/color_viewer/ColorCameraViewer/Color",
+                  "active": true
+                },
+                {
+                  "name": "codebook_generation/color_viewer/DetectionsViewer/detections",
+                  "active": true
+                }
+              ]
+            },
+            "Pose Estimation - Classes": {
+              "renderer": "2d",
+              "dims": {
+                "width": 640,
+                "height": 360
+              },
+              "channels": [
+                {
+                  "name": "codebook_generation/segmentation_viewer/SegmentationCameraViewer/Classes",
+                  "active": true
+                },
+                {
+                  "name": "codebook_generation/color_viewer/DetectionsViewer/detections",
+                  "active": true
+                }
+              ]
+            },
+            "Pose Estimation - Instances": {
+              "renderer": "2d",
+              "dims": {
+                "width": 640,
+                "height": 360
+              },
+              "channels": [
+                {
+                  "name": "codebook_generation/segmentation_viewer/SegmentationCameraViewer/Classes",
+                  "active": true
+                },
+                {
+                  "name": "codebook_generation/color_viewer/DetectionsViewer/detections",
+                  "active": true
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

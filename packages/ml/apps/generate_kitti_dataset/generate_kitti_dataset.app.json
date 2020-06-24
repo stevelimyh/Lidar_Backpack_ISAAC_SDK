@@ -1,0 +1,156 @@
+{
+  "name": "generate_kitti_dataset",
+  "modules": [
+    "ml",
+    "perception",
+    "viewers"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "simulation",
+        "subgraph": "packages/navsim/apps/navsim_training.subgraph.json"
+      },
+      {
+        "name": "crop_and_downsample",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "CropAndDownsample",
+            "type": "isaac::perception::CropAndDownsample"
+          }
+        ]
+      },
+      {
+        "name": "resize_detections",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "resize_detections",
+            "type": "isaac::ml::ResizeDetections"
+          }
+        ]
+      },
+      {
+        "name": "generate_kitti_dataset",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "generate_kitti_dataset",
+            "type": "isaac::ml::GenerateKittiDataset"
+          }
+        ]
+      },
+      {
+        "name": "viewers",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "color_viewer",
+            "type": "isaac::viewers::ColorCameraViewer"
+          },
+          {
+            "name": "detections_viewer",
+            "type": "isaac::viewers::DetectionsViewer"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "simulation.interface/output/color",
+        "target": "crop_and_downsample/CropAndDownsample/input_image"
+      },
+      {
+        "source": "crop_and_downsample/CropAndDownsample/output_image",
+        "target": "generate_kitti_dataset/generate_kitti_dataset/image"
+      },
+      {
+        "source": "simulation.interface/output/bounding_boxes",
+        "target": "resize_detections/resize_detections/detections"
+      },
+      {
+        "source": "resize_detections/resize_detections/resized_detections",
+        "target": "generate_kitti_dataset/generate_kitti_dataset/detections"
+      },
+      {
+        "source": "simulation.interface/output/color",
+        "target": "viewers/color_viewer/color_listener"
+      },
+      {
+        "source": "simulation.interface/output/bounding_boxes",
+        "target": "viewers/detections_viewer/detections"
+      }
+    ]
+  },
+  "config": {
+    "generate_kitti_dataset": {
+      "generate_kitti_dataset": {
+        "num_training_samples": 10000,
+        "num_testing_samples": 100,
+        "path_to_dataset": "/tmp/unity3d_kitti_dataset/"
+      }
+    },
+    "resize_detections": {
+      "resize_detections": {
+        "input_image_dimensions": [
+          720,
+          1280
+        ],
+        "output_image_dimensions": [
+          368,
+          640
+        ]
+      }
+    },
+    "crop_and_downsample": {
+      "CropAndDownsample": {
+        "crop_mode": "auto",
+        "downsample_size": [
+          368,
+          640
+        ]
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "webroot": "packages/sight/webroot",
+        "assetroot": "../isaac_assets",
+        "port": 3000,
+        "ui_config": {
+          "windows": {
+            "Data from Unity3d Simulation": {
+              "renderer": "2d",
+              "dims": {
+                "width": 1280,
+                "height": 720
+              },
+              "channels": [
+                {
+                  "name": "generate_kitti_dataset/viewers/color_viewer/Color",
+                  "active": true
+                },
+                {
+                  "name": "generate_kitti_dataset/viewers/detections_viewer/detections",
+                  "active": true
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

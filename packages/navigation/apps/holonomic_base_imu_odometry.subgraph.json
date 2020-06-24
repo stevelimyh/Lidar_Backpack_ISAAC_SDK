@@ -1,0 +1,75 @@
+{
+  "modules": [
+    "imu",
+    "navigation"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "subgraph",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "interface",
+            "type": "isaac::alice::Subgraph"
+          }
+        ]
+      },
+      {
+        "name": "odometry",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "HolonomicBaseWheelImuOdometry",
+            "type": "isaac::navigation::HolonomicBaseWheelImuOdometry"
+          }
+        ]
+      },
+      {
+        "name": "imu_corrector",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "ImuCorrector",
+            "type": "isaac::imu::ImuCorrector"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "subgraph/interface/state",
+        "target": "odometry/HolonomicBaseWheelImuOdometry/state"
+      },
+      {
+        "source": "subgraph/interface/imu_raw",
+        "target": "imu_corrector/ImuCorrector/raw"
+      },
+      {
+        "source": "imu_corrector/ImuCorrector/corrected",
+        "target": "odometry/HolonomicBaseWheelImuOdometry/imu"
+      },
+      {
+        "source": "odometry/HolonomicBaseWheelImuOdometry/odometry",
+        "target": "subgraph/interface/odometry"
+      }
+    ]
+  },
+  "config": {
+    "odometry": {
+      "HolonomicBaseWheelImuOdometry": {
+        "tick_period": "100Hz",
+        "use_imu": true
+      }
+    }
+  }
+}

@@ -1,0 +1,55 @@
+{
+    "name": "pong",
+    "modules": [
+      "apps/tutorials/ping_net:ping_component"
+    ],
+    "graph": {
+      "nodes": [
+        {
+          "name": "ping",
+          "components": [
+            {
+              "name": "message_ledger",
+              "type": "isaac::alice::MessageLedger"
+            },
+            {
+              "name": "ping",
+              "type": "Ping"
+            }
+          ]
+        },
+        {
+          "name": "pub",
+          "components": [
+            {
+              "name": "message_ledger",
+              "type": "isaac::alice::MessageLedger"
+            },
+            {
+              "name": "tcp_publisher",
+              "type": "isaac::alice::TcpPublisher"
+            }
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "source": "ping/ping/ping",
+          "target": "pub/tcp_publisher/tunnel"
+        }
+      ]
+    },
+    "config": {
+      "pub": {
+        "tcp_publisher": {
+          "port": 5005
+        }
+      },
+      "ping" : {
+        "ping" : {
+          "message": "My own hello world!",
+          "tick_period" : "1Hz"
+        }
+      }
+    }
+  }

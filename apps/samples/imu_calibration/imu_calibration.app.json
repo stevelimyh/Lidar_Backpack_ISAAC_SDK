@@ -1,0 +1,44 @@
+{
+  "name": "imu_calibration",
+  "modules": [
+    "imu"
+  ],
+  "config": {
+    "imu_calibration": {
+      "imu.iio": {
+        "i2c_device_id": 1,
+        "tick_period": "100Hz"
+      },
+      "imu.calibration": {
+        "imu_calibration_file": "apps/samples/imu_calibration/imu_calibration.out.json"
+      }
+    }
+  },
+  "graph": {
+    "nodes": [
+      {
+        "name": "imu_calibration",
+        "components": [
+          {
+            "name": "ml",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "imu.iio",
+            "type": "isaac::imu::IioBmi160"
+          },
+          {
+            "name": "imu.calibration",
+            "type": "isaac::imu::ImuCalibration2D"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "imu_calibration/imu.iio/imu_raw",
+        "target": "imu_calibration/imu.calibration/imu"
+      }
+    ]
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "modules": [
+    "navsim"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "interface",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "input",
+            "type": "isaac::alice::TcpPublisher"
+          },
+          {
+            "name": "output",
+            "type": "isaac::alice::TcpSubscriber"
+          },
+          {
+            "name": "time_sync",
+            "type": "isaac::alice::TimeSynchronizer"
+          }
+        ]
+      },
+      {
+        "name": "scenario_manager",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "scenario_manager",
+            "type": "isaac::navsim::ScenarioManager"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "scenario_manager/scenario_manager/scenario_control",
+        "target": "interface/input/scenario_control"
+      },
+      {
+        "source": "scenario_manager/scenario_manager/robot",
+        "target": "interface/input/scenario_actors"
+      },
+      {
+        "source": "interface/output/scenario_reply",
+        "target": "scenario_manager/scenario_manager/scenario_reply"
+      }
+    ]
+  },
+  "config": {
+    "interface": {
+      "input": {
+        "port": 55001
+      },
+      "output": {
+        "port": 55000,
+        "host": "localhost"
+      }
+    },
+    "scenario_manager": {
+      "scenario_manager": {
+        "ref_pose_name": "unity"
+      }
+    }
+  }
+}

@@ -1,0 +1,104 @@
+{
+  "name": "object_detection",
+  "graph": {
+    "nodes": [
+      {
+        "name": "detect_net_inference",
+        "subgraph": "packages/detect_net/apps/detect_net_inference.subgraph.json"
+      },
+      {
+        "name": "image_throttle",
+        "components": [
+          {
+            "name": "isaac.alice.MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.alice.Throttle",
+            "type": "isaac::alice::Throttle"
+          }
+        ]
+      },
+      {
+        "name": "2d_kaya",
+        "subgraph": "apps/kaya/2d_kaya.subgraph.json"
+      },
+      {
+        "name": "commander",
+        "subgraph": "packages/navigation/apps/holonomic_base_commander.subgraph.json"
+      },
+      {
+        "name": "odometry",
+        "subgraph": "packages/navigation/apps/holonomic_base_imu_odometry.subgraph.json"
+      }
+    ],
+    "edges": [
+      {
+        "source": "2d_kaya.subgraph/interface/base_state",
+        "target": "odometry.subgraph/interface/state"
+      },
+      {
+        "source": "commander.subgraph/interface/command",
+        "target": "2d_kaya.subgraph/interface/base_command"
+      },
+      {
+        "source": "2d_kaya.subgraph/interface/realsense_color",
+        "target": "image_throttle/isaac.alice.Throttle/input"
+      },
+      {
+        "source": "image_throttle/isaac.alice.Throttle/output",
+        "target": "detect_net_inference.subgraph/interface/image"
+      }
+    ]
+  },
+  "config": {
+    "detect_net_inference.tensor_r_t_inference": {
+      "isaac.ml.TensorRTInference": {
+        "model_file_path": "external/tennis_ball_resnet_object_detection_model/kaya_tennis_ball_resnet18.etlt",
+        "etlt_password": "kaya_2020",
+        "force_engine_update": false
+      }
+    },
+    "detect_net_inference.detection_decoder": {
+      "isaac.detect_net.DetectNetDecoder": {
+        "labels": ["tennis_ball"],
+        "non_maximum_suppression_threshold": 0.3,
+        "confidence_threshold": 0.35,
+        "output_scale": [480, 848]
+      }
+    },
+    "odometry.odometry": {
+      "HolonomicBaseWheelImuOdometry": {
+        "use_imu": false
+      }
+    },
+    "image_throttle": {
+      "isaac.alice.Throttle": {
+        "data_channel": "input",
+        "output_channel": "output",
+        "minimum_interval": 0.2,
+        "use_signal_channel": false
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "port": 3000,
+        "ui_config": {
+          "windows": {
+            "Detector Kaya - Objects": {
+              "renderer": "2d",
+              "channels": [
+                {
+                  "name": "object_detection/2d_kaya.kaya_hardware.camera/color_viewer/Color"
+                },
+                {
+                  "name": "object_detection/detect_net_inference.detection_viewer/isaac.viewers.DetectionsViewer/detections"
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

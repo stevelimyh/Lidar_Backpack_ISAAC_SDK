@@ -1,0 +1,123 @@
+{
+  "name": "gstreamer_pipeline_distributed_a",
+  "modules": [
+    "deepstream",
+    "perception",
+    "sight",
+    "viewers"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "acquisition",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "pipeline",
+            "type": "isaac::deepstream::Pipeline"
+          },
+          {
+            "name": "viewer",
+            "type": "isaac::viewers::ColorCameraViewer"
+          },
+          {
+            "name": "viewer_widget",
+            "type": "isaac::sight::SightWidget"
+          }
+        ]
+      },
+      {
+        "name": "compute",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "operation",
+            "type": "isaac::perception::CropAndDownsampleCuda"
+          },
+          {
+            "name": "viewer",
+            "type": "isaac::viewers::ColorCameraViewer"
+          },
+          {
+            "name": "viewer_widget",
+            "type": "isaac::sight::SightWidget"
+          }
+        ]
+      },
+      {
+        "name": "publishing",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "pipeline",
+            "type": "isaac::deepstream::Pipeline"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "acquisition/pipeline/acquired_image",
+        "target": "acquisition/viewer/color_listener"
+      },
+      {
+        "source": "acquisition/pipeline/acquired_image",
+        "target": "compute/operation/input_image"
+      },
+      {
+        "source": "compute/operation/output_image",
+        "target": "compute/viewer/color_listener"
+      },
+      {
+        "source": "compute/operation/output_image",
+        "target": "publishing/pipeline/distributed_image"
+      }
+    ]
+  },
+  "config": {
+    "acquisition": {
+      "pipeline": {
+        "pipeline": "videotestsrc ! video/x-raw,format=RGB,width=3200,height=1800 ! videoconvert ! appsink name=acquired_image"
+      },
+      "viewer_widget": {
+        "title": "Viewer: Acquisition",
+        "type": "2d",
+        "channels": [
+          {
+            "name": "acquisition/viewer/Color"
+          }
+        ]
+      }
+    },
+    "compute": {
+      "operation": {
+        "crop_start": [720, 1280],
+        "crop_size": [1080, 1920],
+        "downsample_size": [1080, 1920]
+      },
+      "viewer_widget": {
+        "title": "Viewer: Processed",
+        "type": "2d",
+        "channels": [
+          {
+            "name": "compute/viewer/Color"
+          }
+        ]
+      }
+    },
+    "publishing": {
+      "pipeline": {
+        "pipeline": "appsrc name=distributed_image ! video/x-raw,format=RGB,width=1920,height=1080,framerate=30/1 ! videoconvert ! avenc_mpeg4 ! rtpmp4vpay config-interval=3 ! udpsink host=127.0.0.1 port=5200"
+      }
+    }
+  }
+}

@@ -1,0 +1,7 @@
+{
+    "stereodnn": {
+        "stereodnn": {
+            "weights_file": "external/redtail/stereoDNN/models/ResNet-18_2D/TensorRT/trt_weights.bin"
+        }
+    }
+}

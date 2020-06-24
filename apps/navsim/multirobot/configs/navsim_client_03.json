@@ -1,0 +1,27 @@
+{
+  "config": {
+    "websight": {
+      "WebsightServer": {
+        "port": 3103
+      }
+    },
+    "navsim": {
+      "output": {
+        "port": 55030
+      },
+      "input": {
+        "port": 55031,
+        "host": "localhost"
+      }
+    },
+    "robot": {
+      "input": {
+        "port": 45031
+      },
+      "output": {
+        "port": 45030,
+        "host": "localhost"
+      }
+    }
+  }
+}

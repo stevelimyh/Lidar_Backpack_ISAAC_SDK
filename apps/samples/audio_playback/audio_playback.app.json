@@ -1,0 +1,83 @@
+{
+  "name": "audio_playback",
+  "modules": [
+    "//apps/samples/audio_playback:audio_playback_file_index",
+    "audio"
+  ],
+  "config": {
+    "audiofileindexselect": {
+      "isaac.AudioPlaybackFileIndex": {
+        "file_index": 0,
+        "tick_period": "12s"
+      }
+    },
+    "audiofileloader": {
+      "isaac.audio.AudioFileLoader": {
+        "pcm_filelist": [
+          "external/audio_assets/audio/test_playback_16k_16bit.pcm",
+          "external/audio_assets/audio/test_playback_22_05k_16bit.pcm",
+          "external/audio_assets/audio/test_playback_44_1k_16bit.pcm",
+          "external/audio_assets/audio/test_playback_48k_16bit.pcm",
+          "external/audio_assets/audio/test_playback_96k_16bit.pcm",
+          "external/audio_assets/audio/test_playback_44_1k_16bit_2ch_left.pcm",
+          "external/audio_assets/audio/test_playback_44_1k_16bit_6ch_left.pcm"
+        ],
+        "sample_rate": 16000,
+        "number_of_channels": 1
+      }
+    }
+  },
+  "graph": {
+    "nodes": [
+      {
+        "name": "audioplayback",
+        "components": [
+          {
+            "name": "ml",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.audio.AudioPlayback",
+            "type": "isaac::audio::AudioPlayback"
+          }
+        ]
+      },
+      {
+        "name": "audiofileloader",
+        "components": [
+          {
+            "name": "ml",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.audio.AudioFileLoader",
+            "type": "isaac::audio::AudioFileLoader"
+          }
+        ]
+      },
+      {
+        "name": "audiofileindexselect",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.AudioPlaybackFileIndex",
+            "type": "isaac::AudioPlaybackFileIndex"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "audiofileindexselect/isaac.AudioPlaybackFileIndex/audio_fileindex",
+        "target": "audiofileloader/isaac.audio.AudioFileLoader/audio_file_index"
+      },
+      {
+        "source": "audiofileloader/isaac.audio.AudioFileLoader/audio_data_publish",
+        "target": "audioplayback/isaac.audio.AudioPlayback/audio_playback_input"
+      }
+    ]
+  }
+}

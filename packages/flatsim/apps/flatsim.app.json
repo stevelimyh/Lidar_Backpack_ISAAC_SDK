@@ -1,0 +1,11 @@
+{
+  "name": "flatsim",
+  "graph": {
+    "nodes": [
+      {
+        "name": "flatsim",
+        "subgraph": "packages/flatsim/apps/flatsim.subgraph.json"
+      }
+    ]
+  }
+}

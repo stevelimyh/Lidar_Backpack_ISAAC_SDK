@@ -1,0 +1,20 @@
+{
+  "2d_carter.scan_flattener.scan_accumulator": {
+    "isaac.perception.ScanAccumulator": {
+      "min_count": 900
+    }
+  },
+  "2d_carter.scan_flattener.range_scan_flattening": {
+    "isaac.perception.RangeScanFlattening": {
+      "height_min": -0.54,
+      "height_max": 0.61
+    }
+  },
+  "2d_carter.carter_hardware.vlp16_initializer": {
+    "lidar_initializer": {
+      "lhs_frame": "robot",
+      "rhs_frame": "lidar",
+      "pose": [1.0, 0.0, 0.0, 0.0, -0.11, -0.005, 0.69]
+    }
+  }
+}

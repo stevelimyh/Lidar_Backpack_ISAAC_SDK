@@ -1,0 +1,345 @@
+{
+  "name": "carter_data_collection",
+  "modules": [
+      "navigation",
+      "realsense",
+      "viewers"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "camera",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "left_rgb_pose",
+            "type": "isaac::alice::PoseInitializer"
+          },
+          {
+            "name": "realsense",
+            "type": "isaac::RealsenseCamera"
+          }
+        ],
+        "start_order": 100
+      },
+      {
+        "name": "viewer",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "depth",
+            "type": "isaac::viewers::DepthCameraViewer"
+          },
+          {
+            "name": "color",
+            "type": "isaac::viewers::ColorCameraViewer"
+          }
+        ]
+      },
+      {
+        "name": "create_plan",
+        "start_order": -5,
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "TravellingSalesman",
+            "type": "isaac::navigation::TravellingSalesman"
+          },
+          {
+            "name": "MoveAndScan",
+            "type": "isaac::navigation::MoveAndScan"
+          }
+        ]
+      },
+      {
+        "name": "follow_path",
+        "start_order": -1,
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "FollowPath",
+            "type": "isaac::navigation::FollowPath"
+          }
+        ]
+      },
+      {
+        "name": "navigation_monitor",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "NavigationMonitor",
+            "type": "isaac::navigation::NavigationMonitor"
+          }
+        ]
+      },
+      {
+        "name": "throttle",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "throttle_color",
+            "type": "isaac::alice::Throttle"
+          },
+          {
+            "name": "throttle_depth",
+            "type": "isaac::alice::Throttle"
+          }
+        ]
+      },
+      {
+        "name": "2d_carter",
+        "subgraph": "apps/carter/2d_carter.subgraph.json"
+      },
+      {
+        "name": "navigation",
+        "subgraph": "packages/navigation/apps/differential_base_navigation.subgraph.json"
+      },
+      {
+        "name": "commander",
+        "subgraph": "packages/navigation/apps/differential_base_commander.subgraph.json"
+      },
+      {
+        "name": "record",
+        "subgraph": "packages/record_replay/apps/record.subgraph.json"
+      }
+    ],
+    "edges": [
+      {
+        "source": "camera/realsense/color",
+        "target": "throttle/throttle_color/color_input"
+      },
+      {
+        "source": "camera/realsense/color",
+        "target": "navigation_monitor/NavigationMonitor/camera"
+      },
+      {
+        "source": "navigation_monitor/NavigationMonitor/robot_state",
+        "target": "throttle/throttle_color/robot_state"
+      },
+      {
+        "source": "throttle/throttle_color/color",
+        "target": "record.interface/input/color"
+      },
+      {
+        "source": "camera/realsense/depth",
+        "target": "throttle/throttle_depth/depth_input"
+      },
+      {
+        "source": "navigation_monitor/NavigationMonitor/robot_state",
+        "target": "throttle/throttle_depth/robot_state"
+      },
+      {
+        "source": "throttle/throttle_depth/depth",
+        "target": "record.interface/input/depth"
+      },
+      {
+        "source": "throttle/throttle_color/color",
+        "target": "viewer/color/color_listener"
+      },
+      {
+        "source": "throttle/throttle_depth/depth",
+        "target": "viewer/depth/depth_listener"
+      },
+      {
+        "source": "commander.subgraph/interface/command",
+        "target": "2d_carter.subgraph/interface/diff_base_command"
+      },
+      {
+        "source": "2d_carter.subgraph/interface/flatscan",
+        "target": "navigation.subgraph/interface/flatscan_for_localization"
+      },
+      {
+        "source": "2d_carter.subgraph/interface/flatscan",
+        "target": "navigation.subgraph/interface/flatscan_for_obstacles"
+      },
+      {
+        "source": "2d_carter.subgraph/interface/diff_base_state",
+        "target": "navigation.subgraph/interface/state"
+      },
+      {
+        "source": "2d_carter.subgraph/interface/imu_raw",
+        "target": "navigation.subgraph/interface/imu_raw"
+      },
+      {
+        "source": "navigation.subgraph/interface/command",
+        "target": "commander.subgraph/interface/control"
+      },
+      {
+        "source": "create_plan/TravellingSalesman/waypoints",
+        "target": "create_plan/MoveAndScan/waypoints"
+      },
+      {
+        "source": "create_plan/MoveAndScan/waypoints_with_orientations",
+        "target": "follow_path/FollowPath/plan"
+      },
+      {
+        "source": "follow_path/FollowPath/goal",
+        "target": "navigation.subgraph/interface/goal"
+      },
+      {
+        "source": "navigation.subgraph/interface/feedback",
+        "target": "follow_path/FollowPath/feedback"
+      }
+    ]
+  },
+  "config": {
+    "camera": {
+      "realsense": {
+        "rows": 360,
+        "cols": 640,
+        "rgb_framerate": 15,
+        "depth_framerate": 15,
+        "align_to_color": true,
+        "frame_queue_size": 2,
+        "auto_exposure_priority": false
+      },
+      "left_rgb_pose": {
+        "lhs_frame": "robot",
+        "rhs_frame": "camera",
+        "pose": [0.270598, -0.653281, 0.653281, -0.270598, 0.0, 0.0, 0.775]
+      }
+    },
+    "viewer": {
+      "color": {
+        "reduce_scale": 2
+      },
+      "depth": {
+        "reduce_scale": 2,
+        "min_visualization_depth": 0.2,
+        "max_visualization_depth": 5.0,
+        "camera_name": "camera",
+        "colormap": [
+          [128,0,0],
+          [255,0,0],
+          [255,255,0],
+          [0,255,255],
+          [0,0,255],
+          [0,0,128]
+        ]
+      }
+    },
+    "follow_path": {
+      "FollowPath": {
+        "tick_period": "20ms",
+        "stationary_wait_time": 10.0,
+        "goal_frame": "world",
+        "wait_time": 1.0,
+        "loop": false
+      }
+    },
+    "create_plan": {
+      "TravellingSalesman": {
+        "tick_period": "100ms"
+      }
+    },
+    "navigation_monitor": {
+      "NavigationMonitor": {
+        "distance_threshold": 0.5,
+        "tick_period": "1.0",
+        "tick_periodically": false,
+        "var_rx_speed_pos": "segway_odometry/isaac.navigation.DifferentialBaseOdometry/speed_p",
+        "var_rx_speed_rot": "segway_odometry/isaac.navigation.DifferentialBaseOdometry/speed_q"
+      }
+    },
+    "throttle": {
+      "throttle_color": {
+        "data_channel": "color_input",
+        "signal_channel": "robot_state",
+        "output_channel": "color"
+      },
+      "throttle_depth": {
+          "data_channel": "depth_input",
+          "signal_channel": "robot_state",
+          "output_channel": "depth"
+      }
+    },
+    "navigation.control.lqr": {
+      "isaac.planner.DifferentialBaseLqrPlanner": {
+        "manual_mode_channel": "commander.robot_remote/isaac.navigation.RobotRemoteControl/manual_mode"
+      }
+    },
+    "navigation.control.control": {
+      "isaac.planner.DifferentialBaseControl": {
+        "manual_mode_channel": "commander.robot_remote/isaac.navigation.RobotRemoteControl/manual_mode"
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "webroot": "packages/sight/webroot",
+        "assetroot": "../isaac-lfs/sight/assets",
+        "port": 3000,
+        "ui_config": {
+          "windows": {
+            "Freespace annotation - Waypoints": {
+              "renderer": "2d",
+              "dims": {
+                "width": 432,
+                "height": 548
+              },
+              "channels": [
+                {
+                  "name": "carter_data_collection/map/occupancy/map",
+                  "active": true
+                },
+                {
+                  "name": "carter_data_collection/create_plan/TravellingSalesman/graph",
+                  "active": true
+                },
+                {
+                  "name": "carter_data_collection/create_plan/TravellingSalesman/path",
+                  "active": true
+                },
+                {
+                  "name": "carter_data_collection/create_plan/TravellingSalesman/waypoints",
+                  "active": false
+                },
+                {
+                  "name": "carter_data_collection/follow_path/FollowPath/waypoints",
+                  "active": true
+                }
+              ]
+            },
+            "Freespace Annotation - Color Camera": {
+              "renderer": "2d",
+              "dims": {
+                "width": 640,
+                "height": 360
+              },
+              "channels": [
+                { "name": "carter_data_collection/viewer/color/Color" }
+              ]
+            },
+            "Freespace Annotation - Depth Camera": {
+              "renderer": "2d",
+              "dims": {
+                "width": 640,
+                "height": 360
+              },
+              "channels": [
+                { "name": "carter_data_collection/viewer/depth/Depth" }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

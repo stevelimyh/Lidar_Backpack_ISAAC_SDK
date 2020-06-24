@@ -1,0 +1,81 @@
+{
+  "config": {
+    "navigation.imu_odometry.odometry": {
+      "DifferentialBaseWheelImuOdometry": {
+        "use_imu": false
+      }
+    },
+    "navigation.control.lqr": {
+      "isaac.planner.DifferentialBaseLqrPlanner": {
+        "stop_robot_on_collision": true,
+        "time_between_command_ms": 100,
+        "num_controls": 50,
+        "target_distance": 0.25,
+        "speed_gradient_target_distance": 0.5,
+        "min_distance": 0.1,
+        "min_speed": -0.3,
+        "max_speed": 1.2,
+        "max_angular_speed": 1.0,
+        "use_predicted_position": true,
+        "reset_robot_position": 10,
+        "distance_to_waypoint": 0.25,
+        "angle_to_waypoint": 0.0872665,
+        "max_predicted_position_error": 0.5
+      }
+    },
+    "navigation.shared_robot_model": {
+      "RangeScanModel": {
+        "max_beam_error_far": 0.5,
+        "max_beam_error_near": 0.5,
+        "invalid_range_threshold": 0.1,
+        "out_of_range_threshold": 40
+      }
+    },
+    "navigation.planner.global_plan_smoother": {
+      "smoother": {
+        "target_clearance": 0.5
+      }
+    },
+    "navigation.planner.global_plan_map": {
+      "isaac.navigation.OccupancyToBinaryMap": {
+        "mean_threshold": 128
+      }
+    },
+    "navigation.planner.global_plan": {
+      "isaac.planner.GlobalPlanner": {
+        "graph_initialization_steps": 50000,
+        "graph_in_tick_steps": 0,
+        "model_error_margin": 0.01,
+        "max_colliding_lookup": 0.5,
+        "model_backward_path_penalty": 100.0,
+        "model_invalid_path_penalty": 10000.0,
+        "check_direct_path": false
+      }
+    },
+    "navigation.local_map.range_scan_2_to_observation_map": {
+      "isaac.navigation.RangeScanToObservationMap": {
+        "dimensions": [396,396],
+        "map_offset_relative": [0.5,0.25]
+      }
+    },
+    "navigation.local_map.range_scan_to_observation_map": {
+      "isaac.navigation.RangeScanToObservationMap": {
+        "dimensions": [396,396],
+        "map_offset_relative": [0.5,0.25]
+      }
+    },
+    "navigation.local_map.local_map": {
+      "isaac.navigation.LocalMap": {
+        "map_decay_factor": 0.995
+      }
+    },
+    "navigation.local_map.local_map_postprocessing": {
+      "cleanup": {
+        "clear_region": [[-1.06, 0.39], [-0.315, 0.315]]
+      },
+      "isaac.navigation.OccupancyToBinaryMap": {
+        "is_optimistic": true
+      }
+    }
+  }
+}

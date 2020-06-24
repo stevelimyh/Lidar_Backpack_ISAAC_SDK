@@ -1,0 +1,140 @@
+{
+  "nodes": [
+    {
+      "name": "A_CarterGroup",
+      "components": [
+        {
+          "name": "MessageLedger",
+          "type": "isaac::alice::MessageLedger"
+        },
+        {
+          "name": "ActorGroup",
+          "type": "isaac::sim_bridge::ActorGroup"
+        },
+        {
+          "name": "MiscGroup",
+          "type": "isaac::sim_bridge::ActorGroup"
+        }
+      ]
+    },
+    {
+      "name": "CarterLidar",
+      "components": [
+        {
+          "name": "MessageLedger",
+          "type": "isaac::alice::MessageLedger"
+        },
+        {
+          "name": "LidarComponent",
+          "type": "isaac::sim_bridge::Lidar"
+        }
+      ]
+    },
+    {
+      "name": "CarterLeftCamera",
+      "components": [
+        {
+          "name": "MessageLedger",
+          "type": "isaac::alice::MessageLedger"
+        },
+        {
+          "name": "CameraComponent",
+          "type": "isaac::sim_bridge::Camera"
+        }
+      ]
+    },
+    {
+      "name": "CarterRightCamera",
+      "components": [
+        {
+          "name": "MessageLedger",
+          "type": "isaac::alice::MessageLedger"
+        },
+        {
+          "name": "CameraComponent",
+          "type": "isaac::sim_bridge::Camera"
+        }
+      ]
+    },
+    {
+      "name": "CarterActuator",
+      "components": [
+        {
+          "name": "MessageLedger",
+          "type": "isaac::alice::MessageLedger"
+        },
+        {
+          "name": "ActuatorComponent",
+          "type": "isaac::sim_bridge::ActuatorGroup"
+        }
+      ]
+    },
+    {
+      "name": "TimeSyncedTcpConnections",
+      "components": [
+        {
+          "name": "TimeSynchronizer",
+          "type": "isaac::alice::TimeSynchronizer"
+        },
+        {
+          "name": "isaac.alice.MessageLedger",
+          "type": "isaac::alice::MessageLedger"
+        },
+        {
+          "name": "LeftCameraPublisher",
+          "type": "isaac::alice::TcpPublisher"
+        },
+        {
+          "name": "RightCameraPublisher",
+          "type": "isaac::alice::TcpPublisher"
+        },
+        {
+          "name": "LidarPublisher",
+          "type": "isaac::alice::TcpPublisher"
+        },
+        {
+          "name": "ActorPublisher",
+          "type": "isaac::alice::TcpPublisher"
+        },
+        {
+          "name": "ActuatorSubscriber",
+          "type": "isaac::alice::TcpSubscriber"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "CarterLidar/LidarComponent/range_scan",
+      "target": "TimeSyncedTcpConnections/LidarPublisher/LidarSensor"
+    },
+    {
+      "source": "A_CarterGroup/ActorGroup/rigid_state",
+      "target": "TimeSyncedTcpConnections/ActorPublisher/bodies"
+    },
+    {
+      "source": "TimeSyncedTcpConnections/ActuatorSubscriber/physics_actuation",
+      "target": "CarterActuator/ActuatorComponent/physics_actuation"
+    },
+    {
+      "source": "CarterLeftCamera/CameraComponent/color_image",
+      "target": "TimeSyncedTcpConnections/LeftCameraPublisher/ColorSensor"
+    },
+    {
+      "source": "CarterLeftCamera/CameraComponent/depth_image",
+      "target": "TimeSyncedTcpConnections/LeftCameraPublisher/DepthSensor"
+    },
+    {
+      "source": "CarterLeftCamera/CameraComponent/segmentation_image",
+      "target": "TimeSyncedTcpConnections/LeftCameraPublisher/SegmentationSensor"
+    },
+    {
+      "source": "CarterLeftCamera/CameraComponent/bounding_box",
+      "target": "TimeSyncedTcpConnections/LeftCameraPublisher/BoundingBox"
+    },
+    {
+      "source": "CarterRightCamera/CameraComponent/color_image",
+      "target": "TimeSyncedTcpConnections/RightCameraPublisher/ColorSensor"
+    }
+  ]
+}

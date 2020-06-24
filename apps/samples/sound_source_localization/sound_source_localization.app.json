@@ -1,0 +1,172 @@
+{
+  "name": "sound_source_localization_app",
+  "modules": [
+    "//apps/samples/sound_source_localization:direction_of_audio_event",
+    "audio"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "audio_capture",
+        "components": [
+          {
+            "name": "ml",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.audio.AudioCapture",
+            "type": "isaac::audio::AudioCapture"
+          }
+        ]
+      },
+      {
+        "name": "audio_energy_calculator",
+        "components": [
+          {
+            "name": "ml",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.audio.AudioEnergyCalculation",
+            "type": "isaac::audio::AudioEnergyCalculation"
+          }
+        ]
+      },
+      {
+        "name": "sound_source_localization",
+        "components": [
+          {
+            "name": "ml",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.audio.SoundSourceLocalization",
+            "type": "isaac::audio::SoundSourceLocalization"
+          }
+        ]
+      },
+      {
+        "name": "direction_of_audio_event",
+        "components": [
+          {
+            "name": "ml",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.DirectionOfAudioEvent",
+            "type": "isaac::DirectionOfAudioEvent"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "audio_capture/isaac.audio.AudioCapture/audio_capture",
+        "target": "sound_source_localization/isaac.audio.SoundSourceLocalization/audio_packets"
+      },
+      {
+        "source": "audio_capture/isaac.audio.AudioCapture/audio_capture",
+        "target": "audio_energy_calculator/isaac.audio.AudioEnergyCalculation/audio_packets"
+      },
+      {
+        "source": "sound_source_localization/isaac.audio.SoundSourceLocalization/audio_angle",
+        "target": "direction_of_audio_event/isaac.DirectionOfAudioEvent/audio_angle"
+      },
+      {
+        "source": "audio_energy_calculator/isaac.audio.AudioEnergyCalculation/audio_energy",
+        "target": "direction_of_audio_event/isaac.DirectionOfAudioEvent/audio_energy"
+      }
+    ]
+  },
+  "config": {
+    "audio_capture": {
+      "isaac.audio.AudioCapture": {
+        "sample_rate": 16000,
+        "num_channels": 6,
+        "audio_frame_in_milliseconds": 100,
+        "ticks_per_frame": 5
+      }
+    },
+    "audio_energy_calculator": {
+      "isaac.audio.AudioEnergyCalculation": {
+        "channel_indices": [1, 3, 2, 4],
+        "reference_energy": 120
+      }
+    },
+    "sound_source_localization": {
+      "isaac.audio.SoundSourceLocalization": {
+        "audio_duration": 0.5,
+        "microphone_distance": 0.064,
+        "microphone_pairs": [[1, 3], [2, 4]],
+        "reference_offset_angle": -45
+      }
+    },
+    "direction_of_audio_event": {
+      "isaac.DirectionOfAudioEvent": {
+        "energy_threshold": 80.0
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "port": 3000,
+        "ui_config": {
+          "windows": {
+            "Sound Source Localization": {
+              "renderer": "plot",
+              "dims": {
+                "width": 1024,
+                "height": 256
+              },
+              "channels": [
+                {
+                  "name": "sound_source_localization_app/sound_source_localization/isaac.audio.SoundSourceLocalization/angle",
+                  "active": true
+                }
+              ]
+            },
+            "Audio Energy Calculator": {
+              "renderer": "plot",
+              "dims": {
+                "width": 1024,
+                "height": 256
+              },
+              "channels": [
+                {
+                  "name": "sound_source_localization_app/audio_energy_calculator/isaac.audio.AudioEnergyCalculation/average_energy_per_audio_packet",
+                  "active": true
+                }
+              ]
+            },
+            "Angle of Direction of Audio Event": {
+              "renderer": "plot",
+              "dims": {
+                "width": 1024,
+                "height": 256
+              },
+              "channels": [
+                {
+                  "name": "sound_source_localization_app/direction_of_audio_event/isaac.DirectionOfAudioEvent/angle_degrees",
+                  "active": true
+                }
+              ]
+            },
+            "Energy of Audio Event": {
+              "renderer": "plot",
+              "dims": {
+                "width": 1024,
+                "height": 256
+              },
+              "channels": [
+                {
+                  "name": "sound_source_localization_app/direction_of_audio_event/isaac.DirectionOfAudioEvent/energy",
+                  "active": true
+                }
+              ]
+            }
+          },
+          "assets": {}
+        }
+      }
+    }
+  }
+}

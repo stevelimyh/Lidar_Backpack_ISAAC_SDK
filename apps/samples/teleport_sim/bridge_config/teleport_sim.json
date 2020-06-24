@@ -1,0 +1,4 @@
+{
+  "graphs": ["teleport_sim_graph.json"],
+  "configs": ["teleport_sim_config.json"]
+}

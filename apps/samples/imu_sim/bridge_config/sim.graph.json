@@ -1,0 +1,67 @@
+{
+  "nodes": [
+    {
+      "name": "A_CarterGroup",
+      "components": [
+        {
+          "name": "message_ledger",
+          "type": "isaac::alice::MessageLedger"
+        },
+        {
+          "name": "ActorGroup",
+          "type": "isaac::sim_bridge::ActorGroup"
+        }
+      ]
+    },
+    {
+      "name": "ActorPublisher",
+      "components": [
+        {
+          "name": "isaac.alice.MessageLedger",
+          "type": "isaac::alice::MessageLedger"
+        },
+        {
+          "name": "isaac.alice.TcpPublisher",
+          "type": "isaac::alice::TcpPublisher"
+        }
+      ]
+    },
+    {
+      "name": "CarterActuator",
+      "components": [
+        {
+          "name": "MessageLedger",
+          "type": "isaac::alice::MessageLedger"
+        },
+        {
+          "name": "ActuatorComponent",
+          "type": "isaac::sim_bridge::ActuatorGroup"
+        }
+      ]
+    },
+    {
+      "name": "ActuatorSubscriber",
+      "components": [
+        {
+          "name": "isaac.alice.MessageLedger",
+          "type": "isaac::alice::MessageLedger"
+        },
+        {
+          "name": "isaac.alice.TcpSubscriber",
+          "type": "isaac::alice::TcpSubscriber"
+        }
+      ]
+    }
+  ],
+
+  "edges": [
+    {
+      "source": "A_CarterGroup/ActorGroup/rigid_state",
+      "target": "ActorPublisher/isaac.alice.TcpPublisher/bodies"
+    },
+    {
+      "source": "ActuatorSubscriber/isaac.alice.TcpSubscriber/physics_actuation",
+      "target": "CarterActuator/ActuatorComponent/physics_actuation"
+    }
+  ]
+}

@@ -1,0 +1,145 @@
+{
+    "name": "record_test",
+    "modules": [
+        "message_generators",
+        "perception",
+        "imu"
+    ],
+    "graph": {
+        "nodes": [
+            {
+                "name": "lidar_generator",
+                "components": [
+                    {
+                        "name": "message_ledger",
+                        "type": "isaac::alice::MessageLedger"
+                    },
+                    {
+                        "name": "range_scan_generator",
+                        "type": "isaac::message_generators::RangeScanGenerator"
+                    }
+                ]
+            },
+            {
+                "name": "camera_generator",
+                "components": [
+                    {
+                        "name": "message_ledger",
+                        "type": "isaac::alice::MessageLedger"
+                    },
+                    {
+                        "name": "camera_generator",
+                        "type": "isaac::message_generators::CameraGenerator"
+                    }
+                ]
+            },
+            {
+                "name": "body_generator",
+                "components": [
+                    {
+                        "name": "message_ledger",
+                        "type": "isaac::alice::MessageLedger"
+                    },
+                    {
+                        "name": "body_generator",
+                        "type": "isaac::message_generators::RigidBody3GroupGenerator"
+                    }
+                ]
+            },
+            {
+                "name": "imu_sim",
+                "components": [
+                    {
+                        "name": "message_ledger",
+                        "type": "isaac::alice::MessageLedger"
+                    },
+                    {
+                        "name": "imu_sim",
+                        "type":"isaac::imu::ImuSim"
+                    }
+                ]
+            },
+            {
+                "name": "scan_accumulator",
+                "components": [
+                  {
+                    "name": "message_ledger",
+                    "type": "isaac::alice::MessageLedger"
+                  },
+                  {
+                    "name": "accumulator",
+                    "type": "isaac::perception::ScanAccumulator"
+                  }
+                ]
+              },
+            {
+                "name": "record",
+                "subgraph": "packages/record_replay/apps/record.subgraph.json"
+            }
+
+        ],
+        "edges": [
+            {
+                "source": "lidar_generator/range_scan_generator/scan" ,
+                "target": "record.interface/input/scan"
+            },
+            {
+                "source": "lidar_generator/range_scan_generator/scan" ,
+                "target": "scan_accumulator/accumulator/scan"
+            },
+            {
+                "source": "scan_accumulator/accumulator/fullscan" ,
+                "target": "record.interface/input/fullscan"
+            },
+            {
+                "source": "camera_generator/camera_generator/color_left" ,
+                "target": "record.interface/input/color_left"
+            },
+            {
+                "source": "camera_generator/camera_generator/color_right" ,
+                "target": "record.interface/input/color_right"
+            },
+            {
+                "source": "camera_generator/camera_generator/depth" ,
+                "target": "record.interface/input/depth"
+            },
+            {
+                "source": "body_generator/body_generator/bodies" ,
+                "target": "record.interface/input/body"
+            },
+            {
+                "source": "imu_sim/imu_sim/imu_raw" ,
+                "target": "record.interface/input/imu"
+            }
+        ]
+    },
+    "config": {
+        "record.interface": {
+            "input": {
+              "start_recording_automatically": false
+            }
+          },
+          "lidar_generator": {
+              "range_scan_generator": {
+                  "tick_period": "1s"
+              }
+          },
+          "camera_generator": {
+              "camera_generator": {
+                  "tick_period": "1s"
+              }
+          },
+          "body_generator": {
+            "body_generator": {
+                "body_name": "imu",
+                "tick_period": "1s"
+            }
+        },
+        "scan_accumulator": {
+            "accumulator": {
+              "min_slice_count": 5,
+              "clock_wise_rotation": false
+            }
+          }
+    }
+}

@@ -1,0 +1,127 @@
+{
+  "modules": [
+    "ml",
+    "navsim"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "interface",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "subgraph",
+            "type": "isaac::alice::Subgraph"
+          },
+          {
+            "name": "output",
+            "type": "isaac::alice::TcpSubscriber"
+          },
+          {
+            "name": "input",
+            "type": "isaac::alice::TcpPublisher"
+          },
+          {
+            "name": "time_sync",
+            "type": "isaac::alice::TimeSynchronizer"
+          }
+        ]
+      },
+      {
+        "name": "scenario_manager",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "scenario_manager",
+            "type": "isaac::navsim::ScenarioManager"
+          }
+        ]
+      },
+      {
+        "name": "encoder_bounding_boxes",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "conversion",
+            "type": "isaac::ml::LabelToBoundingBox"
+          }
+        ]
+      },
+      {
+        "name": "decoder_bounding_boxes",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "conversion",
+            "type": "isaac::ml::LabelToBoundingBox"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "interface/output/encoder_segmentation",
+        "target": "encoder_bounding_boxes/conversion/segmentation"
+      },
+      {
+        "source": "encoder_bounding_boxes/conversion/detections",
+        "target": "interface/subgraph/encoder_bounding_boxes"
+      },
+      {
+        "source": "interface/output/decoder_segmentation",
+        "target": "decoder_bounding_boxes/conversion/segmentation"
+      },
+      {
+        "source": "decoder_bounding_boxes/conversion/detections",
+        "target": "interface/subgraph/decoder_bounding_boxes"
+      },
+      {
+        "source": "scenario_manager/scenario_manager/scenario_control",
+        "target": "interface/input/scenario_control"
+      },
+      {
+        "source": "scenario_manager/scenario_manager/robot",
+        "target": "interface/input/scenario_actors"
+      },
+      {
+        "source": "interface/output/scenario_reply",
+        "target": "scenario_manager/scenario_manager/scenario_reply"
+      }
+    ]
+  },
+  "config": {
+    "interface": {
+      "output": {
+        "port": 55000,
+        "host": "localhost"
+      },
+      "input": {
+        "port": 55001
+      }
+    },
+    "encoder_bounding_boxes": {
+      "conversion": {
+        "resolution": 2,
+        "min_bbox_size": 20
+      }
+    },
+    "decoder_bounding_boxes": {
+      "conversion": {
+        "resolution": 2,
+        "min_bbox_size": 20
+      }
+    }
+  }
+}

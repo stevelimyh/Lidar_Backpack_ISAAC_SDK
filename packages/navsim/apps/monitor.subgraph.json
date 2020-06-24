@@ -1,0 +1,128 @@
+{
+  "modules": [
+    "navigation",
+    "navsim",
+    "utils"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "subgraph",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "interface",
+            "type": "isaac::alice::Subgraph"
+          }
+        ]
+      },
+      {
+        "name": "scenario_monitor",
+        "components" : [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "monitor",
+            "type": "isaac::navsim::ScenarioMonitor"
+          }
+        ]
+      },
+      {
+        "name": "monitor_utils",
+        "components" : [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "gt_goal",
+            "type": "isaac::navigation::GoalMonitor"
+          },
+          {
+            "name": "collision",
+            "type": "isaac::navigation::CollisionMonitor"
+          },
+          {
+            "name": "poses",
+            "type": "isaac::utils::PoseMonitor"
+          }
+        ]
+      },
+      {
+        "name": "robot_gt_viewer",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "robot_viewer",
+            "type": "isaac::navigation::RobotViewer"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "subgraph/interface/collision",
+        "target": "monitor_utils/collision/collision"
+      },
+      {
+        "source": "monitor_utils/poses/report",
+        "target": "scenario_monitor/monitor/poses"
+      },
+      {
+        "source": "monitor_utils/collision/report",
+        "target": "scenario_monitor/monitor/collision"
+      },
+      {
+        "source": "subgraph/interface/goal",
+        "target": "monitor_utils/gt_goal/goal"
+      },
+      {
+        "source": "subgraph/interface/odometry",
+        "target": "monitor_utils/gt_goal/odometry"
+      },
+      {
+        "source": "monitor_utils/gt_goal/feedback",
+        "target": "scenario_monitor/monitor/gt_goal_feedback"
+      },
+      {
+        "source": "subgraph/interface/goal_feedback",
+        "target": "scenario_monitor/monitor/goal_feedback"
+      }
+    ]
+  },
+  "config": {
+    "scenario_monitor": {
+      "monitor": {
+        "tick_period": "10Hz",
+        "maximum_time": 60
+      }
+    },
+    "monitor_utils": {
+      "gt_goal": {
+        "robot_frame": "robot_gt",
+        "tick_period": "20Hz"
+      },
+      "poses": {
+        "tick_period": "20Hz",
+        "pose_names": [
+          "robot_gt"
+        ]
+      }
+    },
+    "robot_gt_viewer": {
+      "robot_viewer": {
+        "tick_period": "30Hz",
+        "robot_pose_name": "robot_gt",
+        "robot_color": [100, 150, 0, 255]
+      }
+    }
+  }
+}

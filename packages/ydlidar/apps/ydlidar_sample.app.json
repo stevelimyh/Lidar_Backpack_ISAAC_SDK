@@ -1,0 +1,51 @@
+{
+  "name": "ydlidar_sample",
+  "modules": [
+    "ydlidar"
+  ],
+  "config": {
+    "lidar": {
+      "yd_lidar_driver": {
+        "device": "/dev/ttyUSB0"
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "ui_config": {
+          "windows": {
+            "YDLidar: Samples Per Tick": {
+              "renderer": "plot",
+              "dims": {
+                "width": 1024,
+                "height": 200
+              },
+              "channels": [
+                { "name" : "ydlidar_sample/ydlidar/driver/samples_count" },
+                { "name" : "ydlidar_sample/ydlidar/driver/arc_measured" }
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "graph": {
+    "nodes": [
+      {
+        "name": "ydlidar",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "driver",
+            "type": "isaac::ydlidar::YdLidar"
+          }
+        ]
+      }
+    ],
+    "edges": [
+    ]
+  }
+}

@@ -1,0 +1,162 @@
+{
+  "modules": [
+      "superpixels",
+      "viewers"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "subgraph",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "interface",
+            "type": "isaac::alice::Subgraph"
+          }
+        ]
+      },
+      {
+        "name": "camera_pose",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "left_rgb_pose",
+            "type": "isaac::alice::PoseInitializer"
+          }
+        ],
+        "start_order": -100
+      },
+      {
+        "name": "viewer",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "depth",
+            "type": "isaac::viewers::DepthCameraViewer"
+          },
+          {
+            "name": "color",
+            "type": "isaac::viewers::ColorCameraViewer"
+          }
+        ]
+      },
+      {
+        "name": "freespace",
+        "components": [
+          {
+            "name": "isaac.alice.MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "freespace",
+            "type": "isaac::superpixels::RgbdSuperpixelFreespace"
+          },
+          {
+            "name": "labeling",
+            "type": "isaac::superpixels::SuperpixelImageLabeling"
+          }
+        ]
+      },
+      {
+        "name": "replay",
+        "subgraph": "packages/record_replay/apps/replay.subgraph.json"
+      },
+      {
+        "name": "superpixels",
+        "subgraph": "packages/superpixels/apps/superpixels.subgraph.json"
+      }
+    ],
+    "edges": [
+      {
+        "source": "replay.interface/output/depth",
+        "target": "superpixels.subgraph/interface/depth"
+      },
+      {
+        "source": "replay.interface/output/color",
+        "target": "superpixels.subgraph/interface/color"
+      },
+      {
+        "source": "replay.interface/output/color",
+        "target": "viewer/color/color_listener"
+      },
+      {
+        "source": "replay.interface/output/depth",
+        "target": "viewer/depth/depth_listener"
+      },
+      {
+        "source": "superpixels.subgraph/interface/superpixels",
+        "target": "freespace/freespace/superpixels"
+      },
+      {
+        "source": "superpixels.subgraph/interface/superpixels",
+        "target": "freespace/labeling/superpixels"
+      },
+      {
+        "source": "freespace/freespace/labels",
+        "target": "freespace/labeling/labels"
+      },
+      {
+        "source": "freespace/labeling/segmentation",
+        "target": "subgraph/interface/segmentation"
+      },
+      {
+        "source": "replay.interface/output/color",
+        "target": "subgraph/interface/color"
+      }
+    ]
+  },
+  "config": {
+     "camera_pose": {
+      "left_rgb_pose": {
+        "lhs_frame": "robot",
+        "rhs_frame": "camera",
+        "pose": [0.270598, -0.653281, 0.653281, -0.270598, 0.0, 0.0, 0.775]
+      }
+    },
+    "freespace": {
+      "freespace": {
+        "ground_frame": "robot",
+        "label_freespace": 1,
+        "label_obstacle": 0,
+        "normal_threshold": 0.25,
+        "superpixels_frame": "camera"
+      },
+      "labeling": {
+        "label_invalid": 0.2
+      }
+    },
+    "viewer": {
+      "color": {
+        "reduce_scale": 2
+      },
+      "depth": {
+        "reduce_scale": 2,
+        "min_visualization_depth": 0.2,
+        "max_visualization_depth": 5.0,
+        "camera_name": "camera",
+        "colormap": [
+          [128,0,0],
+          [255,0,0],
+          [255,255,0],
+          [0,255,255],
+          [0,0,255],
+          [0,0,128]
+        ]
+      }
+    },
+    "replay.interface": {
+      "output": {
+        "cask_directory": "<path_to_log_file>"
+      }
+    }
+  }
+}

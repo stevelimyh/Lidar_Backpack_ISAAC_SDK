@@ -1,0 +1,235 @@
+{
+  "modules": [
+    "map",
+    "ml",
+    "sight",
+    "viewers"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "interface",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "subgraph",
+            "type": "isaac::alice::Subgraph"
+          }
+        ]
+      },
+      {
+        "name": "color_camera_encoder",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "ColorCameraEncoderCpu",
+            "type": "isaac::ml::ColorCameraEncoderCpu"
+          }
+        ]
+      },
+      {
+        "name": "color_camera_viewer",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "ColorCameraViewer",
+            "type": "isaac::viewers::ColorCameraViewer"
+          }
+        ]
+      },
+      {
+        "name": "segmentation_viewer",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "SegmentationCameraViewer",
+            "type": "isaac::viewers::SegmentationCameraViewer"
+          }
+        ]
+      },
+      {
+        "name": "segmentation_encoder",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "SegmentationEncoder",
+            "type": "isaac::ml::SegmentationEncoder"
+          }
+        ]
+      },
+      {
+        "name": "camera_teleportation",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "random",
+            "type": "isaac::alice::Random"
+          },
+          {
+            "name": "Spline",
+            "type": "isaac::map::Spline"
+          },
+          {
+            "name": "Teleportation",
+            "type": "isaac::ml::Teleportation"
+          }
+        ]
+      },
+      {
+        "name": "throttle_color",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "Throttle",
+            "type": "isaac::alice::Throttle"
+          }
+        ]
+      },
+      {
+        "name": "throttle_segmentation",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "Throttle",
+            "type": "isaac::alice::Throttle"
+          }
+        ]
+      },
+      {
+        "name": "sight_widgets",
+        "components": [
+          {
+            "type": "isaac::sight::SightWidget",
+            "name": "Image"
+          },
+          {
+            "type": "isaac::sight::SightWidget",
+            "name": "Segmentation"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "interface/subgraph/color",
+        "target": "throttle_color/Throttle/input"
+      },
+      {
+        "source": "throttle_color/Throttle/output",
+        "target": "color_camera_viewer/ColorCameraViewer/color_listener"
+      },
+      {
+        "source": "interface/subgraph/color",
+        "target": "color_camera_encoder/ColorCameraEncoderCpu/rgb_image"
+      },
+      {
+        "source": "interface/subgraph/segmentation",
+        "target": "throttle_segmentation/Throttle/input"
+      },
+      {
+        "source": "throttle_segmentation/Throttle/output",
+        "target": "throttle_color/Throttle/signal"
+      },
+      {
+        "source": "throttle_segmentation/Throttle/output",
+        "target": "segmentation_viewer/SegmentationCameraViewer/segmentation_listener"
+      },
+      {
+        "source": "interface/subgraph/segmentation",
+        "target": "segmentation_encoder/SegmentationEncoder/segmentation"
+      },
+      {
+        "source": "color_camera_encoder/ColorCameraEncoderCpu/tensor",
+        "target": "interface/subgraph/training_sample_image"
+      },
+      {
+        "source": "segmentation_encoder/SegmentationEncoder/tensor",
+        "target": "interface/subgraph/training_sample_segmentation"
+      },
+      {
+        "source": "camera_teleportation/Teleportation/rigid_command",
+        "target": "interface/subgraph/teleport_command"
+      }
+    ]
+  },
+  "config": {
+    "color_camera_encoder": {
+      "ColorCameraEncoderCpu": {
+        "rows": 256,
+        "cols": 512,
+        "pixel_normalization_mode": "PositiveNegative"
+      }
+    },
+    "segmentation_viewer": {
+      "SegmentationCameraViewer": {
+        "camera_name": "segmentation",
+        "target_fps": 15
+      }
+    },
+    "color_camera_viewer": {
+      "ColorCameraViewer": {
+        "camera_name": "color",
+        "target_fps": 15
+      }
+    },
+    "camera_teleportation": {
+      "random": {
+        "use_random_seed": true
+      }
+    },
+    "throttle_segmentation": {
+      "Throttle": {
+        "data_channel": "input",
+        "output_channel": "output",
+        "minimum_interval": 1.0,
+        "use_signal_channel": false
+      }
+    },
+    "throttle_color": {
+      "Throttle": {
+        "data_channel": "input",
+        "output_channel": "output",
+        "signal_channel": "signal",
+        "use_signal_channel": true
+      }
+    },
+    "sight_widgets": {
+      "Image": {
+        "type": "2d",
+        "channels": [
+          { "name": "$(fullname color_camera_viewer/ColorCameraViewer/Color)" }
+        ]
+      },
+      "Segmentation": {
+        "type": "2d",
+        "channels": [
+          { "name": "$(fullname segmentation_viewer/SegmentationCameraViewer/Classes)" }
+        ]
+      }
+    }
+  }
+}

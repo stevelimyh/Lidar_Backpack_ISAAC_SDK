@@ -1,0 +1,288 @@
+{
+  "modules": [
+    "flatsim",
+    "sight"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "subgraph",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "interface",
+            "type": "isaac::alice::Subgraph"
+          }
+        ]
+      },
+      {
+        "name": "base_simulation",
+        "components": [
+          {
+            "name": "isaac.flatsim.DifferentialBaseSimulator",
+            "type": "isaac::flatsim::DifferentialBaseSimulator"
+          },
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "Failsafe",
+            "type": "isaac::alice::Failsafe"
+          }
+        ]
+      },
+      {
+        "name": "TimeSyncedTcpConnections",
+        "components": [
+          {
+            "name": "TimeSynchronizer",
+            "type": "isaac::alice::TimeSynchronizer"
+          },
+          {
+            "name": "isaac.alice.MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "ActuatorPublisher",
+            "type": "isaac::alice::TcpPublisher"
+          },
+          {
+            "name": "RigidBodySubscriber",
+            "type": "isaac::alice::TcpSubscriber"
+          },
+          {
+            "name": "LidarSubscriber",
+            "type": "isaac::alice::TcpSubscriber"
+          },
+          {
+            "name": "LeftCameraSubscriber",
+            "type": "isaac::alice::TcpSubscriber"
+          },
+          {
+            "name": "RightCameraSubscriber",
+            "type": "isaac::alice::TcpSubscriber"
+          }
+        ]
+      },
+      {
+        "name": "PoseInitializers",
+        "components": [
+          {
+            "name": "lidar_initializer",
+            "type": "isaac::alice::PoseInitializer"
+          },
+          {
+            "name": "left_camera_initializer",
+            "type": "isaac::alice::PoseInitializer"
+          },
+          {
+            "name": "right_camera_initializer",
+            "type": "isaac::alice::PoseInitializer"
+          }
+        ]
+      },
+      {
+        "name": "camera_viewer",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "left_color_viewer",
+            "type": "isaac::viewers::ColorCameraViewer"
+          },
+          {
+            "name": "right_color_viewer",
+            "type": "isaac::viewers::ColorCameraViewer"
+          },
+          {
+            "name": "depth_viewer",
+            "type": "isaac::viewers::DepthCameraViewer"
+          },
+          {
+            "name": "segmentation_viewer",
+            "type": "isaac::viewers::SegmentationCameraViewer"
+          },
+          {
+            "name": "detections_viewer",
+            "type": "isaac::viewers::DetectionsViewer"
+          }
+        ]
+      },
+      {
+        "name": "sight_widgets",
+        "components": [
+          {
+            "type": "isaac::sight::SightWidget",
+            "name": "Left Color"
+          },
+          {
+            "type": "isaac::sight::SightWidget",
+            "name": "Left Depth"
+          },
+          {
+            "type": "isaac::sight::SightWidget",
+            "name": "Left Segmentation"
+          },
+          {
+            "type": "isaac::sight::SightWidget",
+            "name": "Right Color"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "base_simulation/isaac.flatsim.DifferentialBaseSimulator/diff_base_state",
+        "target": "subgraph/interface/diff_base_state"
+      },
+      {
+        "source": "TimeSyncedTcpConnections/LidarSubscriber/LidarSensor",
+        "target": "subgraph/interface/scan"
+      },
+      {
+        "source": "subgraph/interface/diff_base_command",
+        "target": "base_simulation/isaac.flatsim.DifferentialBaseSimulator/diff_base_command"
+      },
+      {
+        "source": "base_simulation/isaac.flatsim.DifferentialBaseSimulator/physics_actuation",
+        "target": "TimeSyncedTcpConnections/ActuatorPublisher/physics_actuation"
+      },
+      {
+        "source": "TimeSyncedTcpConnections/RigidBodySubscriber/bodies",
+        "target": "base_simulation/isaac.flatsim.DifferentialBaseSimulator/physics_bodies"
+      },
+      {
+        "source": "TimeSyncedTcpConnections/LeftCameraSubscriber/ColorSensor",
+        "target": "camera_viewer/left_color_viewer/color_listener"
+      },
+      {
+        "source": "TimeSyncedTcpConnections/LeftCameraSubscriber/DepthSensor",
+        "target": "camera_viewer/depth_viewer/depth_listener"
+      },
+      {
+        "source": "TimeSyncedTcpConnections/LeftCameraSubscriber/SegmentationSensor",
+        "target": "camera_viewer/segmentation_viewer/segmentation_listener"
+      },
+      {
+        "source": "TimeSyncedTcpConnections/LeftCameraSubscriber/BoundingBox",
+        "target": "camera_viewer/detections_viewer/detections"
+      },
+      {
+        "source": "TimeSyncedTcpConnections/RightCameraSubscriber/ColorSensor",
+        "target": "camera_viewer/right_color_viewer/color_listener"
+      }
+    ]
+  },
+  "config": {
+    "base_simulation": {
+      "isaac.flatsim.DifferentialBaseSimulator": {
+        "flip_left_wheel": true,
+        "flip_right_wheel": true,
+        "joint_name_left_wheel": "left_wheel",
+        "joint_name_right_wheel": "right_wheel",
+        "tick_period": "100Hz"
+      },
+      "Failsafe": {
+        "name": "robot_failsafe"
+      }
+    },
+    "PoseInitializers": {
+      "lidar_initializer": {
+        "lhs_frame": "robot",
+        "rhs_frame": "lidar",
+        "pose": [1.0, 0.0, 0.0, 0.0, -0.06, 0.0, 0.62]
+      },
+      "left_camera_initializer": {
+        "lhs_frame": "robot",
+        "rhs_frame": "left_camera",
+        "pose": [0.5, -0.5, 0.5, -0.5, 0.11, 0.06, 0.55]
+      },
+      "right_camera_initializer": {
+        "lhs_frame": "robot",
+        "rhs_frame": "right_camera",
+        "pose": [0.5, -0.5, 0.5, -0.5, 0.11, -0.06, 0.55]
+      }
+    },
+    "camera_viewer": {
+      "left_color_viewer": {
+        "target_fps": 15,
+        "reduce_scale": 2,
+        "camera_name": "left_camera"
+      },
+      "right_color_viewer": {
+        "target_fps": 15,
+        "reduce_scale": 2,
+        "camera_name": "right_camera"
+      },
+      "detections_viewer": {
+        "reduce_scale": 2
+      },
+      "depth_viewer": {
+        "target_fps": 15,
+        "reduce_scale": 2,
+        "camera_name": "left_camera"
+      },
+      "segmentation_viewer": {
+        "target_fps": 15,
+        "reduce_scale": 2,
+        "camera_name": "left_camera"
+      }
+    },
+    "TimeSyncedTcpConnections": {
+      "LidarSubscriber": {
+        "port": 5000,
+        "host": "localhost"
+      },
+      "RigidBodySubscriber": {
+        "port": 5001,
+        "host": "localhost"
+      },
+      "ActuatorPublisher": {
+        "port": 5002,
+        "host": "localhost"
+      },
+      "LeftCameraSubscriber": {
+        "port": 5003,
+        "host": "localhost"
+      },
+      "RightCameraSubscriber": {
+        "port": 5004,
+        "host": "localhost"
+      }
+    },
+    "sight_widgets": {
+      "Left Color": {
+        "type": "2d",
+        "channels": [
+          { "name": "$(fullname camera_viewer/left_color_viewer/Color)" },
+          { "name": "$(fullname camera_viewer/detections_viewer/detections)" }
+        ]
+      },
+      "Left Depth": {
+        "type": "2d",
+        "channels": [
+          { "name": "$(fullname camera_viewer/depth_viewer/Depth)" }
+        ]
+      },
+      "Left Segmentation": {
+        "type": "2d",
+        "channels": [
+          { "name": "$(fullname camera_viewer/segmentation_viewer/Instances)" },
+          { "name": "$(fullname camera_viewer/segmentation_viewer/Classes)" }
+        ]
+      },
+      "Right Color": {
+        "type": "2d",
+        "channels": [
+          { "name": "$(fullname camera_viewer/right_color_viewer/Color)" }
+        ]
+      }
+    }
+  }
+}

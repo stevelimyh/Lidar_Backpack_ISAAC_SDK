@@ -1,0 +1,72 @@
+{
+  "config": {
+    "detection_pose_estimation.object_detection.tensor_r_t_inference": {
+      "isaac.ml.TensorRTInference": {
+        "model_file_path": "external/industrial_dolly_pose_estimation_cnn_model/resnet18_detector_industrial_dolly_bldgK.etlt",
+        "etlt_password": "test_pilot_2020",
+        "force_engine_update": false
+      }
+    },
+    "detection_pose_estimation.object_detection.detection_decoder": {
+      "isaac.detect_net.DetectNetDecoder": {
+        "labels": ["dolly"],
+        "non_maximum_suppression_threshold": 0.3,
+        "confidence_threshold": 0.35,
+        "min_bbox_area": 10000
+      }
+    },
+    "detection_pose_estimation.object_pose_estimation.pose_encoder": {
+      "TensorRTInference": {
+        "model_file_path": "external/industrial_dolly_pose_estimation_cnn_model/pose_estimation_cnn_industrial_dolly_bldgK.uff",
+        "force_engine_update": false
+      }
+    },
+    "detection_pose_estimation.object_pose_estimation.detection_convertor": {
+      "BoundingBoxEncoder": {
+        "class_names": ["IndustrialDolly", "Dolly", "dolly"]
+      }
+    },
+    "detection_pose_estimation.viewers": {
+      "Detections3Viewer": {
+        "frame": "camera",
+        "object_T_box_center": [1.0, 0, 0, 0, 0, 0, 0.375],
+        "box_dimensions": [0.9, 1.32, 0.25],
+        "mesh_name": "dolly"
+      }
+    },
+    "detection_pose_estimation.object_pose_estimation.detection_filter": {
+      "FilterDetectionsByLabel": {
+        "whitelist_labels": [
+          "Dolly",
+          "dolly"
+        ]
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "webroot": "packages/sight/webroot",
+        "assetroot": "external/industrial_dolly_pose_estimation_cnn_model",
+        "port": 3000,
+        "ui_config": {
+          "assets": {
+            "dolly": {
+              "obj": "/apps/assets/industrial_dolly_frame.obj",
+              "rotation": [
+                0.70710678118,
+                0.70710678118,
+                0,
+                0
+              ],
+              "translation": [
+                0,
+                0,
+                0.4
+              ],
+              "scale": 1.0
+            }
+          }
+        }
+      }
+    }
+  }
+}

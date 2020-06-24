@@ -1,0 +1,156 @@
+{
+  "name": "interactive_markers",
+  "modules": [
+    "flatsim",
+    "//apps/samples/interactive_markers:virtual_arm"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "map",
+        "components": [
+          {
+            "name": "isaac.map.Map",
+            "type": "isaac::map::Map"
+          },
+          {
+            "name": "map",
+            "type": "isaac::navigation::NavigationMap"
+          },
+          {
+            "name": "occupancy",
+            "type": "isaac::map::OccupancyGridMapLayer"
+          }
+        ]
+      },
+      {
+        "name": "virtual_arm",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "root_initializer",
+            "type": "isaac::alice::PoseInitializer"
+          },
+          {
+            "name": "left_shoulder_initializer",
+            "type": "isaac::alice::PoseInitializer"
+          },
+          {
+            "name": "left_hand_initializer",
+            "type": "isaac::alice::PoseInitializer"
+          },
+          {
+            "name": "right_shoulder_initializer",
+            "type": "isaac::alice::PoseInitializer"
+          },
+          {
+            "name": "right_elbow_initializer",
+            "type": "isaac::alice::PoseInitializer"
+          },
+          {
+            "name": "right_hand_initializer",
+            "type": "isaac::alice::PoseInitializer"
+          },
+          {
+            "name": "VirtualArm",
+            "type": "VirtualArm"
+          }
+        ]
+      }
+    ],
+    "edges": [ ]
+  },
+  "config": {
+    "map": {
+      "occupancy": {
+        "cell_size": 0.1,
+        "filename": "apps/assets/maps/nvidia_R_180306.png"
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "port": 3000,
+        "ui_config": {
+          "windows": {
+            "InteractiveMarkers - 3D View": {
+              "renderer": "3d",
+              "dims": {
+                "width":640,
+                "height":480
+              },
+              "channels": [
+                { "name": "interactive_markers/map/occupancy/map" }
+              ],
+              "markers": [
+                { "name": "leftShoulder" },
+                { "name": "rightElbow" },
+                { "name": "rightHand" }
+              ]
+            },
+            "InteractiveMarkers - 2D View": {
+              "renderer": "2d",
+              "dims": {
+                "width":600,
+                "height":900
+              },
+              "channels": [
+                { "name": "interactive_markers/map/occupancy/map" }
+              ],
+              "markers": [
+                { "name": "leftShoulder" },
+                { "name": "leftHand" },
+                { "name": "rightShoulder" },
+                { "name": "rightHand" }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "virtual_arm": {
+      "root_initializer": {
+        "lhs_frame": "world",
+        "rhs_frame": "root",
+        "pose": [1.0, 0.0, 0.0, 0.0, 4.0, 4.0, 0.0]
+      },
+      "left_shoulder_initializer": {
+        "lhs_frame": "root",
+        "rhs_frame": "leftShoulder",
+        "pose": [1.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0],
+        "attach_interactive_marker": true
+      },
+      "left_hand_initializer": {
+        "lhs_frame": "leftElbow",
+        "rhs_frame": "leftHand",
+        "pose": [1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0],
+        "attach_interactive_marker": true
+      },
+      "right_shoulder_initializer": {
+        "lhs_frame": "root",
+        "rhs_frame": "rightShoulder",
+        "pose": [1.0, 0.0, 0.0, 0.0, 0.0, -2.0, 0.0],
+        "attach_interactive_marker": true
+      },
+      "right_elbow_initializer": {
+        "lhs_frame": "rightShoulder",
+        "rhs_frame": "rightElbow",
+        "pose": [1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0],
+        "attach_interactive_marker": true
+      },
+      "right_hand_initializer": {
+        "lhs_frame": "rightElbow",
+        "rhs_frame": "rightHand",
+        "pose": [1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0],
+        "attach_interactive_marker": true
+      },
+      "VirtualArm": {
+        "lhs_frame": "leftShoulder",
+        "rhs_frame": "leftElbow",
+        "tick_period": "0.2"
+      }
+    }
+  }
+}

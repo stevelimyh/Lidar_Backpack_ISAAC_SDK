@@ -1,0 +1,33 @@
+{
+  "modules": [
+    "planner"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "pose2_graph_builder",
+        "components": [
+          {
+            "name": "Pose2GridGraphBuilder",
+            "type": "isaac::planner::Pose2GridGraphBuilder"
+          }
+        ]
+      }
+    ]
+  },
+  "config": {
+    "pose2_graph_builder": {
+      "Pose2GridGraphBuilder": {
+        "flatmap_cost_name": "flatmap_cost/MultiplicationFlatmapCost",
+        "graph_filename": "/tmp/pose2_grid_graph.capnp.bin",
+        "stop_application_uppon_success": true,
+        "neighbours_roi_radius": 4,
+        "region_of_interest": {
+          "corner_1": [0.0, 0.0],
+          "corner_2": [50.0, 125.0]
+        },
+        "tick_period": "1.0"
+      }
+    }
+  }
+}

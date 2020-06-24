@@ -1,0 +1,200 @@
+{
+  "name": "display_dummy",
+  "modules": [
+    "viewers",
+    "imu"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "depth",
+        "components": [
+          {
+            "name": "isaac.alice.MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "depth_viewer",
+            "type": "isaac::viewers::DepthCameraViewer"
+          }
+        ]
+      },
+      {
+        "name": "color_l",
+        "components": [
+          {
+            "name": "isaac.alice.MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "color_viewer",
+            "type": "isaac::viewers::ColorCameraViewer"
+          }
+        ]
+      },
+      {
+        "name": "color_r",
+        "components": [
+          {
+            "name": "isaac.alice.MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "color_viewer",
+            "type": "isaac::viewers::ColorCameraViewer"
+          }
+        ]
+      },
+      {
+          "name": "flat",
+          "components": [
+            {
+              "name": "isaac.alice.MessageLedger",
+              "type": "isaac::alice::MessageLedger"
+            },
+            {
+              "name": "flatscan_viewer",
+              "type": "isaac::viewers::FlatscanViewer"
+            }
+          ]
+      },
+      {
+        "name": "imu_corrector",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "imu_correct",
+            "type": "isaac::imu::ImuCorrector"
+          }
+        ]
+      },
+      {
+        "name": "scan_flattener",
+        "subgraph": "packages/navigation/apps/scan_flattener.subgraph.json"
+      },
+      {
+          "name": "replay",
+          "subgraph": "packages/record_replay/apps/replay.subgraph.json"
+      }
+    ],
+    "edges": [
+      {
+        "source": "replay.interface/output/scan",
+        "target": "scan_flattener.subgraph/interface/scan"
+      },
+      {
+        "source": "scan_flattener.subgraph/interface/flatscan",
+        "target": "flat/flatscan_viewer/flatscan"
+      },
+      {
+        "source": "replay.interface/output/depth",
+        "target": "depth/depth_viewer/depth_listener"
+      },
+      {
+        "source": "replay.interface/output/color_left",
+        "target": "color_l/color_viewer/color_listener"
+      },
+      {
+        "source": "replay.interface/output/color_right",
+        "target": "color_r/color_viewer/color_listener"
+      },
+      {
+        "source": "replay.interface/output/imu_raw",
+        "target": "imu_corrector/imu_correct/raw"
+      }
+    ]
+  },
+  "config": {
+    "websight": {
+      "WebsightServer": {
+        "port": 5000,
+        "ui_config": {
+          "windows": {
+            "Depth Generator": {
+              "renderer": "2d",
+              "channels": [
+                {
+                  "name": "display_dummy/depth/depth_viewer/Depth"
+                }
+              ]
+            },
+            "Color Generator (left)": {
+              "renderer": "2d",
+              "channels": [
+                {
+                  "name": "display_dummy/color_l/color_viewer/Color"
+                }
+              ]
+            },
+            "Color Generator (right)": {
+              "renderer": "2d",
+              "channels": [
+                {
+                  "name": "display_dummy/color_r/color_viewer/Color"
+                }
+              ]
+            },
+            "Scan Generator endpoints": {
+              "renderer": "2d",
+              "channels": [
+                {
+                  "name": "display_dummy/flat/flatscan_viewer/beam_endpoints"
+                }
+              ]
+            },
+            "Scan Generator lines": {
+              "renderer": "2d",
+              "channels": [
+                {
+                  "name": "display_dummy/flat/flatscan_viewer/beam_lines"
+                }
+              ]
+            },
+            "Imu Generator": {
+              "renderer": "plot",
+              "channels": [
+                {
+                  "name": "display_test/imu_corrector/imu_correct/RawLinearAcceleration.x"
+                },
+                {
+                  "name": "display_test/imu_corrector/imu_correct/RawLinearAcceleration.y"
+                },
+                {
+                  "name": "display_test/imu_corrector/imu_correct/RawLinearAcceleration.z"
+                },
+                {
+                  "name": "display_test/imu_corrector/imu_correct/RawAngularVelocity.x"
+                },
+                {
+                  "name": "display_test/imu_corrector/imu_correct/RawAngularVelocity.y"
+                },
+                {
+                  "name": "display_test/imu_corrector/imu_correct/RawAngularVelocity.z"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "depth": {
+      "depth_viewer": {
+        "max_visualization_depth": 20.0
+      }
+    },
+    "scan_flattener.scan_accumulator": {
+      "isaac.perception.ScanAccumulator": {
+        "min_slice_count": 5,
+        "clock_wise_rotation": false
+      }
+    },
+    "scan_flattener.range_scan_flattening": {
+      "isaac.perception.RangeScanFlattening": {
+        "pitch_fudge": 0.005
+      }
+    }
+  }
+}

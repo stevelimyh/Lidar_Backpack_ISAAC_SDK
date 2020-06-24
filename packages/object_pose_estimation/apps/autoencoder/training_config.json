@@ -1,0 +1,31 @@
+{
+  "app_filename": "packages/object_pose_estimation/apps/autoencoder/training.app.json",
+  "sleep_duration": 1,
+
+  "add_noise_to_image": false,
+
+  "gpu_memory_usage": 0.8,
+  "checkpoint": "",
+  "train_logdir": "/tmp/autoenc_logs/",
+
+  "num_prefetch": 3,
+  "batch_size": 64,
+  "learning_rate": 2e-4,
+  "training_steps": 50000,
+  "summary_every": 10,
+  "save_every": 1000,
+
+  "latent_space_size": 128,
+  "num_filter": [128, 256, 512, 512],
+  "kernel_size_encoder": 5,
+  "strides": [2, 2, 2, 2],
+  "batch_norm": false,
+
+  "variational": false,
+  "kernel_size_decoder": 5,
+  "loss": "L2",
+  "bootstrap_ratio": 5,
+  "auxiliary_mask": true,
+
+  "norm_regularize": 0
+}

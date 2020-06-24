@@ -1,0 +1,109 @@
+{
+    "action_dimension": 6,
+    "action_scale": 0.5,
+    "agent_spawn_randomization": [
+        0.0,
+        0.0,
+        0.0
+    ],
+    "agents_per_row": 3,
+    "angle_allowance": 1.3,
+    "aux_dimension": 7,
+    "aux_end_of_episode_flag": 1,
+    "batch_size": 256,
+    "bias": [
+        1.0,
+        10.0,
+        30.0
+    ],
+    "buffer_threshold": 50000,
+    "cell_size": 0.05,
+    "checkpoint_directory": "/tmp/rl_checkpoints",
+    "collision_penalty": -20,
+    "delay_sending": 3.0,
+    "dividing_space": [
+        15,
+        20
+    ],
+    "experience_buffer_size": 200000,
+    "gamma": 0.99,
+    "ideal_docking_pose": [
+        0.335,
+        0
+    ],
+    "learning_rate": 0.0001,
+    "look_back": 3,
+    "max_episode_length": 500,
+    "max_steps_per_epoch": 1500,
+    "mode": "train",
+    "num_agents_per_sim": 9,
+    "observation_map_dimension": 128,
+    "obstacle_scale_randomization": [
+        0,
+        2,
+        0
+    ],
+    "obstacle_separation": [
+        0,
+        5
+    ],
+    "obstacle_spawn_randomization": [
+        0.5,
+        0.5,
+        0.1
+    ],
+    "output_angular_velocity_range": [
+        -0.3,
+        0.3
+    ],
+    "output_linear_velocity_range": [
+        0,
+        0.5
+    ],
+    "polyak": 0.999,
+    "reaction_time": 0.1,
+    "restore_path": "<PATH TO RESTORE CHECKPOINTS>",
+    "reward_clip_range": [
+        -10,
+        10
+    ],
+    "sim_instances": 1,
+    "size_pose_state": 7,
+    "start_coordinate": [
+        0,
+        -2
+    ],
+    "success_reward": 100,
+    "target_pose_noise": [
+        0,
+        0,
+        0
+    ],
+    "target_separation": [
+        4,
+        0
+    ],
+    "target_spawn_randomization": [
+        0,
+        0,
+        0.1
+    ],
+    "tensorboard_log_directory": "/tmp/rl_logs",
+    "tick_period": "100.0Hz",
+    "timestamp_profile": [
+        0,
+        0.6,
+        1.2
+    ],
+    "tolerance": [
+        0.11,
+        0.085
+    ],
+    "use_pretrained_model": false,
+    "wall_thickness": 0.2,
+    "x_allowance": [
+        -1,
+        6
+    ],
+    "y_allowance": 3.5
+}

@@ -1,0 +1,51 @@
+{
+    "name": "pong",
+    "modules": [
+      "apps/tutorials/ping_net:pong_component"
+    ],
+    "graph": {
+      "nodes": [
+        {
+          "name": "sub",
+          "components": [
+            {
+              "name": "message_ledger",
+              "type": "isaac::alice::MessageLedger"
+            },
+            {
+              "name": "tcp_receiver",
+              "type": "isaac::alice::TcpSubscriber"
+            }
+          ]
+        },
+        {
+          "name": "pong",
+          "components": [
+            {
+              "name": "message_ledger",
+              "type": "isaac::alice::MessageLedger"
+            },
+            {
+              "name": "pong",
+              "type": "Pong"
+            }
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "source": "sub/tcp_receiver/tunnel",
+          "target": "pong/pong/trigger"
+        }
+      ]
+    },
+    "config": {
+      "sub": {
+        "tcp_receiver": {
+          "port": 5005,
+          "reconnect_interval": 0.5,
+          "host": "localhost"
+        }
+      }
+    }
+  }

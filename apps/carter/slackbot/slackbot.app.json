@@ -1,0 +1,145 @@
+{
+  "name": "slackbot",
+  "modules": [
+    "//apps/carter/slackbot:waypoint_from_slack",
+    "communications",
+    "navigation"
+  ],
+  "config_files": [
+    "apps/carter/robots/carter_1.config.json",
+    "apps/assets/maps/nvidia_R_meeting_rooms_181213b.config.json"
+  ],
+  "graph_files": [
+    "apps/assets/maps/nvidia_R_meeting_rooms_181213b.graph.json"
+  ],
+  "config": {
+    "waypoint_from_slack": {
+      "isaac.WaypointFromSlack": {
+        "navigation_mode": "navigation.control.navigation_mode/isaac.navigation.GroupSelectorBehavior",
+        "tick_period": "10ms"
+      }
+    },
+    "waypoint_as_goal": {
+      "isaac.navigation.MapWaypointAsGoal": {
+        "map_layer": "map/waypoints",
+        "tick_period": "50ms"
+      }
+    },
+    "slackbot": {
+      "slackbot": {
+        "bot_token": "bot-token-here"
+      }
+    },
+    "navigation.control.lqr": {
+      "isaac.planner.DifferentialBaseLqrPlanner": {
+        "manual_mode_channel": "commander.robot_remote/isaac.navigation.RobotRemoteControl/manual_mode"
+      }
+    },
+    "navigation.control.control": {
+      "isaac.planner.DifferentialBaseControl": {
+        "manual_mode_channel": "commander.robot_remote/isaac.navigation.RobotRemoteControl/manual_mode"
+      }
+    }
+  },
+  "graph": {
+    "nodes": [
+      {
+        "name": "2d_carter",
+        "subgraph": "apps/carter/2d_carter.subgraph.json"
+      },
+      {
+        "name": "navigation",
+        "subgraph": "packages/navigation/apps/differential_base_navigation.subgraph.json"
+      },
+      {
+        "name": "commander",
+        "subgraph": "packages/navigation/apps/differential_base_commander.subgraph.json"
+      },
+      {
+        "name": "waypoint_from_slack",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.WaypointFromSlack",
+            "type": "isaac::WaypointFromSlack"
+          }
+        ]
+      },
+      {
+        "name": "waypoint_as_goal",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.navigation.MapWaypointAsGoal",
+            "type": "isaac::navigation::MapWaypointAsGoal"
+          }
+        ]
+      },
+      {
+        "name": "slackbot",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "slackbot",
+            "type": "isaac::SlackBot"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "commander.subgraph/interface/command",
+        "target": "2d_carter.subgraph/interface/diff_base_command"
+      },
+      {
+        "source": "slackbot/slackbot/user_instruction",
+        "target": "waypoint_from_slack/isaac.WaypointFromSlack/incoming_message"
+      },
+      {
+        "source": "waypoint_from_slack/isaac.WaypointFromSlack/outgoing_message",
+        "target": "slackbot/slackbot/slack_message"
+      },
+      {
+        "source": "waypoint_from_slack/isaac.WaypointFromSlack/target_waypoint",
+        "target": "waypoint_as_goal/isaac.navigation.MapWaypointAsGoal/desired_waypoint"
+      },
+      {
+        "source": "navigation.subgraph/interface/feedback",
+        "target": "waypoint_from_slack/isaac.WaypointFromSlack/feedback"
+      },
+      {
+        "source": "waypoint_as_goal/isaac.navigation.MapWaypointAsGoal/goal",
+        "target": "navigation.subgraph/interface/goal"
+      },
+      {
+        "source": "2d_carter.subgraph/interface/flatscan",
+        "target": "navigation.subgraph/interface/flatscan_for_localization"
+      },
+      {
+        "source": "2d_carter.subgraph/interface/flatscan",
+        "target": "navigation.subgraph/interface/flatscan_for_obstacles"
+      },
+      {
+        "source": "2d_carter.subgraph/interface/diff_base_state",
+        "target": "navigation.subgraph/interface/state"
+      },
+      {
+        "source": "2d_carter.subgraph/interface/imu_raw",
+        "target": "navigation.subgraph/interface/imu_raw"
+      },
+      {
+        "source": "navigation.subgraph/interface/command",
+        "target": "commander.subgraph/interface/control"
+      }
+    ]
+  }
+}

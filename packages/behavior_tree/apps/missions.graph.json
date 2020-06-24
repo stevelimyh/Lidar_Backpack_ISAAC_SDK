@@ -1,0 +1,107 @@
+{
+  "modules": [
+    "behavior_tree",
+    "json"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "tcp_client",
+        "components": [
+          {
+            "name": "JsonTcpClient",
+            "type": "isaac::json::JsonTcpClient"
+          },
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          }
+        ]
+      },
+      {
+        "name": "mission_control",
+        "components": [
+          {
+            "name": "Mission",
+            "type": "isaac::behavior_tree::Mission"
+          },
+          {
+            "name": "NodeGroup",
+            "type": "isaac::behavior_tree::NodeGroup"
+          },
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "robot_name",
+        "components" : [
+          {
+            "name": "JsonMockup",
+            "type": "isaac::json::JsonMockup"
+          },
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          }
+        ]
+      },
+      {
+        "name": "name_converter",
+        "components" : [
+          {
+            "name": "JsonToProto",
+            "type": "isaac::alice::JsonToProto"
+          },
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "tcp_client/JsonTcpClient/mission",
+        "target": "mission_control/Mission/mission"
+      },
+      {
+        "source": "mission_control/Mission/mission_status",
+        "target": "tcp_client/JsonTcpClient/mission_status"
+      },
+      {
+        "source": "robot_name/JsonMockup/raw_json",
+        "target": "name_converter/JsonToProto/json"
+      },
+      {
+        "source": "name_converter/JsonToProto/proto",
+        "target": "tcp_client/JsonTcpClient/name"
+      }
+    ]
+  },
+  "config": {
+    "tcp_client": {
+      "JsonTcpClient": {
+        "host":"localhost",
+        "port":9998
+      }
+    },
+    "mission_control": {
+      "Mission": {
+        "tick_period": "100ms"
+      }
+    },
+    "robot_name": {
+      "JsonMockup": {
+        "json_mock": {
+          "text": "robot_01"
+        },
+        "tick_period": "250ms",
+        "raw_type": 10961607615765939303
+      }
+    }
+  }
+}

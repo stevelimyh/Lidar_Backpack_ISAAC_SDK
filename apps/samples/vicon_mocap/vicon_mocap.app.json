@@ -1,0 +1,77 @@
+{
+  "name": "vicon_mocap",
+  "modules": [
+    "//apps/samples/vicon_mocap:vicon_mocap_test",
+    "sensors:vicon"
+  ],
+  "config": {
+    "vicon": {
+      "vicon_node": {
+        "vicon_hostname": "192.168.1.27",
+        "vicon_port": "801"
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "port": 3000,
+        "ui_config": {
+          "windows": {
+            "Vicon Markers": {
+              "renderer": "3d",
+              "dims": {
+                "width": 640,
+                "height": 480
+              },
+              "channels": [
+                {
+                  "name": "Motion Capture Sample with Vicon/mocap_test/mocap_node/markers",
+                  "active": true
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "graph": {
+    "nodes": [
+      {
+        "name": "vicon",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "vicon_node",
+            "type": "isaac::Vicon"
+          }
+        ]
+      },
+      {
+        "name": "mocap_test",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "mocap_node",
+            "type": "isaac::vicon::MocapTest"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "vicon/vicon_node/vicon_pose_tree",
+        "target": "mocap_test/mocap_node/vicon_pose_tree"
+      },
+      {
+        "source": "vicon/vicon_node/vicon_markers",
+        "target": "mocap_test/mocap_node/vicon_markers"
+      }
+    ]
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "name": "sony_snchmx70",
+  "modules": [
+    "deepstream",
+    "sight",
+    "viewers"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "camera",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "pipeline",
+            "type": "isaac::deepstream::Pipeline"
+          },
+          {
+            "name": "viewer",
+            "type": "isaac::viewers::ColorCameraViewer"
+          },
+          {
+            "name": "viewer_widget",
+            "type": "isaac::sight::SightWidget"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "camera/pipeline/image",
+        "target": "camera/viewer/color_listener"
+      }
+    ]
+  },
+  "config": {
+    "camera": {
+      "pipeline": {
+        "pipeline": "nvstreammux name=mux width=2640 height=2640 batch-size=1 live-source=true batched-push-timeout=3300000 ! video/x-raw(memory:NVMM),format=(string)NV12,width=2640,height=2640 ! nvvideoconvert ! videoconvert ! video/x-raw, format=(string)RGB ! videoconvert ! appsink name=image uridecodebin uri=\"rtsp://192.168.0.203:554/media/video1\" ! mux.sink_0"
+      },
+      "viewer_widget": {
+        "title": "Viewer: SONY SNC-HMX70",
+        "type": "2d",
+        "channels": [
+          {
+            "name": "camera/viewer/Color"
+          }
+        ]
+      }
+    }
+  }
+}

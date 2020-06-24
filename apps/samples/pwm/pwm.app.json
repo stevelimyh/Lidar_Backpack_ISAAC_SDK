@@ -1,0 +1,49 @@
+{
+  "name": "pwm",
+  "modules": [
+    "//apps/samples/pwm:pwm_driver",
+    "pwm"
+  ],
+  "config": {
+    "pwm": {
+      "PwmDriver": {
+        "tick_period": "1s"
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "port": 3000,
+        "ui_config": {
+          "windows": {}
+        }
+      }
+    }
+  },
+  "graph": {
+    "nodes": [
+      {
+        "name": "pwm",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "PwmController",
+            "type": "isaac::pwm::PwmController"
+          },
+          {
+            "name": "PwmDriver",
+            "type": "isaac::pwm::PwmDriver"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "pwm/PwmDriver/set_duty_cycle",
+        "target": "pwm/PwmController/set_duty_cycle"
+      }
+    ]
+  }
+}

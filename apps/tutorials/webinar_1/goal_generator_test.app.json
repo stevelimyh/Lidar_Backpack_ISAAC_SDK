@@ -1,0 +1,59 @@
+{
+  "name": "goal_generator",
+  "modules": [
+    "//apps/tutorials/webinar_1:go_to_mockup",
+    "//apps/tutorials/webinar_1:goal_generator"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "go_to_mockup",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "GoToMockup",
+            "type": "isaac::tutorials::GoToMockup"
+          }
+        ]
+      },
+      {
+        "name": "goal_generator",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "GoalGenerator",
+            "type": "isaac::tutorials::GoalGenerator"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "goal_generator/GoalGenerator/goal",
+        "target": "go_to_mockup/GoToMockup/goal"
+      },
+      {
+        "source": "go_to_mockup/GoToMockup/feedback",
+        "target": "goal_generator/GoalGenerator/feedback"
+      }
+    ]
+  },
+  "config": {
+    "go_to_mockup" : {
+      "GoToMockup" : {
+        "tick_period" : "10ms"
+      }
+    },
+    "goal_generator" : {
+      "GoalGenerator" : {
+        "tick_period" : "10Hz"
+      }
+    }
+  }
+}

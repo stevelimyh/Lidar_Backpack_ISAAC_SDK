@@ -1,0 +1,36 @@
+{
+  "name": "map_editor",
+  "modules": [
+    "map",
+    "navigation"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "map_bridge",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.map.MapBridge",
+            "type": "isaac::map::MapBridge"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "websight/WebsightServer/map",
+        "target": "map_bridge/isaac.map.MapBridge/request"
+      },
+      {
+        "source": "map_bridge/isaac.map.MapBridge/reply",
+        "target": "websight/WebsightServer/map_reply"
+      }
+    ]
+  },
+  "config": {
+  }
+}

@@ -1,0 +1,155 @@
+{
+  "name": "pose_estimation_inference_camerafeed",
+  "modules": [
+    "ml",
+    "realsense",
+    "sight",
+    "viewers"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "camera",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "realsense",
+            "type": "isaac::RealsenseCamera"
+          }
+        ]
+      },
+      {
+        "name": "object_detection",
+        "subgraph": "packages/detect_net/apps/detect_net_inference.subgraph.json"
+      },
+      {
+        "name": "viewers",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "ObjectDetectionViewer",
+            "type": "isaac::viewers::Detections3Viewer"
+          },
+          {
+            "name": "ColorCameraViewer",
+            "type": "isaac::viewers::ColorCameraViewer"
+          }
+        ]
+      },
+      {
+        "name": "object_pose_estimation",
+        "subgraph": "packages/object_pose_estimation/apps/autoencoder/pose_estimation.subgraph.json"
+      },
+      {
+        "name": "sight_widgets",
+        "components": [
+          {
+            "type": "isaac::sight::SightWidget",
+            "name": "Object Pose"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "camera/realsense/color",
+        "target": "viewers/ColorCameraViewer/color_listener"
+      },
+      {
+        "source": "camera/realsense/color",
+        "target": "object_pose_estimation.subgraph/interface/input_image"
+      },
+      {
+        "source": "camera/realsense/color",
+        "target": "object_detection.subgraph/interface/image"
+      },
+      {
+        "source": "object_detection.subgraph/interface/detections",
+        "target": "object_pose_estimation.subgraph/interface/input_detections"
+      },
+      {
+        "source": "object_pose_estimation.subgraph/interface/output_poses",
+        "target": "viewers/ObjectDetectionViewer/detections"
+      }
+    ]
+  },
+  "config": {
+    "camera": {
+      "realsense": {
+        "rows": 720,
+        "cols": 1280,
+        "depth_framerate": 15,
+        "ir_framerate": 15,
+        "rgb_framerate": 15,
+        "enable_depth": false,
+        "enable_ir_stereo": false,
+        "enable_rgb": true,
+        "enable_depth_laser": false,
+        "align_to_color": false,
+        "frame_queue_size": 2,
+        "auto_exposure_priority": false
+      }
+    },
+    "viewers": {
+      "ColorCameraViewer": {
+        "camera_name": "camera"
+      },
+      "ObjectDetectionViewer": {
+        "frame": "camera",
+        "object_T_box_center": [1.0, 0, 0, 0, 0, 0, 0.5],
+        "box_dimensions": [0.75, 1.5, 1.0],
+        "alpha_channel": 128,
+        "mesh_name": "dolly"
+      }
+    },
+    "object_pose_estimation.detection_filter": {
+      "FilterDetectionsByLabel": {
+        "whitelist_labels": ["Dolly", "dolly"]
+      }
+    },
+    "object_pose_estimation.pose_encoder": {
+      "TensorRTInference": {
+        "model_file_path": "external/dolly_pose_estimation_model/dolly_ae_model.uff"
+      }
+    },
+    "object_pose_estimation.codebook_lookup": {
+      "CodebookLookup": {
+        "codebook_path": "external/dolly_pose_estimation_model/dolly_codebook.jsonl"
+      }
+    },
+    "sight_widgets": {
+      "Object Pose": {
+        "type": "2d",
+        "channels": [
+          { "name": "viewers/ColorCameraViewer/Color" },
+          { "name": "object_detection.detection_viewer/isaac.viewers.DetectionsViewer/detections" },
+          { "name": "viewers/ObjectDetectionViewer/bounding_box" },
+          { "name": "viewers/ObjectDetectionViewer/mesh"}
+        ]
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "webroot": "packages/sight/webroot",
+        "assetroot": "external/dolly_pose_estimation_model/dolly_assets",
+        "port": 3000,
+        "ui_config": {
+          "assets": {
+            "dolly": {
+              "obj": "/apps/assets/dolly.obj",
+              "rotation": [0.70710678118, 0.70710678118, 0, 0],
+              "translation": [0, 0, 0.0],
+              "scale": 1.0
+            }
+          }
+        }
+      }
+    }
+  }
+}

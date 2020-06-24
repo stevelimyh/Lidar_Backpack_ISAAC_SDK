@@ -1,0 +1,62 @@
+{
+  "graph": {
+    "nodes": [
+      {
+        "name": "pose_initializers",
+        "start_order": -200,
+        "components": [
+          {
+            "name": "front_lidar_pose_initializer",
+            "type": "isaac::alice::PoseInitializer"
+          },
+          {
+            "name": "rear_lidar_pose_initializer",
+            "type": "isaac::alice::PoseInitializer"
+          },
+          {
+            "name": "camera_pose_initializer",
+            "type": "isaac::alice::PoseInitializer"
+          }
+        ]
+      }
+    ]
+  },
+  "config": {
+    "pose_initializers": {
+      "front_lidar_pose_initializer": {
+        "lhs_frame": "robot",
+        "rhs_frame": "lidar",
+        "pose": {
+          "rotation": { "yaw_degrees": -60.0 },
+          "translation": [ 0.335, 0.24, 0.17 ]
+        }
+      },
+      "rear_lidar_pose_initializer": {
+        "lhs_frame": "robot",
+        "rhs_frame": "lidar_2",
+        "pose": {
+          "rotation": { "yaw_degrees": 120.0 },
+          "translation": [ -0.985, -0.24, 0.17 ]
+        }
+      },
+      "camera_pose_initializer": {
+        "lhs_frame": "robot",
+        "rhs_frame": "camera",
+        "pose": {
+          "rotation": {
+            "roll_degrees": -180.0,
+            "pitch_degrees": 97.0,
+            "yaw_degrees": 90.0
+          },
+          "translation": [ 0.35, 0.0, 0.15 ]
+        }
+      }
+    },
+    "simulation.scenario_manager": {
+      "scenario_manager": {
+        "robot_name": "bmw_str",
+        "robot_prefab": "STRv4"
+      }
+    }
+  }
+}

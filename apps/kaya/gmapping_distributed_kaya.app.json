@@ -1,0 +1,195 @@
+{
+  "name": "gmapping_distributed_kaya",
+  "modules": [
+    "navigation",
+    "planner"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "tcp_publisher",
+        "components": [
+          {
+            "name": "isaac.alice.MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.alice.TcpPublisher",
+            "type": "isaac::alice::TcpPublisher"
+          }
+        ]
+      },
+      {
+        "name": "shared_robot_model",
+        "components": [
+          {
+            "name": "RangeScanModel",
+            "type": "isaac::navigation::RangeScanModelFlatloc"
+          },
+          {
+            "name": "SphericalRobotShapeComponent",
+            "type": "isaac::planner::SphericalRobotShapeComponent"
+          }
+        ]
+      },
+      {
+       "name": "obstacle_atlas",
+       "components": [
+         {
+           "name": "obstacle_atlas",
+           "type": "isaac::map::ObstacleAtlas"
+         }
+       ]
+      },
+      {
+        "name": "2d_kaya",
+        "subgraph": "apps/kaya/2d_kaya.subgraph.json"
+      },
+      {
+        "name": "commander",
+        "subgraph": "packages/navigation/apps/holonomic_base_commander.subgraph.json"
+      },
+      {
+        "name": "odometry",
+        "subgraph": "packages/navigation/apps/holonomic_base_imu_odometry.subgraph.json"
+      },
+      {
+        "name": "local_map",
+        "subgraph": "packages/navigation/apps/local_map.subgraph.json"
+      }
+    ],
+    "edges": [
+      {
+        "source": "commander.subgraph/interface/command",
+        "target": "2d_kaya.subgraph/interface/base_command"
+      },
+      {
+        "source": "2d_kaya.subgraph/interface/imu_raw",
+        "target": "odometry.subgraph/interface/imu_raw"
+      },
+      {
+        "source": "2d_kaya.subgraph/interface/base_state",
+        "target": "odometry.subgraph/interface/state"
+      },
+      {
+        "source": "2d_kaya.subgraph/interface/flatscan",
+        "target": "local_map.subgraph/interface/flatscan"
+      },
+      {
+        "source": "2d_kaya.subgraph/interface/flatscan",
+        "target": "tcp_publisher/isaac.alice.TcpPublisher/flatscan"
+      },
+      {
+        "source": "odometry.subgraph/interface/odometry",
+        "target": "tcp_publisher/isaac.alice.TcpPublisher/odometry"
+      }
+    ]
+  },
+  "config": {
+    "shared_robot_model": {
+      "SphericalRobotShapeComponent": {
+        "circles": [
+          { "center": [0.0 ,0.0], "radius": 0.075},
+          { "center": [0.02 ,0.03464], "radius": 0.055},
+          { "center": [0.02 ,-0.03464], "radius": 0.055},
+          { "center": [-0.04 ,0.0], "radius": 0.055},
+          { "center": [0.0525 ,0.09093], "radius": 0.035},
+          { "center": [0.0525 ,-0.09093], "radius": 0.035},
+          { "center": [-0.105 ,0.0], "radius": 0.035}
+        ]
+      },
+      "RangeScanModel": {
+        "invalid_range_threshold": 0.0,
+        "max_beam_error_far": 0.1,
+        "max_beam_error_near": 0.2,
+        "max_weight": 0.5,
+        "out_of_range_threshold": 2.0,
+        "percentile": 0.9,
+        "sharpness": 10
+      }
+    },
+    "local_map.range_scan_to_observation_map": {
+      "isaac.navigation.RangeScanToObservationMap": {
+        "sensor_frame": "robot",
+        "sensor_lattice_frame": "sensor_lattice"
+      }
+    },
+    "local_map.local_map": {
+      "isaac.navigation.LocalMap": {
+        "flatscan_frame": "camera",
+        "map_decay_factor": 0.98
+      }
+    },
+    "local_map.local_map_postprocessing": {
+      "cleanup": {
+        "clear_region": [[-0.05, 0.05],[-0.05, 0.05]]
+      },
+      "isaac.navigation.BinaryToDistanceMap": {
+        "obstacle_name": ""
+      }
+    },
+    "tcp_publisher": {
+      "isaac.alice.TcpPublisher": {
+        "port": 5000
+      }
+    },
+    "commander.robot_remote": {
+      "isaac.navigation.RobotRemoteControl": {
+        "angular_speed_max": 0.75,
+        "linear_speed_max": 0.15
+      }
+    },
+    "websight": {
+      "WebsightServer": {
+        "port": 3000,
+        "ui_config": {
+          "windows": {
+            "Mapper Kaya - Local View": {
+              "renderer": "2d",
+              "dims": {
+                "width": 256,
+                "height": 256
+              },
+              "zoom": 2.0,
+              "channels": [
+                { "name": "gmapping_distributed_kaya/local_map.local_map/isaac.navigation.LocalMap/local_map" }
+              ]
+            },
+            "Mapper Kaya - Camera": {
+              "renderer": "2d",
+              "dims": {
+                "width": 640,
+                "height": 360
+              },
+              "channels": [
+                {
+                  "name": "gmapping_distributed_kaya/2d_kaya.kaya_hardware.camera/color_viewer/Color"
+                }
+              ]
+            },
+            "Mapper Kaya - Depth": {
+              "renderer": "2d",
+              "dims": {
+                "width": 640,
+                "height": 360
+              },
+              "channels": [
+                {
+                  "name": "gmapping_distributed_kaya/2d_kaya.kaya_hardware.camera/depth_viewer/Depth"
+                }
+              ]
+            },
+            "Mapper Kaya - Odometry": {
+              "renderer": "plot",
+              "channels": [
+                { "name": "gmapping_distributed_kaya/odometry.odometry/HolonomicBaseWheelImuOdometry/state.heading" },
+                { "name": "gmapping_distributed_kaya/odometry.odometry/HolonomicBaseWheelImuOdometry/state.pos_x" },
+                { "name": "gmapping_distributed_kaya/odometry.odometry/HolonomicBaseWheelImuOdometry/state.pos_y" }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

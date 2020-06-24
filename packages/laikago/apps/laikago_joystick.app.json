@@ -1,0 +1,58 @@
+{
+  "name": "laikago_joystick",
+  "modules": [
+    "laikago"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "commander",
+        "subgraph": "packages/navigation/apps/holonomic_base_commander.subgraph.json"
+      },
+      {
+        "name": "laikago_driver",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "LaikagoDriver",
+            "type": "isaac::laikago::LaikagoDriver"
+          },
+          {
+            "name": "Failsafe",
+            "type": "isaac::alice::Failsafe"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "commander.subgraph/interface/command",
+        "target": "laikago_driver/LaikagoDriver/base_command"
+      }
+    ]
+  },
+  "config": {
+    "laikago_driver": {
+      "Failsafe": {
+        "name": "robot_failsafe"
+      },
+      "LaikagoDriver": {
+        "tick_period": "200Hz"
+      }
+    },
+    "commander.joystick": {
+      "isaac.Joystick": {
+        "device": "/dev/input/js0"
+      }
+    },
+    "commander.robot_remote": {
+      "isaac.navigation.RobotRemoteControl": {
+        "linear_speed_max": 0.5,
+        "angular_speed_max": 0.9
+      }
+    }
+  }
+}

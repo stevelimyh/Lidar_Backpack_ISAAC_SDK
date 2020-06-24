@@ -1,0 +1,166 @@
+{
+  "links": [
+    {
+      "name": "base",
+      "motor": {
+        "type": "constant",
+        "properties": {
+          "pose": [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+        }
+      }
+    },
+    {
+      "name" : "axis1",
+      "parent": "base",
+      "motor": {
+        "type": "constant",
+        "properties": {
+          "pose": [0.0, 0.7071, 0.7071, 0.0, 0.0, 0.0, 0.1373]
+        }
+      }
+    },
+    {
+      "name" : "joint1",
+      "parent": "axis1",
+      "motor": {
+        "type": "revolute",
+        "properties": {
+          "axis": [0, 0, 1]
+        }
+      }
+    },
+    {
+      "name" : "axis2",
+      "parent": "joint1",
+      "motor": {
+        "type": "constant",
+        "properties": {
+          "pose": [0, -0.7071, 0, 0.7071, 0.0, 0.0, -0.1428]
+        }
+      }
+    },
+    {
+      "name" : "joint2",
+      "parent": "axis2",
+      "motor": {
+        "type": "revolute",
+        "properties": {
+          "axis": [0, 0, 1],
+          "limits": [0.25, 6.0]
+        }
+      }
+    },
+    {
+      "name" : "axis3",
+      "parent": "joint2",
+      "motor": {
+        "type": "constant",
+        "properties": {
+          "pose": [0.7071, 0, 0.7071, 0, -0.195, 0.0, -0.0108]
+        }
+      }
+    },
+    {
+      "name" : "joint3",
+      "parent": "axis3",
+      "motor": {
+        "type": "revolute",
+        "properties": {
+          "axis": [0, 0, 1]
+        }
+      }
+    },
+    {
+      "name" : "axis4",
+      "parent": "joint3",
+      "motor": {
+        "type": "constant",
+        "properties": {
+          "pose": [0, -0.7071, 0, -0.7071, 0.0, 0.0, -0.2248]
+        }
+      }
+    },
+    {
+      "name" : "joint4",
+      "parent": "axis4",
+      "motor": {
+        "type": "revolute",
+        "properties": {
+          "axis": [0, 0, 1],
+          "limits": [0.5, 5.8]
+        }
+      }
+    },
+    {
+      "name" : "axis5",
+      "parent": "joint4",
+      "motor": {
+        "type": "constant",
+        "properties": {
+          "pose": [0.7071, 0, -0.7071, 0, 0.1950003, 0.0, -0.0118]
+        }
+      }
+    },
+    {
+      "name" : "joint5",
+      "parent": "axis5",
+      "motor": {
+        "type": "revolute",
+        "properties": {
+          "axis": [0, 0, 1]
+        }
+      }
+    },
+    {
+      "name" : "axis6",
+      "parent": "joint5",
+      "motor": {
+        "type": "constant",
+        "properties": {
+          "pose": [0, 0.7071, 0, -0.7071, 0.0, 0.0, -0.1184]
+        }
+      }
+    },
+    {
+      "name" : "joint6",
+      "parent": "axis6",
+      "motor": {
+        "type": "revolute",
+        "properties": {
+          "axis": [0, 0, 1],
+          "limits": [1.3, 5.0]
+        }
+      }
+    },
+    {
+      "name" : "axis7",
+      "parent": "joint6",
+      "motor": {
+        "type": "constant",
+        "properties": {
+          "pose": [0.7071, 0, 0.7071, 0, -0.0925, 0.0, 0.0006]
+        }
+      }
+    },
+    {
+      "name" : "joint7",
+      "parent": "axis7",
+      "motor": {
+        "type": "revolute",
+        "properties": {
+          "axis": [0, 0, 1]
+        }
+      }
+    },
+    {
+      "name" : "end_effector",
+      "parent": "joint7",
+      "motor": {
+        "type": "constant",
+        "properties": {
+          "pose": [0.0, 1.0, 0.0, 0.0, 0.0, 0.01, -0.18]
+        }
+      }
+    }
+  ]
+}

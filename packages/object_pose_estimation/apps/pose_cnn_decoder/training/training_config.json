@@ -1,0 +1,43 @@
+{
+  "app_filename": "packages/object_pose_estimation/apps/pose_cnn_decoder/training/training.app.json",
+  "sleep_duration": 1,
+
+  "add_noise_to_image": false,
+
+  "gpu_memory_usage": 0.8,
+  "checkpoint": "",
+  "train_logdir": "/tmp/autoenc_logs/",
+
+  "num_prefetch": 3,
+  "batch_size": 64,
+  "learning_rate": 6e-4,
+  "training_steps": 80000,
+  "summary_every": 10,
+  "save_every": 500,
+
+  "latent_space_size": 128,
+  "num_filter": [128, 256, 512, 512],
+  "kernel_size_encoder": 5,
+  "strides": [2, 2, 2, 2],
+  "batch_norm": false,
+
+  "num_fc_layers_encoder_bbox": [128, 128],
+
+  "variational": false,
+  "decode_from_pose": false,
+  "kernel_size_decoder": 5,
+  "bootstrap_ratio": 6,
+  "auxiliary_mask": true,
+  "decoder_loss": "L2",
+
+  "translation_loss": "L1",
+  "rotation_loss": "AcosLoss",
+  "num_fc_layers_translation": [128],
+  "num_fc_layers_rotation": [128],
+  "symmetry_axes": [2],
+  "num_rotation_symmetry": 2,
+  "quaternion_mag_loss_weight": 3,
+
+  "norm_regularize": 0,
+  "losses_weights": [1, 1, 1]
+}

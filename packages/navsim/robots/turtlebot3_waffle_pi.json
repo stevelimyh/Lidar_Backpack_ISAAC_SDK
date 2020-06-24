@@ -1,0 +1,54 @@
+{
+  "graph": {
+    "nodes": [
+      {
+        "name": "pose_initializers",
+        "components": [
+          {
+            "name": "lidar_initializer",
+            "type": "isaac::alice::PoseInitializer"
+          }
+        ]
+      }
+    ]
+  },
+  "config": {
+    "navigation.shared_robot_model": {
+      "DifferentialBaseModel": {
+        "robot_radius": 0.220,
+        "base_length": 0.287,
+        "wheel_radius": 0.033
+      },
+      "SphericalRobotShapeComponent": {
+        "circles": [
+          { "center": [-0.06, 0.0], "radius": 0.14},
+          { "center": [0.0,  0.103], "radius": 0.07},
+          { "center": [0.0, -0.103], "radius": 0.07},
+          { "center": [-0.13,  0.075], "radius": 0.07},
+          { "center": [-0.13, -0.075], "radius": 0.07}
+        ]
+      }
+    },
+    "pose_initializers": {
+      "lidar_initializer": {
+        "lhs_frame": "robot",
+        "pose": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          -0.064,
+          0.0,
+          0.1
+        ],
+        "rhs_frame": "lidar"
+      }
+    },
+    "simulation.scenario_manager": {
+      "scenario_manager": {
+        "robot_name": "turtlebot3",
+        "robot_prefab": "Turtlebot3WafflePi"
+      }
+    }
+  }
+}

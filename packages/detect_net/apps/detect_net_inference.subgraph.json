@@ -1,0 +1,204 @@
+{
+  "modules": [
+    "detect_net",
+    "ml",
+    "perception",
+    "sight",
+    "viewers"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "subgraph",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "interface",
+            "type": "isaac::alice::Subgraph"
+          }
+        ]
+      },
+      {
+        "name": "tensor_encoder",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.ml.ColorCameraEncoderCuda",
+            "type": "isaac::ml::ColorCameraEncoderCuda"
+          }
+        ]
+      },
+      {
+        "name": "tensor_r_t_inference",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.ml.TensorRTInference",
+            "type": "isaac::ml::TensorRTInference"
+          }
+        ]
+      },
+      {
+        "name": "detection_decoder",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.detect_net.DetectNetDecoder",
+            "type": "isaac::detect_net::DetectNetDecoder"
+          }
+        ]
+      },
+      {
+        "name": "detection_viewer",
+        "components": [
+          {
+            "name": "isaac.alice.MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.viewers.DetectionsViewer",
+            "type": "isaac::viewers::DetectionsViewer"
+          }
+        ]
+      },
+      {
+        "name": "color_camera_visualizer",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "isaac.viewers.ColorCameraViewer",
+            "type": "isaac::viewers::ColorCameraViewer"
+          }
+        ]
+      },
+      {
+        "name": "sight_widgets",
+        "components": [
+          {
+            "type": "isaac::sight::SightWidget",
+            "name": "Detections"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "subgraph/interface/image",
+        "target": "tensor_encoder/isaac.ml.ColorCameraEncoderCuda/rgb_image"
+      },
+      {
+        "source": "tensor_encoder/isaac.ml.ColorCameraEncoderCuda/tensor",
+        "target": "tensor_r_t_inference/isaac.ml.TensorRTInference/image"
+      },
+      {
+        "source": "tensor_r_t_inference/isaac.ml.TensorRTInference/bounding_boxes_tensor",
+        "target": "detection_decoder/isaac.detect_net.DetectNetDecoder/bounding_boxes_tensor"
+      },
+      {
+        "source": "tensor_r_t_inference/isaac.ml.TensorRTInference/confidence_tensor",
+        "target": "detection_decoder/isaac.detect_net.DetectNetDecoder/confidence_tensor"
+      },
+      {
+        "source": "detection_decoder/isaac.detect_net.DetectNetDecoder/detections",
+        "target": "detection_viewer/isaac.viewers.DetectionsViewer/detections"
+      },
+      {
+        "source": "subgraph/interface/image",
+        "target": "color_camera_visualizer/isaac.viewers.ColorCameraViewer/color_listener"
+      },
+      {
+        "source": "detection_decoder/isaac.detect_net.DetectNetDecoder/detections",
+        "target": "subgraph/interface/detections"
+      }
+    ]
+  },
+  "config": {
+    "color_camera_visualizer": {
+      "isaac.viewers.ColorCameraViewer": {
+        "camera_name": "camera"
+      }
+    },
+    "tensor_encoder": {
+      "isaac.ml.ColorCameraEncoderCuda": {
+        "rows": 368,
+        "cols": 640,
+        "pixel_normalization_mode": "Unit",
+        "tensor_index_order": "201"
+      }
+    },
+    "tensor_r_t_inference": {
+      "isaac.ml.TensorRTInference": {
+        "model_file_path": "external/resnet_object_detection_model/resnet18_detector_dolly_data_bldgk_368x640_pruned.etlt",
+        "etlt_password": "sNcx4Mu2SX",
+        "max_workspace_size": 67108864,
+        "max_batch_size": 1,
+        "inference_mode": "Float32",
+        "force_engine_update": false,
+        "input_tensor_info": [
+          {
+            "operation_name": "input_1",
+            "channel": "image",
+            "dims": [
+              3,
+              368,
+              640
+            ],
+            "uff_input_order": "channels_last"
+          }
+        ],
+        "output_tensor_info": [
+          {
+            "operation_name": "output_bbox/BiasAdd",
+            "channel": "bounding_boxes_tensor",
+            "dims": [
+              4,
+              23,
+              40
+            ]
+          },
+          {
+            "operation_name": "output_cov/Sigmoid",
+            "channel": "confidence_tensor",
+            "dims": [
+              1,
+              23,
+              40
+            ]
+          }
+        ]
+      }
+    },
+    "detection_decoder": {
+      "isaac.detect_net.DetectNetDecoder": {
+        "labels": ["dolly"],
+        "non_maximum_suppression_threshold": 0.6,
+        "confidence_threshold": 0.6,
+        "output_scale": [720, 1280]
+      }
+    },
+    "sight_widgets": {
+      "Detections": {
+        "type": "2d",
+        "channels": [
+          { "name": "$(fullname color_camera_visualizer/isaac.viewers.ColorCameraViewer/Color)" },
+          { "name": "$(fullname detection_viewer/isaac.viewers.DetectionsViewer/detections)" }
+        ]
+      }
+    }
+  }
+}

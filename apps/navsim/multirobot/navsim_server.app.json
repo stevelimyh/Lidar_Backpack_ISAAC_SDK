@@ -1,0 +1,247 @@
+{
+  "name": "navsim_server",
+  "modules": [],
+  "graph": {
+    "nodes": [
+      {
+        "name": "navsim",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "input",
+            "type": "isaac::alice::Subgraph"
+          },
+          {
+            "name": "output",
+            "type": "isaac::alice::TcpPublisher"
+          },
+          {
+            "name": "time_sync",
+            "type": "isaac::alice::TimeSynchronizer"
+          }
+        ]
+      },
+      {
+        "name": "robot_0",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "output",
+            "type": "isaac::alice::TcpPublisher"
+          },
+          {
+            "name": "input",
+            "type": "isaac::alice::TcpSubscriber"
+          },
+          {
+            "name": "time_sync",
+            "type": "isaac::alice::TimeSynchronizer"
+          }
+        ]
+      },
+      {
+        "name": "robot_1",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "output",
+            "type": "isaac::alice::TcpPublisher"
+          },
+          {
+            "name": "input",
+            "type": "isaac::alice::TcpSubscriber"
+          },
+          {
+            "name": "time_sync",
+            "type": "isaac::alice::TimeSynchronizer"
+          }
+        ]
+      },
+      {
+        "name": "robot_2",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "output",
+            "type": "isaac::alice::TcpPublisher"
+          },
+          {
+            "name": "input",
+            "type": "isaac::alice::TcpSubscriber"
+          },
+          {
+            "name": "time_sync",
+            "type": "isaac::alice::TimeSynchronizer"
+          }
+        ]
+      },
+      {
+        "name": "robot_3",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "output",
+            "type": "isaac::alice::TcpPublisher"
+          },
+          {
+            "name": "input",
+            "type": "isaac::alice::TcpSubscriber"
+          },
+          {
+            "name": "time_sync",
+            "type": "isaac::alice::TimeSynchronizer"
+          }
+        ]
+      },
+      {
+        "name": "robot_4",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "output",
+            "type": "isaac::alice::TcpPublisher"
+          },
+          {
+            "name": "input",
+            "type": "isaac::alice::TcpSubscriber"
+          },
+          {
+            "name": "time_sync",
+            "type": "isaac::alice::TimeSynchronizer"
+          }
+        ]
+      },
+      {
+        "name": "robot_5",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "output",
+            "type": "isaac::alice::TcpPublisher"
+          },
+          {
+            "name": "input",
+            "type": "isaac::alice::TcpSubscriber"
+          },
+          {
+            "name": "time_sync",
+            "type": "isaac::alice::TimeSynchronizer"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "navsim/ledger/bodies",
+        "target": "robot_0/output/players"
+      },
+      {
+        "source": "navsim/ledger/bodies",
+        "target": "robot_1/output/players"
+      },
+      {
+        "source": "navsim/ledger/bodies",
+        "target": "robot_2/output/players"
+      },
+      {
+        "source": "navsim/ledger/bodies",
+        "target": "robot_3/output/players"
+      },
+      {
+        "source": "navsim/ledger/bodies",
+        "target": "robot_4/output/players"
+      },
+      {
+        "source": "navsim/ledger/bodies",
+        "target": "robot_5/output/players"
+      }
+    ]
+  },
+  "config": {
+    "websight": {
+      "WebsightServer": {
+        "port": 2999
+      }
+    },
+    "navsim": {
+      "output": {
+        "port": 46000
+      }
+    },
+    "robot_0": {
+      "output": {
+        "port": 45000
+      },
+      "input": {
+        "port": 45001,
+        "host": "localhost"
+      }
+    },
+    "robot_1": {
+      "output": {
+        "port": 45010
+      },
+      "input": {
+        "port": 45011,
+        "host": "localhost"
+      }
+    },
+    "robot_2": {
+      "output": {
+        "port": 45020
+      },
+      "input": {
+        "port": 45021,
+        "host": "localhost"
+      }
+    },
+    "robot_3": {
+      "output": {
+        "port": 45030
+      },
+      "input": {
+        "port": 45031,
+        "host": "localhost"
+      }
+    },
+    "robot_4": {
+      "output": {
+        "port": 45040
+      },
+      "input": {
+        "port": 45041,
+        "host": "localhost"
+      }
+    },
+    "robot_5": {
+      "output": {
+        "port": 45050
+      },
+      "input": {
+        "port": 45051,
+        "host": "localhost"
+      }
+    }
+  }
+}

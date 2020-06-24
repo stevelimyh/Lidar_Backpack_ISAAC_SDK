@@ -1,0 +1,17 @@
+{
+  "map": {
+    "occupancy": {
+      "cell_size": 0.1,
+      "filename": "apps/assets/maps/carter_warehouse_p.png"
+    },
+    "waypoints": {
+      "vis_cell_size": 0.1,
+      "waypoints": {},
+      "tick_period": "1.0"
+    },
+    "restricted_area": {
+      "polygons": {},
+      "tick_period": "1.0"
+    }
+  }
+}

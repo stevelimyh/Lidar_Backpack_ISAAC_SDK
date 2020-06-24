@@ -1,0 +1,22 @@
+{
+  "training.segmentation_encoder": {
+    "SegmentationEncoder": {
+      "class_label_names": ["floor"],
+      "offset": 1
+    }
+  },
+  "training.camera_teleportation": {
+    "Teleportation": {
+      "name": "CDS Camera Rig",
+      "min": [-8.07, -3.52, 0.5],
+      "max": [3.9, 4.06, 2.5],
+      "enable_yaw": true,
+      "min_yaw": 2.87,
+      "max_yaw": 3.31,
+      "enable_roll": true,
+      "min_roll": 3.14,
+      "max_roll": 3.14,
+      "tick_period": "1Hz"
+    }
+  }
+}

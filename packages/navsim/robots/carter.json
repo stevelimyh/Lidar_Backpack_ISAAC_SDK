@@ -1,0 +1,38 @@
+{
+  "graph": {
+    "nodes": [
+      {
+        "name": "pose_initializers",
+        "components": [
+          {
+            "name": "lidar_initializer",
+            "type": "isaac::alice::PoseInitializer"
+          }
+        ]
+      }
+    ]
+  },
+  "config": {
+    "pose_initializers": {
+      "lidar_initializer": {
+        "lhs_frame": "robot",
+        "pose": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          -0.06,
+          0.0,
+          0.625
+        ],
+        "rhs_frame": "lidar"
+      }
+    },
+    "simulation.scenario_manager": {
+      "scenario_manager": {
+        "robot_name": "carter",
+        "robot_prefab": "Carter_Wheeled"
+      }
+    }
+  }
+}

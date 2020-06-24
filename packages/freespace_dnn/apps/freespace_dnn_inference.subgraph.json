@@ -1,0 +1,285 @@
+{
+  "modules": [
+    "behavior_tree",
+    "ml",
+    "ml:tensorflow",
+    "perception",
+    "sight",
+    "viewers"
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "name": "subgraph",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "interface",
+            "type": "isaac::alice::Subgraph"
+          }
+        ]
+      },
+      {
+        "name": "viewer",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "ColorCameraViewer",
+            "type": "isaac::viewers::ColorCameraViewer"
+          },
+          {
+            "name": "RawSegmentationViewer",
+            "type": "isaac::viewers::TensorViewer"
+          },
+          {
+            "name": "DiscreteSegmentationViewer",
+            "type": "isaac::viewers::TensorViewer"
+          }
+        ]
+      },
+      {
+        "name": "crop_and_downsample",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "CropAndDownsample",
+            "type": "isaac::perception::CropAndDownsample"
+          }
+        ]
+      },
+      {
+        "name": "color_camera_encoder",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "ColorCameraEncoderCpu",
+            "type": "isaac::ml::ColorCameraEncoderCpu"
+          }
+        ]
+      },
+      {
+        "name": "tensorflow_inference",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "TensorflowInference",
+            "type": "isaac::ml::TensorflowInference"
+          }
+        ]
+      },
+      {
+        "name": "tensor_rt_inference",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "TensorRTInference",
+            "type": "isaac::ml::TensorRTInference"
+          }
+        ]
+      },
+      {
+        "name": "inference_behavior",
+        "components": [
+          {
+            "name": "Behavior",
+            "type": "isaac::behavior_tree::deprecated::Behavior"
+          },
+          {
+            "name": "SelectorBehavior",
+            "type": "isaac::behavior_tree::deprecated::SelectorBehavior"
+          }
+        ]
+      },
+      {
+        "name": "tensor_reshape_after_image_encoder",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "TensorReshape",
+            "type": "isaac::ml::TensorReshape"
+          }
+        ]
+      },
+      {
+        "name": "tensor_reshape_before_segmentation_decoder",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "TensorReshape",
+            "type": "isaac::ml::TensorReshape"
+          }
+        ]
+      },
+      {
+        "name": "discretize_segmentation",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "DiscretizeSegmentation",
+            "type": "isaac::ml::TensorArgMax"
+          }
+        ]
+      },
+      {
+        "name": "sight_widgets",
+        "components": [
+          {
+            "type": "isaac::sight::SightWidget",
+            "name": "Image"
+          },
+          {
+            "type": "isaac::sight::SightWidget",
+            "name": "Raw Segmentation"
+          },
+          {
+            "type": "isaac::sight::SightWidget",
+            "name": "Discrete Segmentation"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "subgraph/interface/rgb_image",
+        "target": "crop_and_downsample/CropAndDownsample/input_image"
+      },
+      {
+        "source": "crop_and_downsample/CropAndDownsample/output_image",
+        "target": "viewer/ColorCameraViewer/color_listener"
+      },
+      {
+        "source": "crop_and_downsample/CropAndDownsample/output_image",
+        "target": "color_camera_encoder/ColorCameraEncoderCpu/rgb_image"
+      },
+      {
+        "source": "color_camera_encoder/ColorCameraEncoderCpu/tensor",
+        "target": "tensor_reshape_after_image_encoder/TensorReshape/input_tensors"
+      },
+      {
+        "source": "color_camera_encoder/ColorCameraEncoderCpu/tensor",
+        "target": "subgraph/interface/image_tensor"
+      },
+      {
+        "source": "tensor_reshape_after_image_encoder/TensorReshape/output_tensors",
+        "target": "tensorflow_inference/TensorflowInference/input"
+      },
+      {
+        "source": "tensorflow_inference/TensorflowInference/output",
+        "target": "tensor_reshape_before_segmentation_decoder/TensorReshape/input_tensors"
+      },
+      {
+        "source": "tensor_reshape_after_image_encoder/TensorReshape/output_tensors",
+        "target": "tensor_rt_inference/TensorRTInference/input"
+      },
+      {
+        "source": "tensor_rt_inference/TensorRTInference/output",
+        "target": "tensor_reshape_before_segmentation_decoder/TensorReshape/input_tensors"
+      },
+      {
+        "source": "tensor_reshape_before_segmentation_decoder/TensorReshape/output_tensors",
+        "target": "discretize_segmentation/DiscretizeSegmentation/input"
+      },
+      {
+        "source": "tensor_reshape_before_segmentation_decoder/TensorReshape/output_tensors",
+        "target": "subgraph/interface/segmentation_prediction"
+      },
+      {
+        "source": "tensor_reshape_before_segmentation_decoder/TensorReshape/output_tensors",
+        "target": "viewer/RawSegmentationViewer/tensor"
+      },
+      {
+        "source": "discretize_segmentation/DiscretizeSegmentation/argmax",
+        "target": "viewer/DiscreteSegmentationViewer/tensor"
+      }
+    ]
+  },
+  "config": {
+    "crop_and_downsample": {
+      "CropAndDownsample": {
+        "crop_mode": "auto",
+        "downsample_size": [256, 512]
+      }
+    },
+    "inference_behavior": {
+      "SelectorBehavior": {
+        "desired_behavior": "tensorflow",
+        "tick_period": "50ms"
+      },
+      "Behavior": {
+        "aliases": [
+          "tensorflow",
+          "tensorrt"
+        ],
+        "nodes": [
+          "$(fullname tensorflow_inference)",
+          "$(fullname tensor_rt_inference)"
+        ]
+      }
+    },
+    "viewer": {
+      "ColorCameraViewer": {
+        "use_png": true
+      },
+      "RawSegmentationViewer": {
+        "storage_order": "interleaved"
+      }
+    },
+    "color_camera_encoder": {
+      "ColorCameraEncoderCpu": {
+        "pixel_normalization_mode": "PositiveNegative"
+      }
+    },
+    "discretize_segmentation": {
+      "DiscretizeSegmentation": {
+        "threshold": 0.5
+      }
+    },
+    "sight_widgets": {
+      "Image": {
+        "type": "2d",
+        "channels": [
+          { "name": "$(fullname viewer/ColorCameraViewer/Color)" }
+        ]
+      },
+      "Raw Segmentation": {
+        "type": "2d",
+        "channels": [
+          { "name": "$(fullname viewer/RawSegmentationViewer/tensor)" }
+        ]
+      },
+      "Discrete Segmentation": {
+        "type": "2d",
+        "channels": [
+          { "name": "$(fullname viewer/DiscreteSegmentationViewer/tensor)" }
+        ]
+      }
+    }
+  }
+}

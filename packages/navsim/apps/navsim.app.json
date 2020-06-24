@@ -1,0 +1,46 @@
+{
+  "name": "navsim",
+  "modules": [],
+  "graph": {
+    "nodes": [
+      {
+        "name": "navsim",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "output",
+            "type": "isaac::alice::TcpPublisher"
+          },
+          {
+            "name": "input",
+            "type": "isaac::alice::TcpSubscriber"
+          },
+          {
+            "name": "time_sync",
+            "type": "isaac::alice::TimeSynchronizer"
+          }
+        ]
+      }
+    ],
+    "edges": []
+  },
+  "config": {
+    "websight": {
+      "WebsightServer": {
+        "port": 3001
+      }
+    },
+    "navsim": {
+      "output": {
+        "port": 55000
+      },
+      "input": {
+        "port": 55001,
+        "host": "localhost"
+      }
+    }
+  }
+}

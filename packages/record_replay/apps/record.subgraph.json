@@ -1,0 +1,63 @@
+{
+  "graph": {
+    "nodes": [
+      {
+        "name": "subgraph",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "Subgraph",
+            "type": "isaac::alice::Subgraph"
+          }
+        ]
+      },
+      {
+        "name": "interface",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "input",
+            "type": "isaac::alice::Recorder"
+          }
+        ]
+      },
+      {
+        "name": "record_bridge",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "RecorderBridge",
+            "type": "isaac::alice::RecorderBridge"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "/websight/WebsightServer/record",
+        "target": "record_bridge/RecorderBridge/request"
+      },
+      {
+        "source": "record_bridge/RecorderBridge/reply",
+        "target": "/websight/WebsightServer/recorder_reply"
+      }
+    ]
+  },
+  "config": {
+    "record_bridge": {
+      "RecorderBridge": {
+        "recorder_component_name": "$(fullname interface/input)",
+        "tick_period": "1.0"
+      }
+    }
+  }
+}
