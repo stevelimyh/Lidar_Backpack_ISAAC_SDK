@@ -7,10 +7,10 @@ System  Requirements:
 -Nvidia GPU with compute capability of 3.5 or higher
 
 
+
 Software Version:
 
 -Isaac SDK: 2020.1
-
 -Isaac Sim: 2020.1 (Unity 3D)
 
 -Unity 3D: 2019.3.15f1
