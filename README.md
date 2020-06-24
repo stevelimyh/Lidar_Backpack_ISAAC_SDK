@@ -5,7 +5,8 @@ System  Requirements:
  -Ubuntu 18.04 LTS
 
  -Nvidia GPU with compute capability of 3.5 or higher
-
+ 
+ -
 
 
 
@@ -24,6 +25,8 @@ Software Version:
 -libcudnn: 7
 
 -Nvidia GPU driver: 450
+
+-
   
   
   
@@ -36,31 +39,49 @@ steve@steve-Inspiron-7559:~/isaac/apps$
 
 steve@steve-Inspiron-7559:~/isaac/packages$ 
 
+-
+
 
 Modifications:
 
-1) modified file: isaac/packages/message_generators: BUILD
+1) 
 
-  -rigid_body_3_group_generator added to module
+modified file: isaac/packages/message_generators: BUILD
+
+-rigid_body_3_group_generator added to module
+
+-
 
 
-2) new directory: isaac/apps/record_dummy
+2) 
 
-  -record_dummy, record_test 
+new directory: isaac/apps/record_dummy
+
+-
+
+-record_dummy, record_test 
   
-  apply message generators to create dummy data, use Isaac Sight Recorder widget to record
+apply message generators to create dummy data, use Isaac Sight Recorder widget to record
+
+-
   
-  -display_dummy. display_test
+-display_dummy. display_test
   
-  replay dummy data, visualize in Isaac Sight
+replay dummy data, visualize in Isaac Sight
+
+-
   
-  -Imu_test
+-Imu_test
   
-  Test imu generation with rigid_body_generator and ImuSim
+Test imu generation with rigid_body_generator and ImuSim
+
+-
   
-  -Svo_test
+-Svo_test
   
-  test stereo visual odometry with message generators
+test stereo visual odometry with message generators
+
+-
   
   
 3) modified directory: isaac/packages/flatsim/apps
