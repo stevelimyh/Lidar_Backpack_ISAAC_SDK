@@ -1,0 +1,76 @@
+{
+    "name": "navsim_manual",
+    "modules": [
+    ],
+    "graph": {
+      "nodes": [
+        {
+          "name": "simulation",
+          "subgraph": "packages/navsim/apps/navsim_navigation.subgraph.json"
+        },
+        {
+            "name": "commander",
+            "subgraph": "packages/navigation/apps/differential_base_commander.subgraph.json"
+        },
+        {
+            "name": "tcp_publisher",
+            "components": [
+              {
+                "name": "isaac.alice.MessageLedger",
+                "type": "isaac::alice::MessageLedger"
+              },
+              {
+                "name": "isaac.alice.TcpPublisher",
+                "type": "isaac::alice::TcpPublisher"
+              }
+            ]
+          },
+          {
+              "name": "record",
+              "subgraph": "packages/record_replay/apps/record.subgraph.json"
+          }
+      ],
+      "edges": [
+        {
+            "source": "commander.subgraph/interface/command",
+            "target": "simulation.interface/input/base_command"
+        },
+        {
+            "source": "simulation.interface/noisy/flatscan",
+            "target": "record.interface/input/flatscan"
+        },
+        {
+            "source": "simulation.interface/output/base_state",
+            "target": "record.interface/input/base_state"
+        },
+        {
+            "source": "simulation.interface/output/imu_raw",
+            "target": "record.interface/input/imu_raw"
+        },
+        {
+            "source": "simulation.interface/noisy/flatscan",
+            "target": "tcp_publisher/isaac.alice.TcpPublisher/flatscan"
+        },
+        {
+            "source": "simulation.interface/output/base_state",
+            "target": "tcp_publisher/isaac.alice.TcpPublisher/base_state"
+        },
+        {
+            "source": "simulation.interface/output/imu_raw",
+            "target": "tcp_publisher/isaac.alice.TcpPublisher/imu_raw"
+        }
+      ]
+    },
+    "config": {
+        "record.interface": {
+            "input": {
+              "start_recording_automatically": false
+            }
+          },
+          "tcp_publisher": {
+            "isaac.alice.TcpPublisher": {
+              "port": 5000
+            }
+          }
+    }
+  }

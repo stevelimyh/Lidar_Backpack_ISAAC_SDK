@@ -64,7 +64,6 @@ isaac_py_app(
         "behavior_tree",
         "map",
         "viewers",
-        "navigation",
     ],
     deps = [
         "//engine/pyalice",
@@ -115,4 +114,27 @@ isaac_app(
     ],
     script = "select_json_gmapping.sh",
     visibility = ["//visibility:public"],
+)
+
+isaac_app(
+    name = "navsim_manual",
+    data = [
+        "//packages/navsim/apps:navsim_navigation_subgraph",
+        "//packages/navigation/apps:differential_base_commander_subgraph",
+        "//packages/record_replay/apps:record_subgraph",
+    ],
+     visibility = ["//visibility:public"],
+)
+
+isaac_app(
+    name = "navsim_manual_gmap",
+    data = [
+        "//packages/navsim/apps:navsim_navigation_subgraph",
+        "//packages/navigation/apps:differential_base_commander_subgraph",
+        "//packages/lidar_slam/apps:differential_base_gmapping_subgraph",
+        "//packages/navsim/robots",
+    ],
+
+    script = "select_json_gmapping.sh",
+     visibility = ["//visibility:public"],
 )
