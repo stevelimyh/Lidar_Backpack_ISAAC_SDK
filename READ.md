@@ -97,17 +97,18 @@ modified directory: isaac/packages/flatsim/apps
 
 a) run small warehouse scene with isaac sim
 
-b) run navsim_record app to publish data while navigating (data can be recorded via Recorder widget on Isaac Sight)
+b) run navsim_record /navsim_manual app to publish data while navigating (data can be recorded via Recorder widget on Isaac Sight)
 
-c) -run navsim_sub_gmap to run gmapping by subscribing to published data, or
+c) -run navsim_sub_gmap to run gmapping or (navsim_sub_carto) by subscribing to published data, or
     
-   -run navsim_replay_gamp to run gmapping by replaying recorded data (Isaac Sight Replay widget)
+   -run navsim_replay_gamp to run gmapping or (navsim_replay_carto) by replaying recorded data (Isaac Sight Replay widget)
 
-.
+
+#03-07-2020: added navsim_manual_carto, navsim_manual_gmap which can run slam simultaneously while controlling the carter robot
    
 
 Note: 
-     To run either (navsim_sub_gmap or navsim_replay_gmap or navsim_gmapping) 
+     To run either (navsim_sub_gmap / navsim_replay_gmap / navsim_gmapping / navsim_manual_gmap / navsim_sub_carto / navsim_replay_carto / navsim_manual_carto) 
      select_json_gmapping.sh need to be modified at line 29 by changing the app name accordingly
      
      line 29: engine/alice/tools/main --app apps/navsim/navsim_sub_gmap.app.json \
