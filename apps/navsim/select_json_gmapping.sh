@@ -26,7 +26,7 @@ then
   ROBOT_ID="carter"
 fi
 
-engine/alice/tools/main --app apps/navsim/navsim_sub_gmap.app.json \
+engine/alice/tools/main --app apps/navsim/navsim_manual_carto.app.json \
 --more "packages/navsim/robots/$ROBOT_ID.json" \
  $@
 

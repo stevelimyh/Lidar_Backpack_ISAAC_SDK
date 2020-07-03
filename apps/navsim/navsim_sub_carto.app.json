@@ -1,0 +1,62 @@
+{
+    "name": "navsim_sub_carto",
+    "graph": {
+      "nodes": [
+        {
+            "name": "cartographer",
+            "subgraph": "packages/lidar_slam/apps/differential_base_cartographer.subgraph.json"
+        },
+        {
+            "name": "tcp_subscriber",
+            "components": [
+              {
+                "name": "isaac.alice.MessageLedger",
+                "type": "isaac::alice::MessageLedger"
+              },
+              {
+                "name": "isaac.alice.TcpSubscriber",
+                "type": "isaac::alice::TcpSubscriber"
+              }
+            ]
+        }
+      ],
+      "edges": [
+        {
+          "source": "tcp_subscriber/isaac.alice.TcpSubscriber/flatscan",
+          "target": "cartographer.interface/Subgraph/flatscan"
+        },
+        {
+          "source": "tcp_subscriber/isaac.alice.TcpSubscriber/base_state",
+          "target": "cartographer.interface/Subgraph/base_state"
+        },
+        {
+          "source": "tcp_subscriber/isaac.alice.TcpSubscriber/imu_raw",
+          "target": "cartographer.interface/Subgraph/imu_raw"
+        }
+      ]
+    },
+    "config": {
+      "cartographer.odometry.odometry": {
+        "DifferentialBaseWheelImuOdometry": {
+          "use_imu": true
+        }
+      },
+      "cartographer.cartographer": {
+        "Cartographer": {
+          "lua_configuration_directory": "apps/navsim/,../com_github_googlecartographer_cartographer/configuration_files/,external/com_github_googlecartographer_cartographer/configuration_files/",
+          "lua_configuration_basename": "carter.lua"
+        }
+      },
+    "tcp_subscriber": {
+      "isaac.alice.TcpSubscriber": {
+        "port": 5000,
+        "host": "localhost"
+      }
+    },
+    "websight": {
+        "WebsightServer": {
+          "port": 4000
+        }
+    }
+    }
+  }

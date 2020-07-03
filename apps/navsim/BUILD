@@ -138,3 +138,57 @@ isaac_app(
     script = "select_json_gmapping.sh",
      visibility = ["//visibility:public"],
 )
+
+isaac_app(
+    name = "navsim_camera_test",
+    data = [
+        "//packages/navsim/apps:navsim_navigation_subgraph",
+        "//packages/navigation/apps:differential_base_commander_subgraph",
+        "//packages/record_replay/apps:record_subgraph",
+    ],
+     modules = [
+        "viewers",
+        "perception",
+    ],
+     visibility = ["//visibility:public"],
+)
+
+isaac_app(
+    name = "navsim_manual_carto",
+    data = [
+        "carter.lua",
+        "//packages/navsim/apps:navsim_navigation_subgraph",
+        "//packages/navigation/apps:differential_base_commander_subgraph",
+        "//packages/lidar_slam/apps:differential_base_cartographer_subgraph",
+        "//packages/navsim/robots",
+    ],
+    modules = [
+        "viewers",
+    ],
+
+    script = "select_json_gmapping.sh",
+     visibility = ["//visibility:public"],
+)
+
+isaac_app(
+    name = "navsim_sub_carto",
+    data = [
+        "carter.lua",
+        "//packages/lidar_slam/apps:differential_base_cartographer_subgraph",
+        "//packages/navsim/robots",
+    ],
+    script = "select_json_gmapping.sh",
+    visibility = ["//visibility:public"],
+)
+
+isaac_app(
+    name = "navsim_replay_carto",
+    data = [
+        "carter.lua",
+        "//packages/lidar_slam/apps:differential_base_cartographer_subgraph",
+        "//packages/record_replay/apps:replay_subgraph",
+        "//packages/navsim/robots",
+    ],
+    script = "select_json_gmapping.sh",
+    visibility = ["//visibility:public"],
+)

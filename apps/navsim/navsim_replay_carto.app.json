@@ -1,0 +1,43 @@
+{
+    "name": "navsim_replay_carto",
+    "graph": {
+      "nodes": [
+        {
+            "name": "cartographer",
+            "subgraph": "packages/lidar_slam/apps/differential_base_cartographer.subgraph.json"
+        },
+        {
+            "name": "replay",
+            "subgraph": "packages/record_replay/apps/replay.subgraph.json"
+        }
+      ],
+      "edges": [
+        {
+          "source": "replay.interface/output/flatscan",
+          "target": "cartographer.interface/Subgraph/flatscan"
+        },
+        {
+          "source": "replay.interface/output/base_state",
+          "target": "cartographer.interface/Subgraph/base_state"
+        },
+        {
+          "source": "replay.interface/output/imu_raw",
+          "target": "cartographer.interface/Subgraph/imu_raw"
+        }
+      ]
+    },
+    "config": {
+      "cartographer.odometry.odometry": {
+        "DifferentialBaseWheelImuOdometry": {
+          "use_imu": true
+        }
+      },
+      "cartographer.cartographer": {
+        "Cartographer": {
+          "lua_configuration_directory": "apps/navsim/,../com_github_googlecartographer_cartographer/configuration_files/,external/com_github_googlecartographer_cartographer/configuration_files/",
+          "lua_configuration_basename": "carter.lua",
+          "output_path": "/tmp/carto"
+        }
+      }
+    }
+  }

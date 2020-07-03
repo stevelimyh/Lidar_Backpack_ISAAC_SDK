@@ -1,0 +1,87 @@
+{
+    "name": "navsim_manual_carto",
+    "modules": [
+      "viewers"
+    ],
+    "graph": {
+      "nodes": [
+        {
+          "name": "simulation",
+          "subgraph": "packages/navsim/apps/navsim_navigation.subgraph.json"
+        },
+        {
+            "name": "commander",
+            "subgraph": "packages/navigation/apps/differential_base_commander.subgraph.json"
+        },
+        {
+            "name": "cartographer",
+            "subgraph": "packages/lidar_slam/apps/differential_base_cartographer.subgraph.json"
+        },
+        {
+          "name": "color_viewer",
+          "components": [
+            {
+              "name": "isaac.alice.MessageLedger",
+              "type": "isaac::alice::MessageLedger"
+            },
+            {
+              "name": "color_viewer",
+              "type": "isaac::viewers::ColorCameraViewer"
+            }
+          ]
+        }
+      ],
+      "edges": [
+        {
+            "source": "commander.subgraph/interface/command",
+            "target": "simulation.interface/input/base_command"
+        },
+        {
+          "source": "simulation.interface/noisy/flatscan",
+          "target": "cartographer.interface/Subgraph/flatscan"
+      },
+      {
+          "source": "simulation.interface/output/base_state",
+          "target": "cartographer.interface/Subgraph/base_state"
+      },
+      {
+          "source": "simulation.interface/output/imu_raw",
+          "target": "cartographer.interface/Subgraph/imu_raw"
+      },
+      {
+        "source": "simulation.interface/output/color",
+        "target": "color_viewer/color_viewer/color_listener"
+      }
+      ]
+    },
+    "config": {
+      "websight": {
+        "WebsightServer": {
+          "port": 3000,
+          "ui_config": {
+            "windows": {
+              "Color Camera": {
+                "renderer": "2d",
+                "channels": [
+                  {
+                    "name": "navsim_manual_carto/color_viewer/color_viewer/Color"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+          "cartographer.odometry.odometry": {
+            "DifferentialBaseWheelImuOdometry": {
+              "use_imu": true
+            }
+          },
+          "cartographer.cartographer": {
+            "Cartographer": {
+              "lua_configuration_directory": "apps/navsim/,../com_github_googlecartographer_cartographer/configuration_files/,external/com_github_googlecartographer_cartographer/configuration_files/",
+              "lua_configuration_basename": "carter.lua"
+            }
+          }
+    }
+  }
