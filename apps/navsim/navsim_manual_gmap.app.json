@@ -1,6 +1,7 @@
 {
     "name": "navsim_manual_gmap",
     "modules": [
+      "viewers"
     ],
     "graph": {
       "nodes": [
@@ -12,10 +13,23 @@
             "name": "commander",
             "subgraph": "packages/navigation/apps/differential_base_commander.subgraph.json"
         },
-          {
+        {
             "name": "gmapping",
             "subgraph": "packages/lidar_slam/apps/differential_base_gmapping.subgraph.json"
-          }
+        },
+        {
+          "name": "color_viewer",
+          "components": [
+            {
+              "name": "isaac.alice.MessageLedger",
+              "type": "isaac::alice::MessageLedger"
+            },
+            {
+              "name": "color_viewer",
+              "type": "isaac::viewers::ColorCameraViewer"
+            }
+          ]
+        }
       ],
       "edges": [
         {
@@ -33,10 +47,31 @@
       {
           "source": "simulation.interface/output/imu_raw",
           "target": "gmapping.interface/Subgraph/imu_raw"
+      },
+      {
+        "source": "simulation.interface/output/color",
+        "target": "color_viewer/color_viewer/color_listener"
       }
       ]
     },
     "config": {
+      "websight": {
+        "WebsightServer": {
+          "port": 3000,
+          "ui_config": {
+            "windows": {
+              "Color Camera": {
+                "renderer": "2d",
+                "channels": [
+                  {
+                    "name": "navsim_manual_gmap/color_viewer/color_viewer/Color"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
           "gmapping.odometry.odometry": {
             "DifferentialBaseWheelImuOdometry": {
               "use_imu": true

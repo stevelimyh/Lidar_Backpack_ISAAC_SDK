@@ -48,6 +48,10 @@
             "target": "record.interface/input/imu_raw"
         },
         {
+            "source": "simulation.interface/output/color",
+            "target": "record.interface/input/color"
+        },
+        {
             "source": "simulation.interface/noisy/flatscan",
             "target": "tcp_publisher/isaac.alice.TcpPublisher/flatscan"
         },
@@ -58,6 +62,10 @@
         {
             "source": "simulation.interface/output/imu_raw",
             "target": "tcp_publisher/isaac.alice.TcpPublisher/imu_raw"
+        },
+        {
+            "source": "simulation.interface/output/color",
+            "target": "tcp_publisher/isaac.alice.TcpPublisher/color"
         }
       ]
     },

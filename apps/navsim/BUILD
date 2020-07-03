@@ -46,31 +46,6 @@ isaac_app(
 )
 
 isaac_py_app(
-    name = "navsim_gmap_nav",
-    srcs = [
-        "navsim_gmap_nav.py",
-    ],
-    data = [
-        "navsim_gmap_nav.app.json",
-        "//packages/lidar_slam/apps:differential_base_gmapping_subgraph",
-        "//apps/assets/maps",
-        "//packages/behavior_tree/apps:missions",
-        "//packages/navigation/apps:differential_base_navigation_subgraph",
-        "//packages/navigation/apps:goal_generators_subgraph",
-        "//packages/navsim/apps:navsim_navigation_subgraph",
-        "//packages/navsim/robots",
-    ],
-    modules = [
-        "behavior_tree",
-        "map",
-        "viewers",
-    ],
-    deps = [
-        "//engine/pyalice",
-    ],
-)
-
-isaac_py_app(
     name = "navsim_record",
     srcs = [
         "navsim_record.py",
@@ -133,6 +108,9 @@ isaac_app(
         "//packages/navigation/apps:differential_base_commander_subgraph",
         "//packages/lidar_slam/apps:differential_base_gmapping_subgraph",
         "//packages/navsim/robots",
+    ],
+    modules = [
+        "viewers",
     ],
 
     script = "select_json_gmapping.sh",

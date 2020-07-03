@@ -225,7 +225,7 @@
           "process_imu_readings": true,
           "lhs_camera_frame": "left_camera_frame",
           "rhs_camera_frame": "right_camera_frame",
-          "imu_frame": "imu"
+          "imu_frame": "imu_frame"
         }
       },
       "color_camera_viewer": {
